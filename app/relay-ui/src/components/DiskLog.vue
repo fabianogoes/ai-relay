@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { DiskEntry } from '../lib/execution'
-import { formatRelative } from '../lib/relative-time'
+import { formatRelative } from '../lib/presentation'
 
 const props = defineProps<{ entries: ReadonlyArray<DiskEntry> }>()
 

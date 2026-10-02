@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
-import { trapFocus } from '../lib/focus-trap'
+import { mountDialog, type DialogHandle } from '../lib/focus-trap'
 
 export interface TaskRow {
   id: string
@@ -20,7 +20,7 @@ const props = defineProps<{
 const emit = defineEmits<{ close: [] }>()
 
 const overlay = ref<HTMLElement | null>(null)
-let release: (() => void) | null = null
+let dialog: DialogHandle | null = null
 
 function onKeydown(event: KeyboardEvent): void {
   if (event.key === 'Escape') emit('close')
@@ -29,14 +29,14 @@ function onKeydown(event: KeyboardEvent): void {
 watch(
   () => props.backlogId,
   async () => {
-    release?.()
+    dialog?.release()
     await nextTick()
-    if (overlay.value) release = trapFocus(overlay.value)
+    if (overlay.value) dialog = mountDialog(overlay.value, overlay.value)
   },
   { immediate: true },
 )
 
-onBeforeUnmount(() => release?.())
+onBeforeUnmount(() => dialog?.release())
 </script>
 
 <template>
@@ -46,6 +46,7 @@ onBeforeUnmount(() => release?.())
     role="dialog"
     aria-modal="true"
     :aria-label="`Tarefas de ${backlogId}`"
+    tabindex="-1"
     @keydown="onKeydown"
   >
     <div class="selector tasks-modal">

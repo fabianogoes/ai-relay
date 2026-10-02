@@ -2,7 +2,9 @@
 import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { Terminal } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
+import '@xterm/xterm/css/xterm.css'
 import { sendInput, subscribeData } from '../lib/execution'
+import { readTerminalTheme } from '../lib/terminal-theme'
 
 const props = defineProps<{ runId: string }>()
 
@@ -20,11 +22,7 @@ onMounted(() => {
     convertEol: false,
     fontFamily: 'var(--font-mono)',
     fontSize: 13,
-    theme: {
-      background: '#070a0d',
-      foreground: '#e9edf3',
-      cursor: '#5fe3b3',
-    },
+    theme: readTerminalTheme(getComputedStyle(container.value)),
   })
   fit = new FitAddon()
   term.loadAddon(fit)

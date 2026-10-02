@@ -7,8 +7,11 @@ import EmptyState from './EmptyState.vue'
 import RepairScreen from './RepairScreen.vue'
 import { allHarnesses, harnessById, selection } from '../lib/harness'
 import { openPreflight } from '../lib/launch'
+import type { Freshness } from '../lib/observer'
 
-const props = defineProps<{ payload: UiPayload }>()
+const props = defineProps<{ payload: UiPayload; freshness: Freshness }>()
+
+const stale = computed(() => props.freshness === 'stale')
 
 const ok = computed<OkState | null>(() =>
   props.payload.state.kind === 'ok' ? props.payload.state : null,
@@ -38,11 +41,11 @@ const availableEntries = computed<ChecklistEntry[]>(() => {
   return source.filter((e) => e.available)
 })
 
-function comecar(backlogId: string): void {
+function comecar(id: string): void {
   openPreflight({
-    title: `Iniciar sessão em ${backlogId}`,
+    title: `Iniciar sessão em ${id}`,
     skill: 'relay-session',
-    intent: `Iniciar sessão em ${backlogId}`,
+    intent: `Iniciar sessão em ${id}`,
   })
 }
 
@@ -60,6 +63,7 @@ function entrevista(): void {
       :handoff="handoff"
       :blocked="status === 'blocked'"
       :exec-enabled="execEnabled"
+      :stale="stale"
     />
 
     <ChecklistList
@@ -83,6 +87,7 @@ function entrevista(): void {
       <EmptyState v-else-if="status === 'idle'" message="Sem trabalho ativo." />
 
       <section v-if="availableEntries.length > 0" class="choose">
+        <h2 class="panel__title">Escolher</h2>
         <p class="choose__reason">
           Estas tarefas são independentes entre si — a ordem da lista não é fila
           nem prioridade, e <code class="mono">needs</code> é a única dependência
@@ -93,10 +98,14 @@ function entrevista(): void {
             <span class="choose__id mono">{{ entry.id }}</span>
             <span class="choose__text">{{ entry.text }}</span>
             <span v-if="entry.spec" class="choose__spec mono">{{ entry.spec }}</span>
+            <span v-if="execEnabled && stale" class="choose__stale-note">
+              Desatualizado — aguardando reconexão
+            </span>
             <button
               v-if="execEnabled"
               class="button button--primary choose__action"
-              @click="comecar(ok.activeBacklogId ?? entry.id)"
+              :disabled="stale"
+              @click="comecar(entry.id)"
             >
               ▶ Começar no {{ activeHarnessName }}
             </button>
@@ -108,7 +117,10 @@ function entrevista(): void {
           <p class="choose__interview-text">
             Nenhuma tarefa cobre o que você precisa? Especifique uma ideia nova.
           </p>
-          <button class="button button--secondary" @click="entrevista()">Iniciar entrevista</button>
+          <span v-if="stale" class="choose__stale-note">Desatualizado — aguardando reconexão</span>
+          <button class="button button--secondary" :disabled="stale" @click="entrevista()">
+            Iniciar entrevista
+          </button>
         </section>
       </section>
 

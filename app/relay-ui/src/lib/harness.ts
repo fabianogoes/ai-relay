@@ -50,28 +50,10 @@ export const CONSENT_OPTIONS: ConsentOption[] = [
   },
 ]
 
-const IDENTITY_TONES: Record<string, 'purple' | 'orange'> = {
-  codex: 'purple',
-  'claude-code': 'orange',
-}
-
-export function harnessTone(id: string): 'purple' | 'orange' | null {
-  return IDENTITY_TONES[id] ?? null
-}
-
-export function harnessInitials(name: string): string {
-  return name
-    .split(/\s+/)
-    .map((word) => word[0] ?? '')
-    .join('')
-    .slice(0, 2)
-    .toUpperCase()
-}
-
 const harnesses = ref<Harness[]>([...HARNESS_FIXTURE])
 
 export function setHarnesses(list: Harness[]): void {
-  harnesses.value = list.length > 0 ? list : [...HARNESS_FIXTURE]
+  harnesses.value = list
 }
 
 export function allHarnesses(): Harness[] {
@@ -119,6 +101,8 @@ export function initHarnessSelection(workspace: string): void {
 
 function persist(workspace: string): void {
   const choice: HarnessSelection = { harnessId: store.harnessId, consent: store.consent }
+  sessionChoices.delete(workspace)
+  localStorage.removeItem(localStorageKey(workspace))
   if (store.consent === 'local') {
     localStorage.setItem(localStorageKey(workspace), JSON.stringify(choice))
     sessionChoices.set(workspace, choice)

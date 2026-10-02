@@ -15,6 +15,23 @@ export interface RelayClient {
 export const RECONNECT_BASE = 500
 export const RECONNECT_MAX = 10_000
 
+/**
+ * Depois de algumas tentativas seguidas na mesma origem, para de assumir que
+ * é uma falha transitória e passa a consultar o farol de descoberta — o host
+ * pode ter reiniciado numa porta nova (ADR-0006 decisão 8, A-010).
+ */
+export const DISCOVERY_AFTER_RETRIES = 3
+
+export function shouldAttemptDiscovery(attempt: number): boolean {
+  return attempt >= DISCOVERY_AFTER_RETRIES
+}
+
+export function parseDiscoveryPort(data: unknown): number | null {
+  if (typeof data !== 'object' || data === null) return null
+  const port = (data as { port?: unknown }).port
+  return typeof port === 'number' && Number.isInteger(port) && port > 0 ? port : null
+}
+
 function meta(name: string): string | null {
   return document.querySelector(`meta[name="${name}"]`)?.getAttribute('content') ?? null
 }
@@ -26,6 +43,7 @@ function wsUrl(token: string): string {
 
 const token = ref(meta('relay-token') ?? '')
 const hostMode = token.value !== ''
+const discoveryPort = meta('relay-discovery-port')
 
 const payload = ref<UiPayload | null>(null)
 const connected = ref(false)
@@ -56,11 +74,27 @@ async function refreshToken(): Promise<string> {
   return token.value
 }
 
+async function tryDiscoverNewOrigin(): Promise<boolean> {
+  if (!discoveryPort) return false
+  try {
+    const res = await fetch(`http://127.0.0.1:${discoveryPort}/`)
+    if (!res.ok) return false
+    const port = parseDiscoveryPort(await res.json())
+    if (port === null) return false
+    window.location.href = `http://127.0.0.1:${port}/`
+    return true
+  } catch {
+    return false
+  }
+}
+
 function scheduleReconnect(): void {
   if (closed) return
   const delay = Math.min(RECONNECT_BASE * 2 ** retries, RECONNECT_MAX)
+  const attempt = retries
   retries += 1
   retryTimer = window.setTimeout(async () => {
+    if (shouldAttemptDiscovery(attempt) && (await tryDiscoverNewOrigin())) return
     await refreshToken()
     connect()
   }, delay)

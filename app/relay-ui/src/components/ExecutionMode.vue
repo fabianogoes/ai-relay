@@ -4,7 +4,7 @@ import StatusPill from './StatusPill.vue'
 import Terminal from './Terminal.vue'
 import DiskLog from './DiskLog.vue'
 import { closeRun, detachRun, terminateRun, useExecution, useDisk } from '../lib/execution'
-import { harnessInitials, harnessTone } from '../lib/harness'
+import HarnessIcon from './HarnessIcon.vue'
 
 const exec = useExecution()
 const disk = useDisk()
@@ -32,17 +32,13 @@ function onClose(): void {
 </script>
 
 <template>
-  <div class="exec-mode">
+  <main class="exec-mode">
     <header class="exec-bar">
       <div class="exec-bar__identity">
-        <span
-          class="harness-avatar"
-          :class="`harness-avatar--${harnessTone(exec.harnessId) ?? 'neutral'}`"
-          aria-hidden="true"
-        >
-          {{ harnessInitials(exec.harnessName) }}
+        <span class="harness-avatar" aria-hidden="true">
+          <HarnessIcon :id="exec.harnessId" />
         </span>
-        <span class="exec-bar__name">{{ exec.processName }}</span>
+        <h1 class="exec-bar__name">{{ exec.processName }}</h1>
         <span v-if="exec.reattached" class="exec-bar__reattach">
           RECONECTADO À EXECUÇÃO VIVA
         </span>
@@ -69,5 +65,5 @@ function onClose(): void {
       <Terminal v-if="exec.activeRunId" :run-id="exec.activeRunId" />
       <DiskLog :entries="disk" />
     </div>
-  </div>
+  </main>
 </template>

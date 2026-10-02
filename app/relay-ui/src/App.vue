@@ -9,7 +9,7 @@ import ExecutionMode from './components/ExecutionMode.vue'
 import BackgroundStrip from './components/BackgroundStrip.vue'
 import KeyboardWarning from './components/KeyboardWarning.vue'
 import { useRelayClient, apiGetJson } from './lib/relay-client'
-import { useExecution } from './lib/execution'
+import { discoverActiveRun, useExecution } from './lib/execution'
 import { fixtures, fixtureNames } from './fixtures'
 import { initHarnessSelection, setHarnesses, type Harness } from './lib/harness'
 
@@ -64,13 +64,21 @@ onMounted(() => {
   if (client.hostMode && !hasFixturesParam) client.connect()
 })
 
+let discoveryAttempted = false
+
 watch(
   execEnabled,
   (enabled) => {
     if (enabled && client.hostMode) {
       apiGetJson<Harness[]>('/api/harnesses')
         .then((list) => setHarnesses(list))
-        .catch(() => {})
+        .catch(() => setHarnesses([]))
+      // reabrir a aba durante uma run viva reanexa a ela; só tenta uma vez
+      // por sessão, não a cada payload (A-009).
+      if (!discoveryAttempted) {
+        discoveryAttempted = true
+        void discoverActiveRun()
+      }
     }
   },
   { immediate: true },
@@ -97,12 +105,26 @@ watch(
       <div v-if="!payload" class="empty-state">Conectando ao relay-host…</div>
 
       <template v-else>
-        <div class="app__body">
+        <main class="app__body">
           <Header :payload="payload" :view="view" :freshness="freshness" @update:view="view = $event" />
           <BackgroundStrip v-if="detached" />
-          <MainScreen v-if="view === 'agora'" :payload="payload" />
-          <WorkScreen v-else :payload="payload" />
-        </div>
+          <MainScreen
+            v-if="view === 'agora'"
+            :payload="payload"
+            :freshness="freshness"
+            id="view-agora"
+            role="tabpanel"
+            aria-labelledby="tab-agora"
+          />
+          <WorkScreen
+            v-else
+            :payload="payload"
+            :freshness="freshness"
+            id="view-trabalho"
+            role="tabpanel"
+            aria-labelledby="tab-trabalho"
+          />
+        </main>
         <template v-if="execEnabled">
           <HarnessSelector :workspace="payload.environment.workspace" />
           <PreflightModal :workspace="payload.environment.workspace" />

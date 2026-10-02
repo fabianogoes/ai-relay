@@ -3,17 +3,9 @@ import { computed } from 'vue'
 import type { UiPayload } from '../types'
 import StatusPill from './StatusPill.vue'
 import FreshnessStatus from './FreshnessStatus.vue'
+import HarnessIcon from './HarnessIcon.vue'
 import type { Freshness } from '../lib/observer'
-import {
-  CONSENT_OPTIONS,
-  HARNESS_FIXTURE,
-  allHarnesses,
-  harnessById,
-  harnessInitials,
-  harnessTone,
-  openSelector,
-  selection,
-} from '../lib/harness'
+import { HARNESS_FIXTURE, allHarnesses, harnessById, openSelector, selection } from '../lib/harness'
 
 const props = defineProps<{
   payload: UiPayload
@@ -37,13 +29,6 @@ const activeHarness = computed(() => {
   return allHarnesses()[0] ?? HARNESS_FIXTURE[0]
 })
 
-const activeInitials = computed(() => harnessInitials(activeHarness.value.name))
-const activeTone = computed(() => harnessTone(activeHarness.value.id))
-
-const consentScope = computed(
-  () => CONSENT_OPTIONS.find((o) => o.id === sel.consent)?.scopeShort ?? 'não grava',
-)
-
 const workspaceName = computed(() => {
   const path = props.payload.environment.workspace
   const base = path.split('/').filter(Boolean).pop()
@@ -54,21 +39,29 @@ const workspaceName = computed(() => {
 <template>
   <header class="header">
     <div class="header__brand">
-      <span class="header__logo">Relay</span>
+      <h1 class="header__logo">Relay</h1>
       <span class="header__workspace mono">
         {{ workspaceName }}<span class="header__workspace-path">{{ payload.environment.workspace }}</span>
       </span>
     </div>
-    <nav class="header__tabs" aria-label="Visões">
+    <nav class="header__tabs" role="tablist" aria-label="Visões">
       <button
+        id="tab-agora"
         class="header__tab"
+        role="tab"
+        :aria-selected="view === 'agora'"
+        aria-controls="view-agora"
         :class="{ 'is-active': view === 'agora' }"
         @click="emit('update:view', 'agora')"
       >
         Agora
       </button>
       <button
+        id="tab-trabalho"
         class="header__tab"
+        role="tab"
+        :aria-selected="view === 'trabalho'"
+        aria-controls="view-trabalho"
         :class="{ 'is-active': view === 'trabalho' }"
         @click="emit('update:view', 'trabalho')"
       >
@@ -77,17 +70,10 @@ const workspaceName = computed(() => {
     </nav>
     <span class="header__spacer"></span>
     <button v-if="payload.environment.execEnabled" class="harness-badge" @click="openSelector()">
-      <span
-        class="harness-avatar"
-        :class="activeTone ? `harness-avatar--${activeTone}` : 'harness-avatar--neutral'"
-        aria-hidden="true"
-      >
-        {{ activeInitials }}
+      <span class="harness-avatar" aria-hidden="true">
+        <HarnessIcon :id="activeHarness.id" />
       </span>
-      <span class="harness-badge__text">
-        <span class="harness-badge__name">{{ activeHarness.name }}</span>
-        <span class="harness-badge__scope mono">{{ consentScope }}</span>
-      </span>
+      <span class="harness-badge__name">{{ activeHarness.name }}</span>
     </button>
     <FreshnessStatus :freshness="freshness" />
     <StatusPill :status="status" />

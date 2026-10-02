@@ -1,6 +1,7 @@
 {
   "name": "relay-app",
   "private": true,
+  "license": "MIT",
   "workspaces": [
     "relay-*"
   ],

@@ -1,13 +1,14 @@
 {
   "name": "relay-ui",
   "private": true,
+  "license": "MIT",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test": "node --test",
+    "test": "node --test test/*.test.ts && vitest run",
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
@@ -17,8 +18,11 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/test-utils": "^2.4.6",
+    "jsdom": "^25.0.1",
     "typescript": "~5.7.3",
     "vite": "^6.2.0",
+    "vitest": "^2.1.8",
     "vue-tsc": "^2.2.0"
   }
 }
