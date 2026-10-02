@@ -187,8 +187,8 @@ supersedir esta ADR, porque a tela Reparar e os testes dependem dele.
 | `check` | Verificação |
 | --- | --- |
 | `handoff-names-no-pending-todo` | Handoff não vazio não nomeia um item pendente do TODO |
-| `backlog-id-mismatch` | Handoff, TODO e backlog discordam do mesmo backlog ID |
-| `spec-path-mismatch` | Caminho da spec ausente no handoff ou diferente do da tarefa |
+| `backlog-id-mismatch` | ID de backlog ativo inexistente no backlog, ou handoff, TODO e backlog discordam do mesmo backlog ID |
+| `spec-path-mismatch` | Tarefa ativa sem entrada de backlog confrontável, sem spec, ou com spec diferente do handoff |
 | `handoff-harness-invalid` | Handoff não vazio sem `Harness` ou fora do formato permitido |
 | `handoff-updated-invalid` | Handoff não vazio sem `Updated` ou fora do RFC 3339 exigido |
 | `multiple-handoffs` | Existe mais de um registro de handoff corrente |

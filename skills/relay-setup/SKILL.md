@@ -19,9 +19,9 @@ Never overwrite populated files. If `AGENTS.md` exists, ensure it ends with a
 newline, then append one `## Relay Protocol` section only when absent;
 otherwise create `# Agent guidance` followed by the Relay section. The section
 must require reading handoff, TODO, backlog, and the referenced spec before
-work. It must also state that clients and interfaces may read, validate,
-derive state, and launch a harness, but only Relay skills may mutate the five
-protocol records. Handle `CLAUDE.md` explicitly:
+Relay work, let work the user requests directly skip the flow, and state that
+clients and interfaces may read, validate, derive state, and launch a harness,
+but only Relay skills may mutate the five protocol records. Handle `CLAUDE.md`:
 
 - If it is absent, create a real symlink with `ln -s AGENTS.md CLAUDE.md`.
 - If it is already a symlink, preserve it and verify `readlink CLAUDE.md`

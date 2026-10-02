@@ -16,8 +16,8 @@ Otherwise:
   explicitly selected available item, or use the first available item in
   textual order as the deterministic default; then change it to `[•]` and write
   one valid `in_progress` handoff before editing;
-- empty TODO with pending backlog: report `backlog` and wait for selection;
-- no pending work: report `idle`.
+- empty TODO: backlog all `[x]` reports `done`; pending backlog reports
+  `backlog` and waits for selection; empty backlog reports `idle`;
 
 An item is available when it is `[ ]` and every ID in its `needs` is `[x]`.
 TODO order never implies priority, dependency, sequence, or effort, and the
@@ -29,12 +29,14 @@ explicit offset), together, never inferred from filesystem metadata.
 When a subtask finishes, append its changelog record with `Criteria` naming
 only what that record's own `Result`/`Evidence` demonstrates, never a
 criterion a later record will satisfy — qualified as `YYYYMMDD-NNN/A-NNN` when
-from another spec, `none` when truthful — mark its TODO item `[x]`, clear
-handoff, and clear TODO only after all its items finish. When another
-available item remains, mark it `[•]` and write its handoff before touching a
-file for it — this repeats for every subtask, not only the first. Before
-marking the last pending backlog entry of a spec `done`, confirm every
-criterion of that spec is named by some record; when one is not, leave it
-pending with `[!]` and a blocked handoff naming what is missing. Set `[!]` and
-a blocked handoff with current provenance whenever work cannot continue. Do
-not silently pick backlog work.
+from another spec, `none` when truthful — mark its TODO item `[x]`, then clear
+handoff before TODO is ever emptied, never after: a cleared TODO with a
+handoff still naming its ID is the exact inconsistency the integrity checks
+catch. Empty TODO only once all its items finish. When another available item
+remains, mark it `[•]` and write its handoff before touching a file for it —
+this repeats for every subtask, not only the first. Before marking the last
+pending backlog entry of a spec `done`, confirm every criterion of that spec
+is named by some record; when one is not, leave it pending with `[!]` and a
+blocked handoff naming what is missing. Set `[!]` and a blocked handoff with
+current provenance whenever work cannot continue. Do not silently pick
+backlog work.
