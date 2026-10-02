@@ -1,7 +1,7 @@
 # Release of relay-tui: a tag `relay-tui-vX.Y.Z` publishes one archive per
-# target on the GitHub Release. The macOS targets are the requirement; Linux
-# and Windows are best effort and a failure there never blocks the release
-# (ADR-0009 decision 4).
+# target on the GitHub Release. The macOS targets are the requirement; Linux is
+# best effort and a failure there never blocks the release. Windows is out for
+# now (ADR-0009 decision 4).
 #
 # Repository tooling, not package surface: it only runs on a relay-tui tag.
 name: relay-tui release
@@ -62,7 +62,6 @@ jobs:
         include:
           - { os: ubuntu-latest, target: x86_64-unknown-linux-musl }
           - { os: ubuntu-24.04-arm, target: aarch64-unknown-linux-musl }
-          - { os: windows-latest, target: x86_64-pc-windows-msvc }
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable

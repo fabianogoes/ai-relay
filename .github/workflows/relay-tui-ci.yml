@@ -1,5 +1,5 @@
-# CI for relay-tui. macOS is the requirement; Linux and Windows are best
-# effort and never fail the workflow (ADR-0009 decision 4).
+# CI for relay-tui. macOS is the requirement; Linux is best effort and never
+# fails the workflow. Windows is out for now (ADR-0009 decision 4).
 #
 # Repository tooling, not package surface: it only runs when app/relay-tui/**
 # or what it is checked against changes, so without app/ it never runs.
@@ -50,7 +50,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable

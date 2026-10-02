@@ -75,20 +75,33 @@ skills mutam.
 
 Uma tag publica no GitHub Release um binário por alvo. **O requisito é o macOS**
 (arm64 e x64), com `cargo test` no macOS no CI. Linux (x64 e arm64, `musl`,
-estático) e Windows (x64) são **melhor esforço**: entram no build quando
-possível e uma falha neles nunca bloqueia o release nem o CI. *(Emenda de
+estático) é **melhor esforço**: entra no build quando possível e uma falha nele
+nunca bloqueia o release nem o CI. **O Windows está fora por enquanto.** *(Emenda de
 2026-10-02: a redação original exigia os cinco alvos e o CI nos três sistemas;
 o dono do projeto trabalha no macOS e Linux e Windows são desejo, não
 impedimento.)*
 
 Isso cria um canal que a ADR-0004 não cobre — a camada "produto" chegava só por
 clone — e reintroduz o que a ADR-0001 tinha descontado: um binário baixado
-recebe `com.apple.quarantine` no macOS e o aviso do SmartScreen no Windows.
+recebe `com.apple.quarantine` no macOS (e receberia o aviso do SmartScreen no
+Windows, se ele voltar).
 
 A primeira versão **não assina nem notariza**; documenta o contorno
 (`xattr -d com.apple.quarantine` e "Executar assim mesmo"). Assinatura exige uma
 conta Apple Developer paga e fica como decisão adiada, junto com auto-update e
 pacotes (brew, scoop, nix).
+
+**Windows adiado (2026-10-02).** O job de Windows do primeiro CI falhou duas
+vezes seguidas por diferenças de plataforma (a primeira, separadores de caminho
+em `display_path`, já corrigida) e poluía o pipeline sem que ninguém o usasse.
+Saiu do CI, do release, do `package.sh` e do README. Para retomar: reincluir
+`windows-latest` na matriz de `best-effort` do CI e
+`{ os: windows-latest, target: x86_64-pc-windows-msvc }` na do release; recuperar
+do commit `6c8f484` o ramo `*-windows-*` do `scripts/package.sh` (`relay-tui.exe`
+e `.zip` via `7z`); reincluir a linha do README e o aviso do SmartScreen; e
+tratar a falha seguinte do `cargo test` (o PTY do teste ponta a ponta também
+nunca rodou lá). O CRLF dos registros (limite conhecido do README) é o
+problema mais provável de ser exigido antes.
 
 **Exceção à conformidade 3 da ADR-0004.** Um workflow só é lido pelo GitHub em
 `.github/workflows/`, fora de `app/`, e precisa nomear `app/relay-tui` para
@@ -162,7 +175,7 @@ derivada do estado.
 - O protocolo passa a ter duas implementações; a suite as mantém alinhadas, mas
   cada mudança de gramática custa duas edições.
 - Uma segunda toolchain (Cargo) entra em `app/` e uma matriz de CI, com o macOS
-  como requisito e Linux e Windows como melhor esforço.
+  como requisito e Linux como melhor esforço.
 - Binários sem assinatura exigem um passo manual de quem baixa, no macOS e no
   Windows.
 - `inconsistent` aparece em cores diferentes na web e no terminal.
@@ -176,7 +189,7 @@ derivada do estado.
    falha em divergência.
 3. O `core` em Rust não acessa disco; só `workspace` lê arquivos.
 4. A tag de release publica os binários de macOS arm64 e x64 e o CI roda
-   `cargo test` no macOS: é o requisito. Linux e Windows são melhor esforço e
+   `cargo test` no macOS: é o requisito. Linux é melhor esforço e
    uma falha neles não impede o release nem o CI.
 5. `.github/workflows/` tem só os dois arquivos do `relay-tui`, com os filtros
    de caminho e de tag da decisão 4.

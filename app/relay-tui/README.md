@@ -36,11 +36,12 @@ um arquivo por alvo:
 | macOS, Apple Silicon | `relay-tui-<versão>-aarch64-apple-darwin.tar.gz` | requisito |
 | macOS, Intel | `relay-tui-<versão>-x86_64-apple-darwin.tar.gz` | requisito |
 | Linux x64 e arm64 | `…-x86_64-unknown-linux-musl.tar.gz`, `…-aarch64-unknown-linux-musl.tar.gz` | melhor esforço |
-| Windows x64 | `…-x86_64-pc-windows-msvc.zip` | melhor esforço |
+| Windows | — | fora por enquanto |
 
-**Melhor esforço** quer dizer que o build é tentado a cada release, mas Linux e
-Windows não são testados à mão: se um alvo falhar, o release sai sem ele. O
-macOS é o que é verificado.
+**Melhor esforço** quer dizer que o build é tentado a cada release, mas o Linux
+não é testado à mão: se falhar, o release sai sem ele. O macOS é o que é
+verificado. O Windows saiu do build por enquanto; como retomá-lo está na
+[ADR-0009](../../docs/adr/0009-relay-tui-observador-de-terminal-em-rust.md).
 
 No macOS:
 
@@ -66,9 +67,6 @@ recebe o atributo `com.apple.quarantine`, e o macOS não o executa. Duas saídas
   ```sh
   xattr -d com.apple.quarantine relay-tui
   ```
-
-No Windows o SmartScreen avisa que o aplicativo é desconhecido: "Mais
-informações" e "Executar assim mesmo".
 
 Cada arquivo tem um `.sha256` ao lado: `shasum -a 256 -c <arquivo>.sha256`.
 
@@ -129,4 +127,4 @@ TypeScript precisam passar; ver o `README.md` dela e a
 2. Criar e enviar a tag `relay-tui-v<versão>` (a mesma versão do `Cargo.toml`;
    o workflow recusa se forem diferentes).
 3. O workflow `relay-tui-release` compila os dois alvos de macOS (requisito) e
-   os de Linux e Windows (melhor esforço), e só publica se os de macOS passaram.
+   os de Linux (melhor esforço), e só publica se os de macOS passaram.

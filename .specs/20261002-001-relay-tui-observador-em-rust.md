@@ -7,7 +7,7 @@ ver, na outra, o estado duravel do workflow mudar sem sair do terminal. A UI web
 (ADR-0007) so entregou valor na parte read-only; a execucao integrada nao
 funcionou. O observador precisa de uma superficie nova: um painel estreito,
 apresentavel, que se instala com um unico download, sem repositorio, Node nem
-gerenciador de pacotes, e roda em macOS, Linux e Windows.
+gerenciador de pacotes, e roda no macOS (Linux em melhor esforco).
 
 ## Scope
 
@@ -40,10 +40,10 @@ gerenciador de pacotes, e roda em macOS, Linux e Windows.
   "nao e um workspace Relay" e continua vigiando.
 - Distribuicao: GitHub Action disparada por tag publica um binario por alvo no
   Release. O requisito e o macOS (arm64 e x64), com `cargo test` no macOS no CI;
-  Linux (x64 e arm64 com `musl`) e Windows (x64) sao melhor esforco: sao
-  construidos e testados quando possivel, e uma falha neles nunca bloqueia o
-  release nem o CI. O contorno da quarentena do Gatekeeper e do SmartScreen fica
-  documentado.
+  Linux (x64 e arm64 com `musl`) e melhor esforco: e construido e testado
+  quando possivel, e uma falha nele nunca bloqueia o release nem o CI. O Windows
+  esta fora por enquanto (emenda de 2026-10-02). O contorno da quarentena do
+  Gatekeeper fica documentado.
 - ADR-0009, secao de paleta do meio terminal no design system e uma linha em
   `app/AGENTS.md` e `README.md`.
 
@@ -54,8 +54,9 @@ gerenciador de pacotes, e roda em macOS, Linux e Windows.
 - Detectar tema do terminal, terminal claro ou tema Omarchy.
 - Assinatura e notarizacao de binario, auto-update, instaladores e pacotes
   (brew, scoop, nix).
-- Exigir que Linux e Windows funcionem para liberar algo: sao desejo, nao
-  impedimento (emenda de 2026-10-02, ver Decisions).
+- Exigir que Linux funcione para liberar algo, ou suportar o Windows nesta
+  versao: o Linux e desejo, nao impedimento, e o Windows foi adiado (emenda de
+  2026-10-02, ver Decisions e a ADR-0009).
 - Substituir o `relay-core` em TS ou a UI web, ou decidir qual core sera a
   referencia a longo prazo.
 - Alterar a gramatica dos cinco registros.
@@ -93,8 +94,9 @@ protocolo. A ADR-0009 registra o argumento.
 **Passivo agora.** Navegacao fica para uma versao posterior, apos uso real.
 
 **macOS primeiro (emenda de 2026-10-02).** O desenvolvimento e a validacao
-acontecem no macOS, que e a maquina do dono do projeto; Linux e Windows seguem
-como diferencial desejado, mas melhor esforco. Isso reescreve o A-008, que
+acontecem no macOS, que e a maquina do dono do projeto; o Linux segue como
+diferencial desejado, mas melhor esforco, e o Windows foi adiado depois que seu
+job de CI falhou e poluiu o pipeline (como retomar: ADR-0009 decisao 4). Isso reescreve o A-008, que
 exigia cinco alvos e CI em tres sistemas, e a conformidade 4 da ADR-0009. O que
 nao e testado fora do macOS nao e declarado funcionando: a documentacao diz qual
 alvo e requisito e qual e melhor esforco.
@@ -122,10 +124,10 @@ alvo e requisito e qual e melhor esforco.
 - A-007 - O `relay-tui` nunca escreve em `.specs/` ou `.orchestration/` nem
   lanca processo, verificado por teste ou inspecao de codigo.
 - A-008 - Uma tag publica no Release binarios para macOS arm64 e x64, e o CI
-  roda `cargo test` no macOS: sao o requisito. Linux x64/arm64 e Windows x64 sao
-  melhor esforco, e uma falha neles nao impede o release nem o CI. A
-  documentacao traz o download, o contorno do Gatekeeper e do SmartScreen e diz
-  quais alvos sao requisito.
+  roda `cargo test` no macOS: sao o requisito. Linux x64/arm64 e melhor esforco,
+  e uma falha nele nao impede o release nem o CI; o Windows esta fora por
+  enquanto. A documentacao traz o download, o contorno do Gatekeeper e diz quais
+  alvos sao requisito.
 
 ## Backlog candidates
 

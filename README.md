@@ -67,7 +67,7 @@ Nao. Relay e Markdown no repositorio mais skills para Claude Code, Codex e
 OpenCode. Interfaces podem exibir o estado, mas nunca escrevem nos registros.
 Para acompanhar o estado num split de terminal existe o `relay-tui`, um binario
 so de leitura baixado em https://github.com/fabianogoes/relay/releases (macOS;
-Linux e Windows em melhor esforco).
+Linux em melhor esforco; Windows fora por enquanto).
 
 **Relay substitui meu gerenciador de projetos?**
 Nao. Ele guarda o minimo para agentes trabalharem com continuidade, e nao

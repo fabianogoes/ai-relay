@@ -39,7 +39,7 @@ not only the choice.
 - `docs/adr/0009-relay-tui-observador-de-terminal-em-rust.md` — Accepted —
   `relay-tui`, a read-only, passive terminal observer in Rust (`ratatui`),
   shipped as a single downloadable binary from a GitHub Release (macOS
-  is the requirement; Linux and Windows are best effort). It
+  is the requirement, Linux is best effort and Windows is out for now). It
   carries a second implementation of the core, held in line with `relay-core` by
   a language-neutral conformance suite in `app/conformance/`; it revises
   ADR-0001 decision 2 and the repository-only distribution premise for the TUI
