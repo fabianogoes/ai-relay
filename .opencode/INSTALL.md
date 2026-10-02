@@ -9,7 +9,7 @@ and `.agents/skills/`, in addition to its global skill directories.
 Clone the public repository into a stable local directory:
 
 ```sh
-git clone https://github.com/fabianogoes/relay.git ~/.config/opencode/relay
+git clone https://github.com/fabianogoes/ai-relay.git ~/.config/opencode/relay
 ```
 
 Expose each Relay skill in OpenCode's global discovery directory:

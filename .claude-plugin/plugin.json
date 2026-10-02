@@ -2,7 +2,7 @@
   "name": "relay",
   "version": "0.1.0",
   "description": "Portable operational memory for coding agents.",
-  "repository": "https://github.com/fabianogoes/relay",
+  "repository": "https://github.com/fabianogoes/ai-relay",
   "author": {
     "name": "Fabiano Góes"
   },
