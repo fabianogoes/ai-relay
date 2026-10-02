@@ -1,5 +1,5 @@
 import { reactive } from 'vue'
-import { apiPostJson } from './relay-client'
+import { apiGetJson, apiPostJson } from './relay-client'
 import { createRunSocket, type RunSocket } from './term-client'
 
 export type RunStatus = 'running' | 'exited'
@@ -113,10 +113,13 @@ function wire(runId: string): void {
     store.detached = false
   })
   socket.onDisk((entries) => {
+    // reanexar reenvia todos os diffs acumulados, não só os novos — dedupe por
+    // id pra nao duplicar entrada ja conhecida (A-006).
     for (const e of entries as DiskEntry[]) {
+      if (diskEntries.some((existing) => existing.id === e.id)) continue
       diskEntries.push(e)
-      store.writtenFiles = diskEntries.length
     }
+    store.writtenFiles = diskEntries.length
   })
   socket.connect(runId)
 }
@@ -141,12 +144,14 @@ export function sendInput(text: string): void {
 export function terminateRun(): void {
   if (!store.activeRunId) return
   const runId = store.activeRunId
+  // não marca `exited` aqui: o status real só muda quando socket.onExit()
+  // (wire()) recebe a saída confirmada pelo host, nunca de forma otimista.
   void apiPostJson(`/api/run/${runId}`, { action: 'terminate' }).catch(() => {})
-  store.status = 'exited'
-  store.detached = false
 }
 
 export function closeRun(): void {
+  const runId = store.activeRunId
+  if (runId) void apiPostJson(`/api/run/${runId}`, { action: 'close' }).catch(() => {})
   socket?.close()
   socket = null
   store.activeRunId = null
@@ -159,4 +164,42 @@ export function closeRun(): void {
 
 export function markRunConsumed(): void {
   store.firstRunThisSession = false
+}
+
+export interface RunInfo {
+  runId: string
+  status: RunStatus
+  exitCode: number | null
+  startedAt: string
+  harnessId: string
+  harnessName: string
+  processName: string
+}
+
+/**
+ * Recupera uma run viva do host que a aba ainda não conhece — fechar a aba e
+ * reabrir durante uma run em andamento reanexa a ela sem reload manual
+ * (A-009). Não faz nada se já houver uma run ativa localmente, ou se o host
+ * não reportar nenhuma run em execução.
+ */
+export function discoverActiveRun(): Promise<void> {
+  if (store.activeRunId) return Promise.resolve()
+  return apiGetJson<RunInfo[]>('/api/runs')
+    .then((runs) => {
+      if (store.activeRunId) return
+      const run = runs.find((r) => r.status === 'running')
+      if (!run) return
+      store.activeRunId = run.runId
+      store.status = 'running'
+      store.detached = false
+      store.harnessId = run.harnessId
+      store.harnessName = run.harnessName
+      store.processName = run.processName
+      store.reattached = true
+      clientScrollback = ''
+      diskEntries.length = 0
+      store.writtenFiles = 0
+      wire(run.runId)
+    })
+    .catch(() => {})
 }

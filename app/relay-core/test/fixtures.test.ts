@@ -58,12 +58,13 @@ test('ready', () => {
     `- [x] T-002 - Escrever tokens.css`,
     `- [ ] T-003 - Scaffold da relay-ui (needs: T-001, T-002)`,
   ].join('\n')
+  const backlog = `- [ ] B-004 - Tela principal renderizando os sete fixtures (spec: ${SPEC_001})`
   const changelog = changelogRecords([
     { backlog: 'B-004', todo: 'T-001' },
     { backlog: 'B-004', todo: 'T-002' },
   ])
   const state = deriveState(
-    files({ todo: `# Active task: B-004\n\n${todo}\n`, handoff: EMPTY_HANDOFF, changelog }),
+    files({ backlog: `# Backlog\n\n${backlog}\n`, todo: `# Active task: B-004\n\n${todo}\n`, handoff: EMPTY_HANDOFF, changelog }),
   )
   assert.deepStrictEqual(state, fixtureState('ready'))
 })
@@ -108,6 +109,7 @@ test('blocked', () => {
     `- [x] T-002 - Escrever tokens.css`,
     `- [!] T-003 - Scaffold da relay-ui (needs: T-001, T-002)`,
   ].join('\n')
+  const backlog = `- [ ] B-004 - Tela principal renderizando os sete fixtures (spec: ${SPEC_001})`
   const handoff = [
     `# Handoff`,
     ``,
@@ -132,7 +134,9 @@ test('blocked', () => {
     { backlog: 'B-004', todo: 'T-001' },
     { backlog: 'B-004', todo: 'T-002' },
   ])
-  const state = deriveState(files({ todo: `# Active task: B-004\n\n${todo}\n`, handoff, changelog }))
+  const state = deriveState(
+    files({ backlog: `# Backlog\n\n${backlog}\n`, todo: `# Active task: B-004\n\n${todo}\n`, handoff, changelog }),
+  )
   assert.deepStrictEqual(state, fixtureState('blocked'))
 })
 

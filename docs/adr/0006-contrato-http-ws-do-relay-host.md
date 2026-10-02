@@ -123,6 +123,52 @@ todo cliente WebSocket conectado — sem recarregar a página.
 mudança é baixo, e observar diretórios inteiros é mais simples e não perde
 spec nova sendo criada (decisão da spec 005).
 
+### 8. Farol de descoberta por workspace para reconexão entre processos
+
+Matar e reiniciar o host muda a porta efêmera (decisão 1); sem mais nada, a
+aba já aberta fica presa tentando o endereço morto, e nenhuma navegação
+same-origin pode alcançar a origem nova sem que algo aponte para ela — a
+reserva desta ADR ("formato de reconexão... é assunto das specs 007/009")
+cobria reconectar dentro do mesmo processo, nunca descobrir um processo novo
+(spec 012, A-010).
+
+O host abre um segundo listener em `127.0.0.1`, somente leitura, numa porta
+**derivada deterministicamente do caminho absoluto do workspace** (hash
+estável, não aleatória): mesma workspace, mesma porta de farol, em toda
+execução. Ele expõe uma única rota que devolve `{ "port": <porta efêmera
+atual> }` — nada além de um inteiro não secreto. Não exige token: não há
+segredo para proteger, e exigi-lo seria inútil, já que o próprio propósito é
+ser alcançado por uma aba cujo token antigo morreu com o processo anterior.
+Aceita `Cross-Origin`: sem isso a aba (presa na origem morta) não conseguiria
+ler a resposta vinda de uma porta diferente; o servidor ecoa
+`Access-Control-Allow-Origin` apenas quando o `Origin` da requisição casa com
+`http://127.0.0.1:<qualquer porta>`, nunca `*`.
+
+A porta do farol viaja para o cliente do mesmo jeito que o token: um `<meta
+name="relay-discovery-port">` no HTML inicial. O cliente nunca recalcula o
+hash; só lembra o valor que já recebeu. Ao detectar que a origem atual não
+responde mais (WebSocket fechado e requisições HTTP falhando de forma
+consistente, não uma falha isolada), a aba consulta o farol com backoff até
+receber uma porta e navega para `http://127.0.0.1:<porta>/`, o que dispara o
+bootstrap normal de `GET /` — token novo, HTML novo, nenhuma mudança nas
+decisões 2 e 3.
+
+**Por quê:** preserva as duas garantias que a spec 012 exige intactas — a
+porta principal continua efêmera e aleatória, o token continua por execução e
+fora de URL/query. O farol não carrega nem token nem conteúdo do protocolo;
+o único fato que expõe (qual porta efêmera atende hoje este workspace) exige
+já conhecer o workspace, o que só é verdade pra quem já tinha a aba aberta
+para ele. Derivar a porta do workspace, em vez de um farol único e global,
+evita concentrar num só ponto a descoberta de todos os workspaces ativos da
+máquina.
+
+**Consequência assumida:** colisão de hash entre dois workspaces é
+astronomicamente rara mas não impossível; quando a porta derivada já está em
+uso por outro processo, o host falha ao iniciar com um erro de diagnóstico
+claro (nunca escolhe silenciosamente outra porta — isso quebraria a
+propriedade "mesma workspace, mesma porta de farol" da qual o mecanismo
+inteiro depende).
+
 ## Consequências
 
 ### Positivas
@@ -148,6 +194,10 @@ spec nova sendo criada (decisão da spec 005).
   string — alguns clientes não-Web exigirão adaptação.
 - Watcher de diretório re-deriva tudo a cada toque; aceitável pelo tamanho
   dos registros, documentado como escolha.
+- O farol de descoberta (decisão 8) é uma segunda superfície de rede sempre
+  ativa, alcançável por qualquer página local que já conheça (ou adivinhe)
+  a porta derivada de um workspace; ela não expõe token nem conteúdo, só um
+  número de porta, mas é uma superfície nova assumida conscientemente.
 
 ### Consequência descartada explicitamente
 
@@ -169,6 +219,10 @@ acesso e contraria a decisão da spec 005. Subprotocol fica com o custo.
 6. O token nunca aparece em URL nem em query string; só no HTML inicial, no
    cabeçalho `X-Relay-Token` e no subprotocol do WS.
 7. O pacote vive em `app/relay-host/`, seguindo a estrutura da ADR-0004.
+8. O farol de descoberta liga só em `127.0.0.1`, numa porta derivada
+   deterministicamente do workspace; devolve somente a porta efêmera atual,
+   nunca token nem conteúdo do protocolo; falha ao iniciar (não escolhe
+   outra porta em silêncio) se a porta derivada já estiver em uso.
 
 ## Notas
 
@@ -182,4 +236,10 @@ implementação de 008 só acrescente, nunca revise o contrato.
 
 **O que esta ADR não decide.** A forma de servir o HTML da `relay-ui` (dev
 server vs arquivo construído) e o formato de reconexão/replay da WebSocket
-são assuntos das specs 007/009.
+**dentro do mesmo processo** são assuntos das specs 007/009. Descoberta
+**entre processos** — quando o host inteiro reinicia numa porta nova — é a
+decisão 8, acrescentada pela spec 012.
+
+**Revisão 2026-09-16 (spec 012).** Decisão 8 é aditiva: nenhuma decisão
+anterior foi revogada, a porta principal e o token continuam exatamente como
+descritos nas decisões 1 e 2. O status permanece Accepted.

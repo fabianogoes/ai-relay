@@ -1,0 +1,100 @@
+# Release of relay-tui: a tag `relay-tui-vX.Y.Z` publishes one archive per
+# target on the GitHub Release. The macOS targets are the requirement; Linux is
+# best effort and a failure there never blocks the release. Windows is out for
+# now (ADR-0009 decision 4).
+#
+# Repository tooling, not package surface: it only runs on a relay-tui tag.
+name: relay-tui release
+
+on:
+  push:
+    tags: ['relay-tui-v*']
+
+permissions:
+  contents: write
+
+jobs:
+  version:
+    name: tag matches Cargo.toml
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          version="$(grep -m1 '^version' app/relay-tui/Cargo.toml | cut -d'"' -f2)"
+          if [ "${GITHUB_REF_NAME}" != "relay-tui-v${version}" ]; then
+            echo "tag ${GITHUB_REF_NAME} does not match Cargo.toml version ${version}" >&2
+            exit 1
+          fi
+
+  macos:
+    name: ${{ matrix.target }} (required)
+    needs: version
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        target: [aarch64-apple-darwin, x86_64-apple-darwin]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app/relay-tui
+      - name: Test
+        working-directory: app/relay-tui
+        run: cargo test --locked
+      - name: Package
+        run: app/relay-tui/scripts/package.sh ${{ matrix.target }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.target }}
+          path: app/relay-tui/dist/*
+
+  best-effort:
+    name: ${{ matrix.target }} (best effort)
+    needs: version
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, target: x86_64-unknown-linux-musl }
+          - { os: ubuntu-24.04-arm, target: aarch64-unknown-linux-musl }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - if: contains(matrix.target, 'linux-musl')
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+      - name: Package
+        shell: bash
+        run: app/relay-tui/scripts/package.sh ${{ matrix.target }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.target }}
+          path: app/relay-tui/dist/*
+
+  publish:
+    name: publish
+    needs: [macos, best-effort]
+    # Whatever the best-effort targets did, a release needs both macOS ones.
+    if: ${{ always() && needs.macos.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: dist-*
+          merge-multiple: true
+          path: dist
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ls -l dist
+          gh release create "${GITHUB_REF_NAME}" dist/* \
+            --repo "${GITHUB_REPOSITORY}" \
+            --title "${GITHUB_REF_NAME}" \
+            --generate-notes

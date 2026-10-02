@@ -1,0 +1,13 @@
+{
+  "kind": "inconsistent",
+  "violations": [
+    {
+      "check": "spec-path-mismatch",
+      "detail": "O handoff diz .specs/20260907-009-outra.md, a tarefa diz .specs/20260907-001-ui-primeiro-marco-visual.md.",
+      "records": [
+        "handoff",
+        "backlog"
+      ]
+    }
+  ]
+}

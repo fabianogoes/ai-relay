@@ -20,3 +20,11 @@ test('nova requisicao aborta a anterior e somente a revisao atual pode publicar'
   assert.equal(second.signal.aborted, false)
   assert.equal(requests.isCurrent(second.revision), true)
 })
+
+test('selecao de backlog cai no primeiro card e nunca fica orfa', () => {
+  const cards = [{ id: 'B-002' }, { id: 'B-001' }]
+  assert.equal(reconcileSpecId(cards, null), 'B-002')
+  assert.equal(reconcileSpecId(cards, 'B-001'), 'B-001')
+  assert.equal(reconcileSpecId(cards, 'B-999'), 'B-002')
+  assert.equal(reconcileSpecId([], 'B-001'), null)
+})

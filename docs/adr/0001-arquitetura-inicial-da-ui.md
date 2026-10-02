@@ -73,6 +73,11 @@ permite começar a construir hoje sem gastar a primeira semana empacotando.
 
 ### 2. TypeScript ponta a ponta, inclusive no core
 
+> **Revisada pela [ADR-0009](0009-relay-tui-observador-de-terminal-em-rust.md)
+> apenas para o `relay-tui`**, que ganha um core em Rust contido por uma suite
+> de conformidade e distribuído como binário. `relay-core`, `relay-host` e
+> `relay-ui` seguem em TypeScript.
+
 Uma linguagem, um `npm install`, e a UI é TypeScript de qualquer forma.
 `node-pty` é a ligação de PTY mais madura disponível e cobre ConPTY quando
 Windows entrar.

@@ -1,0 +1,14 @@
+{
+  "kind": "inconsistent",
+  "violations": [
+    {
+      "check": "backlog-id-mismatch",
+      "detail": "O handoff diz B-001, o TODO diz B-002.",
+      "records": [
+        "handoff",
+        "todo",
+        "backlog"
+      ]
+    }
+  ]
+}

@@ -9,6 +9,7 @@
   --meta: #9ba6b4;
   --line: rgba(255, 255, 255, 0.10);
   --line-2: rgba(255, 255, 255, 0.16);
+  --scrim: rgba(0, 0, 0, 0.55);
 
   --green: #5fe3b3;
   --green-soft: rgba(95, 227, 179, 0.10);

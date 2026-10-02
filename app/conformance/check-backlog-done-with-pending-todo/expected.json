@@ -1,0 +1,13 @@
+{
+  "kind": "inconsistent",
+  "violations": [
+    {
+      "check": "backlog-done-with-pending-todo",
+      "detail": "Backlog B-001 está done com TODO pendente.",
+      "records": [
+        "backlog",
+        "todo"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+# CI for relay-tui. macOS is the requirement; Linux is best effort and never
+# fails the workflow. Windows is out for now (ADR-0009 decision 4).
+#
+# Repository tooling, not package surface: it only runs when app/relay-tui/**
+# or what it is checked against changes, so without app/ it never runs.
+name: relay-tui CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/relay-tui/**'
+      - 'app/conformance/**'
+      - 'app/relay-core/**'
+      - '.github/workflows/relay-tui-ci.yml'
+  pull_request:
+    paths:
+      - 'app/relay-tui/**'
+      - 'app/conformance/**'
+      - 'app/relay-core/**'
+      - '.github/workflows/relay-tui-ci.yml'
+
+jobs:
+  macos:
+    name: macOS (required)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app/relay-tui
+      - name: Rust core and view
+        working-directory: app/relay-tui
+        run: cargo test --locked
+      # The same conformance suite, run by the other reader.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: TypeScript core on the same conformance suite
+        working-directory: app
+        run: |
+          npm ci --workspace relay-core --include-workspace-root
+          npm test --workspace relay-core
+
+  best-effort:
+    name: ${{ matrix.os }} (best effort)
+    runs-on: ${{ matrix.os }}
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: app/relay-tui
+      - name: Rust core and view
+        working-directory: app/relay-tui
+        run: cargo test --locked

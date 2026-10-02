@@ -1,0 +1,62 @@
+ relay  ~/Developer/relay                                                                                   ● atualizado
+
+╭ Handoff ──────────────────────────────────────────────────────────────────────────────────────────────── ● Bloqueado ╮
+│ B-004 · T-003 · opencode · há 10 min                                                                                 │
+│                                                                                                                      │
+│ Objetivo  Scaffold da relay-ui com Vue 3.                                                                            │
+│ Próximo   Resolvido o bloqueio, rodar a criação do projeto Vite.                                                     │
+│ Bloqueio  Bloqueio: node_modules não pode ser instalado sem acesso ao registro npm neste ambiente. Condição de       │
+│           retomada: acesso ao registro npm restabelecido.                                                            │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭ TODO ─────────────────────────────────────────────────────────────────────────────────────────────────────────── 2/3 ╮
+│ ████████ ████████ ████████                                                                                           │
+│                                                                                                                      │
+│ ✓ T-001 Materializar os sete fixtures                                                                                │
+│ ✓ T-002 Escrever tokens.css                                                                                          │
+│ ! T-003 Scaffold da relay-ui  bloqueado                                                                              │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭ Backlog ──────────────────────────────────────────────────────────────────────────────────────────────────────── 0/1 ╮
+│ ○ 1 disponível                                                                                                       │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+
+
+
+
+
+
+
+
+ q sair
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm...................................................................................g.mmmmmmmmmm
+
+y.FFFFFFF.yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy.Y.YYYYYYYYY.y
+y.IIIII.m.iiiii.m.mmmmmmmm.m.mm.mm.mmm.................................................................................y
+y......................................................................................................................y
+y.mmmmmmmm..ffffffff.ff.ffffffff.fff.fff.ff............................................................................y
+y.mmmmmmm...fffffffff.f.fffffffff.fffff.f.fffffff.ff.fffffff.fffff.....................................................y
+y.mmmmmmmm..fffffffff.ffffffffffff.fff.ffff.fff.fffffffff.fff.ffffff.ff.ffffffff.fff.fffff.fffffffff.ffffffff.ff.......y
+y...........fffffffff.ffffff.ff.ffffffff.fff.ffffffffffffff............................................................y
+yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
+d.FFFF.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.mmm.d
+d.gggggggg.gggggggg.yyyyyyyy...........................................................................................d
+d......................................................................................................................d
+d.G.iiiii.mmmmmmmmmmmm.mm.mmmm.mmmmmmmm................................................................................d
+d.G.iiiii.mmmmmmmm.mmmmmmmmmm..........................................................................................d
+d.Y.iiiii.ffffffff.ff.ffffffff..yyyyyyyyy..............................................................................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFFFFFF.dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.mmm.d
+d.U.f.ffffffffff.......................................................................................................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+
+
+
+
+
+
+
+
+
+.F.mmmm

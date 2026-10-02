@@ -41,11 +41,35 @@ contract; read-only skills remain read-only. If a client cannot derive a
 required state from the records, change this protocol before adding private
 write logic to the client.
 
+## Work outside the flow
+
+Relay governs the work tracked through it, not every change to the repository.
+The user may request a change directly, without invoking a Relay skill. Such
+work creates no specification, backlog entry, TODO item, handoff, or changelog
+record, and it leaves the derived state unchanged.
+
+An agent asked for direct work need not read the Relay records first and must
+not route the work into the flow unprompted. It may suggest `relay-spec` when
+the work turns out to span sessions or harnesses, but the user decides. Reading
+the records is required only before a Relay skill acts, or before work the user
+ties to a backlog task or to the active handoff.
+
+Direct work never writes the five records, so it cannot make the state
+`inconsistent`: the integrity checks compare the records with each other, not
+with the code. When a handoff is active, direct work is not part of it and is
+not recorded under it.
+
 ## Allowed statuses
 
 `backlog`, `ready`, `in_progress`, `blocked`, `done`, and `idle` are English
 status values. `inconsistent` is a derived diagnostic and must not be written
 as a work status.
+
+`done` and `idle` are the terminal states and are derived, never written. A
+non-empty backlog whose entries are all `[x]` derives `done`. The absence of
+backlog, TODO, and handoff entries derives `idle`. An empty backlog is not a
+status: with pending backlog entries absent, the other records decide the
+state.
 
 Specification filenames use `YYYYMMDD-NNN-<slug>.md`: the date is the creation
 date and `NNN` is a three-digit sequence that restarts at `001` each day.
@@ -243,6 +267,16 @@ No active handoff.
    the entry stays pending: set `[!]` and write a blocked handoff naming the
    criteria without evidence and what would satisfy them.
 
+**Write order within steps 4 and 5 is not a suggestion.** The handoff clears
+in step 4, strictly before TODO or BACKLOG are rewritten in step 5. A tool or
+harness that writes TODO's empty state (or BACKLOG's `done` marker) first and
+the empty handoff second produces exactly the window the integrity checks
+below exist to catch: a nonempty handoff naming a TODO or backlog ID that no
+longer has a matching entry. This is not a race to tolerate — it is a write
+ordering to get right the first time. When multiple records change together,
+clear or update the handoff in the same step that makes it stale, never in a
+later one.
+
 `relay-continue` may be used before a session to summarize this state machine.
 It executes only the option selected by the user; starting or resuming work is
 delegated to `relay-session`.
@@ -258,8 +292,10 @@ repair.
 Treat the state as `inconsistent` when any condition below fails:
 
 - A nonempty handoff does not name one pending TODO item.
-- Handoff, TODO, and backlog records do not agree on the same backlog ID.
-- The handoff's spec path is missing or differs from the task's spec path.
+- The active backlog ID does not exist in the backlog, or handoff, TODO, and
+  backlog records do not agree on the same backlog ID.
+- The active task has no confrontable backlog entry, no spec, or a spec that
+  differs from the handoff's spec path.
 - A nonempty handoff omits `Harness` or uses an identifier outside the allowed
   format.
 - A nonempty handoff omits `Updated` or its value is not an RFC 3339 timestamp

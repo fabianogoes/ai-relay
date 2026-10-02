@@ -138,6 +138,9 @@ de distribuição com versionamento próprio para manter em dia.
    fora de `app/` **resolve** um caminho para dentro dele — link de markdown,
    import, symlink, entrada de manifesto ou linha de script. Prosa que
    simplesmente cita `app/`, como uma spec ou uma ADR, não é dependência.
+   *Exceção da [ADR-0009](0009-relay-tui-observador-de-terminal-em-rust.md)
+   decisão 4: os dois workflows do `relay-tui` em `.github/workflows/`, inertes
+   quando `app/` não existe.*
 4. Nada sob `app/` é referenciado por manifesto de distribuição.
 5. Nenhum arquivo sob `app/` escreve em `.specs/` ou `.orchestration/`.
 6. `app/CLAUDE.md` é symlink real para `app/AGENTS.md`, nunca arquivo regular.

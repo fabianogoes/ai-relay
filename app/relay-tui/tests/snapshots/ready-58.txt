@@ -1,0 +1,50 @@
+ relay  ~/Developer/relay                     ● atualizado
+
+ ● Pronto  Sem handoff ativo
+╭ TODO ───────────────────────────────────────────── 2/3 ╮
+│ ████████ ████████ ████████                             │
+│                                                        │
+│ ✓ T-001 Materializar os sete fixtures                  │
+│ ✓ T-002 Escrever tokens.css                            │
+│ ○ T-003 Scaffold da relay-ui                           │
+╰────────────────────────────────────────────────────────╯
+╭ Backlog ────────────────────────────────────────── 0/1 ╮
+│ ○ 1 disponível                                         │
+╰────────────────────────────────────────────────────────╯
+
+
+
+
+
+
+
+
+
+
+ q sair
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
+
+.U.UUUUUU..mmm.mmmmmmm.mmmmm
+d.FFFF.ddddddddddddddddddddddddddddddddddddddddddddd.mmm.d
+d.gggggggg.gggggggg.uuuuuuuu.............................d
+d........................................................d
+d.G.iiiii.mmmmmmmmmmmm.mm.mmmm.mmmmmmmm..................d
+d.G.iiiii.mmmmmmmm.mmmmmmmmmm............................d
+d.u.iiiii.ffffffff.ff.ffffffff...........................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFFFFFF.dddddddddddddddddddddddddddddddddddddddddd.mmm.d
+d.U.f.ffffffffff.........................................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+
+
+
+
+
+
+
+
+
+
+.F.mmmm

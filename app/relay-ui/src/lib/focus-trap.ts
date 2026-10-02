@@ -7,7 +7,30 @@ function focusables(root: HTMLElement): HTMLElement[] {
   )
 }
 
-export function trapFocus(root: HTMLElement): () => void {
+function inertSiblings(root: HTMLElement): Array<{ el: HTMLElement }> {
+  const parent = root.parentElement
+  if (!parent) return []
+  const inerted: Array<{ el: HTMLElement }> = []
+  for (const el of Array.from(parent.children) as HTMLElement[]) {
+    if (el === root || root.contains(el) || el.contains(root)) continue
+    if (el.inert) continue
+    el.inert = true
+    inerted.push({ el })
+  }
+  return inerted
+}
+
+export interface DialogHandle {
+  release(): void
+}
+
+export function mountDialog(root: HTMLElement, initialFocus: HTMLElement | null = null): DialogHandle {
+  const originator = document.activeElement as HTMLElement | null
+  const inerted = inertSiblings(root)
+
+  const target = initialFocus ?? focusables(root)[0] ?? root
+  target.focus()
+
   const onKeydown = (event: KeyboardEvent): void => {
     if (event.key !== 'Tab') return
     const els = focusables(root)
@@ -20,14 +43,19 @@ export function trapFocus(root: HTMLElement): () => void {
         event.preventDefault()
         last.focus()
       }
-    } else {
-      if (active === last || !root.contains(active)) {
-        event.preventDefault()
-        first.focus()
-      }
+    } else if (active === last || !root.contains(active)) {
+      event.preventDefault()
+      first.focus()
     }
   }
 
   root.addEventListener('keydown', onKeydown)
-  return () => root.removeEventListener('keydown', onKeydown)
+
+  return {
+    release() {
+      root.removeEventListener('keydown', onKeydown)
+      for (const { el } of inerted) el.inert = false
+      originator?.focus()
+    },
+  }
 }

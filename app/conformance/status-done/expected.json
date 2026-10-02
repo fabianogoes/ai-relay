@@ -1,0 +1,47 @@
+{
+  "kind": "ok",
+  "status": "done",
+  "handoff": null,
+  "activeBacklogId": null,
+  "todo": [],
+  "backlog": [
+    {
+      "id": "B-001",
+      "text": "Contrato do estado derivado",
+      "marker": "x",
+      "needs": [],
+      "available": false,
+      "spec": ".specs/20260907-001-ui-primeiro-marco-visual.md"
+    },
+    {
+      "id": "B-002",
+      "text": "Fronteira e estrutura do app/",
+      "marker": "x",
+      "needs": [],
+      "available": false,
+      "spec": ".specs/20260907-001-ui-primeiro-marco-visual.md"
+    },
+    {
+      "id": "B-003",
+      "text": "Framework da relay-ui",
+      "marker": "x",
+      "needs": [],
+      "available": false,
+      "spec": ".specs/20260907-001-ui-primeiro-marco-visual.md"
+    },
+    {
+      "id": "B-004",
+      "text": "Tela principal renderizando os sete fixtures",
+      "marker": "x",
+      "needs": [
+        "B-001",
+        "B-002",
+        "B-003"
+      ],
+      "available": false,
+      "spec": ".specs/20260907-001-ui-primeiro-marco-visual.md"
+    }
+  ],
+  "completed": 0,
+  "total": 0
+}

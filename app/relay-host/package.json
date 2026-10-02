@@ -1,14 +1,17 @@
 {
   "name": "relay-host",
   "private": true,
+  "license": "MIT",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "start": "node src/index.ts",
     "test": "node --test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "postinstall": "node scripts/fix-node-pty-permissions.mjs"
   },
   "dependencies": {
+    "node-pty": "^1.1.0",
     "relay-core": "*",
     "ws": "^8.18.0"
   },

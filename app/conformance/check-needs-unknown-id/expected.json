@@ -1,0 +1,12 @@
+{
+  "kind": "inconsistent",
+  "violations": [
+    {
+      "check": "needs-unknown-id",
+      "detail": "T-003 referencia T-999, ausente em todo.",
+      "records": [
+        "todo"
+      ]
+    }
+  ]
+}

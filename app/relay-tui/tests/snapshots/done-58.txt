@@ -1,0 +1,50 @@
+ relay  ~/Developer/relay                     ● atualizado
+
+╭ ● Concluído ───────────────────────────────────────────╮
+│ ✓ 4 de 4 itens do backlog concluídos.                  │
+╰────────────────────────────────────────────────────────╯
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ q sair
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
+
+g.G.GGGGGGGGG.gggggggggggggggggggggggggggggggggggggggggggg
+g.G.f.ff.f.fffff.ff.fffffff.fffffffffff..................g
+gggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.F.mmmm

@@ -38,8 +38,9 @@ export interface ServerDeps {
   runInfo?(runId: string): RunInfo | null
   runWrite?(runId: string, data: string): void
   runTerminate?(runId: string): void
+  runClose?(runId: string): boolean
   runScrollback?(runId: string): string | null
-  runDiskEntries?(runId: string): unknown[]
+  runDiskEntries?(runId: string): unknown[] | null
   runs?(): RunInfo[]
 }
 
@@ -52,6 +53,7 @@ export interface RelayServerOptions {
   workspace: string
   execEnabled: boolean
   token: string
+  discoveryPort: number
   port?: number
   deps: ServerDeps
 }
@@ -111,7 +113,9 @@ function escapeHtml(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 }
 
-function bootstrapHtml(options: Pick<RelayServerOptions, 'workspace' | 'execEnabled' | 'token'>): string {
+type MetaOptions = Pick<RelayServerOptions, 'workspace' | 'execEnabled' | 'token' | 'discoveryPort'>
+
+function bootstrapHtml(options: MetaOptions): string {
   return [
     '<!doctype html>',
     '<html lang="pt-BR">',
@@ -120,6 +124,7 @@ function bootstrapHtml(options: Pick<RelayServerOptions, 'workspace' | 'execEnab
     `<meta name="relay-token" content="${escapeHtml(options.token)}">`,
     `<meta name="relay-workspace" content="${escapeHtml(options.workspace)}">`,
     `<meta name="relay-exec-enabled" content="${options.execEnabled ? 'true' : 'false'}">`,
+    `<meta name="relay-discovery-port" content="${options.discoveryPort}">`,
     '<title>Relay</title>',
     '</head>',
     '<body>',
@@ -130,15 +135,16 @@ function bootstrapHtml(options: Pick<RelayServerOptions, 'workspace' | 'execEnab
   ].join('\n')
 }
 
-function relayMetas(options: Pick<RelayServerOptions, 'workspace' | 'execEnabled' | 'token'>): string {
+function relayMetas(options: MetaOptions): string {
   return [
     `<meta name="relay-token" content="${escapeHtml(options.token)}">`,
     `<meta name="relay-workspace" content="${escapeHtml(options.workspace)}">`,
     `<meta name="relay-exec-enabled" content="${options.execEnabled ? 'true' : 'false'}">`,
+    `<meta name="relay-discovery-port" content="${options.discoveryPort}">`,
   ].join('\n    ')
 }
 
-function uiIndex(options: Pick<RelayServerOptions, 'workspace' | 'execEnabled' | 'token'>): string | null {
+function uiIndex(options: MetaOptions): string | null {
   const file = join(UI_DIST, 'index.html')
   if (!existsSync(file)) return null
   const html = readFileSync(file, 'utf8')
@@ -163,7 +169,7 @@ function serveStatic(res: ServerResponse, pathname: string): boolean {
 }
 
 export function createRelayServer(options: RelayServerOptions): Promise<RelayServer> {
-  const { token, workspace, execEnabled, deps, port = 0 } = options
+  const { token, workspace, execEnabled, deps, port = 0, discoveryPort } = options
   const clients = new Set<WebSocket>()
   let serverOrigin = ''
   let refreshing = false
@@ -192,13 +198,13 @@ export function createRelayServer(options: RelayServerOptions): Promise<RelaySer
   async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> {
     const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`)
     if (url.pathname === '/' && req.method === 'GET') {
-      const ui = uiIndex({ workspace, execEnabled, token })
+      const ui = uiIndex({ workspace, execEnabled, token, discoveryPort })
       if (ui !== null) {
         res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' })
         res.end(ui)
       } else {
         res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' })
-        res.end(bootstrapHtml({ workspace, execEnabled, token }))
+        res.end(bootstrapHtml({ workspace, execEnabled, token, discoveryPort }))
       }
       return
     }
@@ -295,8 +301,21 @@ export function createRelayServer(options: RelayServerOptions): Promise<RelaySer
       try {
         const body = await readJsonBody(req)
         if (body.action === 'terminate') {
+          if (!deps.runInfo || deps.runInfo(runId) === null) {
+            res.writeHead(404)
+            res.end()
+            return
+          }
           deps.runTerminate?.(runId)
           json(res, 200, { terminated: true })
+        } else if (body.action === 'close') {
+          const closed = deps.runClose ? deps.runClose(runId) : false
+          if (!closed) {
+            res.writeHead(404)
+            res.end()
+            return
+          }
+          json(res, 200, { closed: true })
         } else {
           res.writeHead(400)
           res.end()
@@ -345,18 +364,37 @@ export function createRelayServer(options: RelayServerOptions): Promise<RelaySer
       json(res, 200, deps.harnesses())
       return
     }
+    if (route === 'runs' || route === 'run') {
+      if (!execEnabled) {
+        res.writeHead(404)
+        res.end()
+        return
+      }
+    }
     if (route === 'runs') {
       json(res, 200, deps.runs ? deps.runs() : [])
       return
     }
-    if (route.startsWith('run/')) {
-      const runId = decodeURIComponent(route.slice(4))
-      if (parts.length === 3) {
-        if (parts[2] === 'disk') {
-          json(res, 200, deps.runDiskEntries ? deps.runDiskEntries(runId) : [])
+    if (route === 'run' && parts.length >= 3) {
+      const runId = decodeURIComponent(parts[2] ?? '')
+      if (parts.length === 4 && parts[3] === 'disk') {
+        const entries = deps.runDiskEntries ? deps.runDiskEntries(runId) : null
+        if (entries === null) {
+          res.writeHead(404)
+          res.end()
           return
         }
-        json(res, 200, deps.runInfo ? deps.runInfo(runId) : null)
+        json(res, 200, entries)
+        return
+      }
+      if (parts.length === 3) {
+        const info = deps.runInfo ? deps.runInfo(runId) : null
+        if (info === null) {
+          res.writeHead(404)
+          res.end()
+          return
+        }
+        json(res, 200, info)
         return
       }
     }
@@ -426,6 +464,12 @@ export function createRelayServer(options: RelayServerOptions): Promise<RelaySer
         socket.destroy()
         return
       }
+      if (!execEnabled) {
+        socket.write('HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n')
+        socket.destroy()
+        return
+      }
+
       termWss.handleUpgrade(req, socket, head, (ws) => {
         let runId = ''
         ws.on('message', (raw) => {
@@ -441,6 +485,12 @@ export function createRelayServer(options: RelayServerOptions): Promise<RelaySer
               set.add(ws)
               const sb = deps.runScrollback?.(runId) ?? ''
               if (sb) ws.send(JSON.stringify({ kind: 'data', runId, data: sb }))
+              // reanexar precisa dos diffs acumulados durante a ausência, não só
+              // do scrollback — sem isso o cliente perde escritas em disco (A-006).
+              const diskSoFar = deps.runDiskEntries?.(runId) ?? null
+              if (diskSoFar && diskSoFar.length > 0) {
+                ws.send(JSON.stringify({ kind: 'disk', runId, entries: diskSoFar }))
+              }
             } else if (msg.kind === 'input' && runId && msg.data !== undefined) {
               deps.runWrite?.(runId, msg.data)
             }

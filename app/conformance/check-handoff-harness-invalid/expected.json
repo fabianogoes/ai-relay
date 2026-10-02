@@ -1,0 +1,12 @@
+{
+  "kind": "inconsistent",
+  "violations": [
+    {
+      "check": "handoff-harness-invalid",
+      "detail": "Harness inválido: \"BAD HARNESS\".",
+      "records": [
+        "handoff"
+      ]
+    }
+  ]
+}

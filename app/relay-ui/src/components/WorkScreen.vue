@@ -6,6 +6,8 @@ import BacklogTasksModal, { type TaskRow } from './BacklogTasksModal.vue'
 import { apiGetJson, useRelayClient } from '../lib/relay-client'
 import { openPreflight } from '../lib/launch'
 import { createLatestRequest, reconcileSpecId } from '../lib/work'
+import { formatCalendarDate } from '../lib/presentation'
+import type { Freshness } from '../lib/observer'
 
 interface SpecSummary {
   id: string
@@ -23,7 +25,7 @@ interface ChangelogEntry {
   criteria: string[]
 }
 
-const props = defineProps<{ payload: UiPayload }>()
+const props = defineProps<{ payload: UiPayload; freshness: Freshness }>()
 
 const client = useRelayClient()
 const specs = ref<SpecSummary[]>([])
@@ -33,6 +35,7 @@ const selectedBacklogId = ref<string | null>(null)
 const listRequests = createLatestRequest()
 
 const execEnabled = computed(() => props.payload.environment.execEnabled)
+const stale = computed(() => props.freshness === 'stale')
 
 async function reload(): Promise<void> {
   if (!client.hostMode) return
@@ -173,6 +176,18 @@ function recordCountLabel(count: number): string {
 function onNewSpec(): void {
   openPreflight({ title: 'Especificar uma ideia', skill: 'relay-spec', intent: 'Especificar uma ideia' })
 }
+
+function retomar(): void {
+  openPreflight({ title: 'Retomar sessão', skill: 'relay-session', intent: 'Retomar sessão' })
+}
+
+function comecar(id: string): void {
+  openPreflight({
+    title: `Iniciar sessão em ${id}`,
+    skill: 'relay-session',
+    intent: `Iniciar sessão em ${id}`,
+  })
+}
 </script>
 
 <template>
@@ -183,6 +198,7 @@ function onNewSpec(): void {
         <button
           v-if="execEnabled"
           class="button button--secondary work__new-spec"
+          :disabled="stale"
           @click="onNewSpec"
         >
           + nova spec
@@ -238,6 +254,22 @@ function onNewSpec(): void {
             >
               Tarefas
             </button>
+            <button
+              v-if="execEnabled && entry.marker === '•'"
+              class="button button--primary backlog-card__action"
+              :disabled="stale"
+              @click="retomar()"
+            >
+              ▶ Retomar
+            </button>
+            <button
+              v-else-if="execEnabled && entry.marker === ' ' && entry.available"
+              class="button button--primary backlog-card__action"
+              :disabled="stale"
+              @click="comecar(entry.id)"
+            >
+              ▶ Começar
+            </button>
           </footer>
         </li>
       </ul>
@@ -254,7 +286,7 @@ function onNewSpec(): void {
       <ul v-if="filteredChangelog.length > 0" class="changelog-cards">
         <li v-for="(entry, i) in filteredChangelog" :key="i" class="changelog-card">
           <header class="changelog-card__meta mono">
-            {{ entry.date }} · {{ entry.todoId }} · {{ entry.backlogId }}
+            {{ formatCalendarDate(entry.date) }} · {{ entry.todoId }} · {{ entry.backlogId }}
           </header>
           <p class="changelog-card__title">{{ entry.title }}</p>
           <p class="changelog-card__evidence mono">evidência: {{ entry.evidence }}</p>

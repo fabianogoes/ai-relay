@@ -1,30 +1,21 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { Handoff } from '../types'
-import { formatAbsolute, formatRelative } from '../lib/relative-time'
-import {
-  allHarnesses,
-  harnessById,
-  harnessInitials,
-  harnessTone,
-  selection,
-  openSelector,
-} from '../lib/harness'
+import { formatAbsolute, formatRelative } from '../lib/presentation'
+import { allHarnesses, harnessById, selection, openSelector } from '../lib/harness'
 import { openPreflight } from '../lib/launch'
+import HarnessIcon from './HarnessIcon.vue'
 
 const props = defineProps<{
   handoff: Handoff
   blocked: boolean
   execEnabled: boolean
+  stale: boolean
 }>()
 
 const sel = selection()
 
 const writer = computed(() => harnessById(props.handoff.harness))
-const writerInitials = computed(() =>
-  harnessInitials(writer.value?.name ?? props.handoff.harness),
-)
-const writerTone = computed(() => harnessTone(props.handoff.harness))
 
 const activeHarness = computed(() => {
   const chosen = harnessById(sel.harnessId)
@@ -41,12 +32,8 @@ function resume(): void {
 <template>
   <article class="handoff-card" :class="blocked ? 'is-blocked' : 'is-in-progress'">
     <div class="handoff-card__provenance">
-      <span
-        class="harness-avatar"
-        :class="writerTone ? `harness-avatar--${writerTone}` : 'harness-avatar--neutral'"
-        aria-hidden="true"
-      >
-        {{ writerInitials }}
+      <span class="harness-avatar" aria-hidden="true">
+        <HarnessIcon :id="handoff.harness" />
       </span>
       <span class="handoff-card__writer">
         Escrito no {{ writer?.name ?? handoff.harness }} ·
@@ -61,7 +48,7 @@ function resume(): void {
       <span class="handoff-card__objective-label mono">
         OBJETIVO · {{ handoff.backlogId }} / {{ handoff.todoId }}
       </span>
-      {{ handoff.objective }}
+      <span class="handoff-card__objective-text">{{ handoff.objective }}</span>
     </h2>
     <div class="handoff-card__columns">
       <section class="handoff-card__column">
@@ -76,7 +63,10 @@ function resume(): void {
       </section>
     </div>
     <footer class="handoff-card__footer">
-      <button v-if="execEnabled" class="button button--primary" @click="resume">
+      <span v-if="execEnabled && stale" class="handoff-card__stale-note">
+        Desatualizado — aguardando reconexão
+      </span>
+      <button v-if="execEnabled" class="button button--primary" :disabled="stale" @click="resume">
         ▶ Retomar {{ handoff.todoId }} no {{ activeHarness.name }}
       </button>
       <button v-if="execEnabled" class="button button--secondary" @click="openSelector()">
