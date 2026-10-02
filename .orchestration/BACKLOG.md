@@ -38,4 +38,4 @@
 - [x] B-036 - Workspace le registros e vigia diretorios com debounce (spec: `.specs/20261002-001-relay-tui-observador-em-rust.md`) (needs: B-035)
 - [x] B-037 - View em cartoes cobre todos os estados e larguras (spec: `.specs/20261002-001-relay-tui-observador-em-rust.md`) (needs: B-033, B-035)
 - [x] B-038 - Binario relay-tui observa um workspace real e restaura o terminal (spec: `.specs/20261002-001-relay-tui-observador-em-rust.md`) (needs: B-036, B-037)
-- [ ] B-039 - Release multiplataforma, CI e documentacao de uso (spec: `.specs/20261002-001-relay-tui-observador-em-rust.md`) (needs: B-038)
+- [x] B-039 - Release multiplataforma, CI e documentacao de uso (spec: `.specs/20261002-001-relay-tui-observador-em-rust.md`) (needs: B-038)
