@@ -71,9 +71,29 @@ test('handoff-names-no-pending-todo', () => {
 
 test('backlog-id-mismatch', () => {
   assert.deepEqual(
-    checks(base({ todo: todoText(DEFAULT_TODO, 'B-002'), changelog: changelogFor(['T-001'], 'B-002') })),
+    checks(
+      base({
+        backlog: backlogText([
+          `- [ ] B-001 - Contrato do estado derivado (spec: ${SPEC})`,
+          `- [ ] B-002 - Outra entrada (spec: ${SPEC})`,
+        ]),
+        todo: todoText(DEFAULT_TODO, 'B-002'),
+        changelog: changelogFor(['T-001'], 'B-002'),
+      }),
+    ),
     ['backlog-id-mismatch'],
   )
+})
+
+test('backlog-id-mismatch: backlog ativo ausente do backlog', () => {
+  const violations = checks(
+    base({
+      backlog: '',
+      todo: todoText(DEFAULT_TODO, 'B-999'),
+      changelog: changelogFor(['T-001'], 'B-999'),
+    }),
+  )
+  assert.ok(violations.includes('backlog-id-mismatch'))
 })
 
 test('spec-path-mismatch', () => {
@@ -81,6 +101,46 @@ test('spec-path-mismatch', () => {
     checks(base({ handoff: handoffText({ Spec: '.specs/20260907-009-outra.md' }) })),
     ['spec-path-mismatch'],
   )
+})
+
+test('spec-path-mismatch: tarefa sem entrada de backlog confrontavel', () => {
+  const violations = checks(
+    base({
+      backlog: '',
+      todo: todoText(DEFAULT_TODO, 'B-999'),
+      changelog: changelogFor(['T-001'], 'B-999'),
+    }),
+  )
+  assert.ok(violations.includes('spec-path-mismatch'))
+})
+
+test('spec-path-mismatch: entrada ativa sem spec', () => {
+  assert.deepEqual(
+    checks(base({ backlog: backlogText(['- [ ] B-001 - Contrato do estado derivado']) })),
+    ['spec-path-mismatch'],
+  )
+})
+
+test('estado terminal: backlog todo [x] deriva done', () => {
+  const spec = '## Acceptance criteria\n- A-001 - um\n'
+  const changelog = `# Change log\n\n## 2026-09-07 - T-001 - Registro\n- Backlog: B-001\n- Spec: ${SPEC}\n- Criteria: A-001\n`
+  const state = deriveState(
+    base({
+      backlog: backlogText([`- [x] B-001 - Contrato do estado derivado (spec: ${SPEC})`]),
+      todo: EMPTY_TODO,
+      handoff: EMPTY_HANDOFF,
+      changelog,
+      specs: { [SPEC]: spec },
+    }),
+  )
+  assert.equal(state.kind, 'ok')
+  if (state.kind === 'ok') assert.equal(state.status, 'done')
+})
+
+test('estado terminal: repositorio vazio deriva idle', () => {
+  const state = deriveState({ backlog: '', todo: EMPTY_TODO, handoff: EMPTY_HANDOFF, changelog: '', specs: {} })
+  assert.equal(state.kind, 'ok')
+  if (state.kind === 'ok') assert.equal(state.status, 'idle')
 })
 
 test('handoff-harness-invalid', () => {

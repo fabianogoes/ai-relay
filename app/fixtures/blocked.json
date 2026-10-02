@@ -16,7 +16,9 @@
       { "id": "T-002", "text": "Escrever tokens.css", "marker": "x", "needs": [], "available": false },
       { "id": "T-003", "text": "Scaffold da relay-ui", "marker": "!", "needs": ["T-001", "T-002"], "available": false }
     ],
-    "backlog": [],
+    "backlog": [
+      { "id": "B-004", "text": "Tela principal renderizando os sete fixtures", "marker": " ", "needs": [], "available": true, "spec": ".specs/20260907-001-ui-primeiro-marco-visual.md" }
+    ],
     "completed": 2,
     "total": 3
   },

@@ -39,23 +39,43 @@ function checkHandoffNamesNoPendingTodo({ handoff, todo }: IntegrityInput): Viol
   )
 }
 
-function checkBacklogIdMismatch({ handoff, activeBacklogId }: IntegrityInput): Violation | null {
+function checkBacklogIdMismatch({ handoff, activeBacklogId, backlog }: IntegrityInput): Violation | null {
+  if (!handoff && !activeBacklogId) return null
+  if (activeBacklogId && !backlog.some((e) => e.id === activeBacklogId)) {
+    return violation(
+      'backlog-id-mismatch',
+      `O backlog ativo ${activeBacklogId} não existe no backlog.`,
+      ['handoff', 'todo', 'backlog'],
+    )
+  }
   if (!handoff) return null
-  if (handoff.backlogId === activeBacklogId) return null
-  return violation(
-    'backlog-id-mismatch',
-    `O handoff diz ${handoff.backlogId}, o TODO diz ${activeBacklogId ?? 'nenhum'}.`,
-    ['handoff', 'todo', 'backlog'],
-  )
+  if (handoff.backlogId !== activeBacklogId) {
+    return violation(
+      'backlog-id-mismatch',
+      `O handoff diz ${handoff.backlogId}, o TODO diz ${activeBacklogId ?? 'nenhum'}.`,
+      ['handoff', 'todo', 'backlog'],
+    )
+  }
+  return null
 }
 
 function checkSpecPathMismatch({ handoff, activeBacklogId, backlog }: IntegrityInput): Violation | null {
   if (!handoff) return null
+  const entry = backlog.find((e) => e.id === activeBacklogId)
+  if (!entry) {
+    return violation(
+      'spec-path-mismatch',
+      `A tarefa ativa ${activeBacklogId ?? '?'} não tem entrada de backlog confrontável.`,
+      ['handoff', 'backlog'],
+    )
+  }
   if (!handoff.spec) {
     return violation('spec-path-mismatch', 'O handoff não tem Spec.', ['handoff'])
   }
-  const entry = backlog.find((e) => e.id === activeBacklogId)
-  if (entry && entry.spec && entry.spec !== handoff.spec) {
+  if (!entry.spec) {
+    return violation('spec-path-mismatch', `A entrada ${entry.id} não tem spec.`, ['backlog'])
+  }
+  if (entry.spec !== handoff.spec) {
     return violation(
       'spec-path-mismatch',
       `O handoff diz ${handoff.spec}, a tarefa diz ${entry.spec}.`,
