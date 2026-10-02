@@ -1,0 +1,50 @@
+ relay  ~/Developer/relay                     ● atualizado
+
+╭ ● A escolher ───────────────────────────────────── 0/4 ╮
+│ ○ 3 disponíveis · ◌ 1 aguardando                       │
+│                                                        │
+│ ○ B-001 Contrato do estado derivado                    │
+│ ○ B-002 Fronteira e estrutura do app/                  │
+│ ○ B-003 Framework da relay-ui                          │
+╰────────────────────────────────────────────────────────╯
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ q sair
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
+
+u.U.U.UUUUUUUU.uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.mmm.u
+u.U.f.fffffffffff.m.M.f.ffffffffff.......................u
+u........................................................u
+u.u.iiiii.ffffffff.ff.ffffff.ffffffff....................u
+u.u.iiiii.fffffffff.f.fffffffff.ff.ffff..................u
+u.u.iiiii.fffffffff.ff.ffffffff..........................u
+uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.F.mmmm

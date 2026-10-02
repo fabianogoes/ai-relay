@@ -1,0 +1,25 @@
+[package]
+name = "relay-tui"
+version = "0.0.0"
+edition = "2024"
+license = "MIT"
+description = "Read-only terminal observer for Relay workspaces"
+publish = false
+
+[dependencies]
+notify = "8.2.0"
+ratatui = "0.30.2"
+regex = "1"
+unicode-width = "0.2.2"
+
+[dev-dependencies]
+portable-pty = "0.9.0"
+serde_json = "1"
+tempfile = "3.27.0"
+vt100 = "0.16.2"
+
+[profile.release]
+# A smaller download: the binary is the whole distribution.
+lto = true
+codegen-units = 1
+strip = true

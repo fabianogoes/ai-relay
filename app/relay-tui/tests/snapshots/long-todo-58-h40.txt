@@ -1,0 +1,82 @@
+ relay  ~/Developer/relay                     ● atualizado
+
+╭ Handoff ─────────────────────────────── ● Em andamento ╮
+│ B-002 · T-004 · claude-code · há 5 min                 │
+│                                                        │
+│ Objetivo  Escrever o runner em Rust que lê a suíte de  │
+│           conformidade e compara cada caso com o       │
+│           expected.json, listando todas as             │
+│           divergências de uma vez.                     │
+│ Próximo   Rodar cargo test e corrigir as divergências  │
+│           pela mensagem do runner.                     │
+╰────────────────────────────────────────────────────────╯
+╭ TODO ──────────────────────────────────────────── 3/10 ╮
+│ ████ ████ ████ ████ ████ ████ ████ ████ ████ ████      │
+│                                                        │
+│ ✓ T-001 Formato do caso de conformidade                │
+│ ✓ T-002 Extrair as entradas dos fixtures para workspa… │
+│ ✓ T-003 Runner TS lê a suíte                           │
+│ ● T-004 Runner Rust lê a suíte                         │
+│ ◌ T-005 CI quebra em divergência  após T-004           │
+│ ○ T-006 Documentar o formato                           │
+│ ◌ T-007 Casos extras para os ramos…  após T-004, T-006 │
+│ ! T-008 Revisão final  bloqueado                       │
+│ ◌ T-009 Publicar  após T-007                           │
+│ ◌ T-010 Anunciar  após T-009                           │
+╰────────────────────────────────────────────────────────╯
+╭ Backlog ────────────────────────────────────────── 1/6 ╮
+│ ✓ 1 · ● 1 · ! 1 · ○ 2 · ◌ 1                            │
+╰────────────────────────────────────────────────────────╯
+
+
+
+
+
+
+
+
+
+
+ q sair
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
+
+g.FFFFFFF.ggggggggggggggggggggggggggggggg.G.GG.GGGGGGGGG.g
+g.IIIII.m.iiiii.m.mmmmmmmmmmm.m.mm.m.mmm.................g
+g........................................................g
+g.mmmmmmmm..ffffffff.f.ffffff.ff.ffff.fff.ff.f.fffff.ff..g
+g...........ffffffffffff.f.fffffff.ffff.ffff.fff.f.......g
+g...........ffffffffffffff.ffffffff.fffff.ff.............g
+g...........ffffffffffff.ff.fff.ffff.....................g
+g.mmmmmmm...fffff.fffff.ffff.f.ffffffff.ff.ffffffffffff..g
+g...........ffff.ffffffff.ff.fffffff.....................g
+gggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+d.FFFF.dddddddddddddddddddddddddddddddddddddddddddd.mmmm.d
+d.gggg.gggg.gggg.gggg.eeee.uuuu.eeee.yyyy.eeee.eeee......d
+d........................................................d
+d.G.iiiii.mmmmmmm.mm.mmmm.mm.mmmmmmmmmmmm................d
+d.G.iiiii.mmmmmmm.mm.mmmmmmmm.mmm.mmmmmmmm.mmmm.mmmmmmmm.d
+d.G.iiiii.mmmmmm.mm.mm.m.mmmmm...........................d
+d.G.iiiii.FFFFFF.FFFF.FF.F.FFFFF.........................d
+d.m.iiiii.mm.mmmmmm.mm.mmmmmmmmmmm..yyyy.yyyyy...........d
+d.u.iiiii.ffffffffff.f.fffffff...........................d
+d.m.iiiii.mmmmm.mmmmmm.mmmm.mm.mmmmmm..yyyy.yyyyyy.yyyyy.d
+d.Y.iiiii.fffffff.fffff..yyyyyyyyy.......................d
+d.m.iiiii.mmmmmmmm..yyyy.yyyyy...........................d
+d.m.iiiii.mmmmmmmm..yyyy.yyyyy...........................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFFFFFF.dddddddddddddddddddddddddddddddddddddddddd.mmm.d
+d.G.f.m.G.f.m.Y.f.m.U.f.m.M.f............................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+
+
+
+
+
+
+
+
+
+
+.F.mmmm

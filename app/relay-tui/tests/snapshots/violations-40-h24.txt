@@ -1,0 +1,50 @@
+ relay  ~/Developer/relay   ● atualizado
+
+╭ ● Inconsistente ────────────────── 3 ╮
+│ handoff-names-no-pending-todo        │
+│ O handoff aponta T-001, que está     │
+│ [x]; T-002 está [•].                 │
+│ handoff · todo                       │
+│                                      │
+│ needs-cycle                          │
+│ Ciclo em todo: T-001 -> T-002 ->     │
+│ T-001.                               │
+│ todo                                 │
+│                                      │
+│ criteria-without-evidence            │
+│ Spec                                 │
+│ .specs/20260907-001-ui-primeiro-marc │
+│ o-visual.md: critérios sem …         │
+│ backlog · changelog · spec           │
+╰──────────────────────────────────────╯
+
+
+
+
+ q sair
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm...g.mmmmmmmmmm
+
+r.R.RRRRRRRRRRRRR.rrrrrrrrrrrrrrrrrr.m.r
+r.RRRRRRRRRRRRRRRRRRRRRRRRRRRRR........r
+r.f.fffffff.ffffff.ffffff.fff.ffff.....r
+r.ffff.fffff.ffff.ffff.................r
+r.mmmmmmm.m.mmmm.......................r
+r......................................r
+r.RRRRRRRRRRR..........................r
+r.fffff.ff.fffff.fffff.ff.fffff.ff.....r
+r.ffffff...............................r
+r.mmmm.................................r
+r......................................r
+r.RRRRRRRRRRRRRRRRRRRRRRRRR............r
+r.ffff.................................r
+r.ffffffffffffffffffffffffffffffffffff.r
+r.ffffffffffff.fffffffff.fff.f.........r
+r.mmmmmmm.m.mmmmmmmmm.m.mmmm...........r
+rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+
+
+
+
+.F.mmmm

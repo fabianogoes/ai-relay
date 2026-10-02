@@ -1,0 +1,34 @@
+ relay  ~/Developer/relay   ● atualizado
+
+╭ Handoff ───────────── ● Em andamento ╮
+│ B-002 · T-004 · claude-code · há 5 … │
+│ Objetivo  Escrever o runner em Rust… │
+│ Próximo   Rodar cargo test e …       │
+╰──────────────────────────────────────╯
+╭ TODO ────────────────────────── 3/10 ╮
+│ ██ ██ ██ ██ ██ ██ ██ ██ ██ ██        │
+│                                      │
+│ ✓ T-001 Formato do caso de conformi… │
+│ ✓ T-002 Extrair as entradas dos fix… │
+│ +8 itens · ● T-004 em andamento      │
+╰──────────────────────────────────────╯
+ Backlog 1/6 · 1 em curso · 1 bloqueado
+ q sair
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm...g.mmmmmmmmmm
+
+g.FFFFFFF.ggggggggggggg.G.GG.GGGGGGGGG.g
+g.IIIII.m.iiiii.m.mmmmmmmmmmm.m.mm.m.m.g
+g.mmmmmmmm..ffffffff.f.ffffff.ff.fffff.g
+g.mmmmmmm...fffff.fffff.ffff.f.f.......g
+gggggggggggggggggggggggggggggggggggggggg
+d.FFFF.dddddddddddddddddddddddddd.mmmm.d
+d.gg.gg.gg.gg.ee.uu.ee.yy.ee.ee........d
+d......................................d
+d.G.iiiii.mmmmmmm.mm.mmmm.mm.mmmmmmmmm.d
+d.G.iiiii.mmmmmmm.mm.mmmmmmmm.mmm.mmmm.d
+d.mm.mmmmm.m.m.mmmmm.mm.mmmmmmmmm......d
+dddddddddddddddddddddddddddddddddddddddd
+.FFFFFFF.mmm.m.m.mm.mmmmm.m.m.mmmmmmmmm
+.F.mmmm

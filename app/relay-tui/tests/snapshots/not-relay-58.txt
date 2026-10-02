@@ -1,0 +1,26 @@
+ relay  ~/Developer/sem-relay                 ● atualizado
+
+╭ Não é um workspace Relay ──────────────────────────────╮
+│ ~/Developer/sem-relay                                  │
+│                                                        │
+│ Não há .orchestration/ neste diretório.                │
+│ Continuo vigiando: ele aparece quando for criado.      │
+╰────────────────────────────────────────────────────────╯
+
+
+
+ q sair
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmmmmmm.................g.mmmmmmmmmm
+
+d.FFF.F.FF.FFFFFFFFF.FFFFF.ddddddddddddddddddddddddddddddd
+d.mmmmmmmmmmmmmmmmmmmmm..................................d
+d........................................................d
+d.fff.ff.fffffffffffffff.fffff.ffffffffff................d
+d.mmmmmmmm.mmmmmmmmm.mmm.mmmmmmm.mmmmmm.mmm.mmmmmmm......d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+
+
+
+.F.mmmm

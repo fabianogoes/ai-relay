@@ -1,0 +1,539 @@
+//! The cards of the screen. Each builds its lines for a given width and the
+//! layout decides how many fit; nothing here scrolls.
+
+use ratatui::buffer::Buffer;
+use ratatui::layout::Rect;
+use ratatui::style::{Color, Style};
+use ratatui::text::{Line, Span};
+use ratatui::widgets::{Block, BorderType, Widget};
+
+use crate::core::{
+    ChecklistEntry, Handoff, OkState, RelayState, Violation, WorkStatus,
+};
+use crate::theme;
+
+use super::text::{relative_time, truncate, width, wrap_capped};
+use super::{Screen, View};
+
+/// The least a TODO card can be: frame, bar and one line.
+const TODO_MIN: u16 = 4;
+
+/// A run of text and its style.
+type Seg = (String, Style);
+
+fn seg(text: impl Into<String>, style: Style) -> Seg {
+    (text.into(), style)
+}
+
+fn seg_width(segs: &[Seg]) -> usize {
+    segs.iter().map(|(t, _)| width(t)).sum()
+}
+
+fn plural(n: usize, one: &str, many: &str) -> String {
+    format!("{n} {}", if n == 1 { one } else { many })
+}
+
+/// `segs` as a line of at most `max` columns; the segment that overflows ends
+/// in `…` and the rest is dropped.
+fn fit(segs: &[Seg], max: usize) -> Line<'static> {
+    let mut spans = Vec::new();
+    let mut used = 0;
+    for (text, style) in segs {
+        let w = width(text);
+        if used + w <= max {
+            spans.push(Span::styled(text.clone(), *style));
+            used += w;
+            continue;
+        }
+        let rest = max - used;
+        if rest > 0 {
+            spans.push(Span::styled(truncate(text, rest), *style));
+        }
+        break;
+    }
+    Line::from(spans)
+}
+
+fn put(buf: &mut Buffer, area: Rect, row: usize, segs: &[Seg]) {
+    if row < area.height as usize {
+        buf.set_line(area.x, area.y + row as u16, &fit(segs, area.width as usize), area.width);
+    }
+}
+
+/// Draws the frame of a card and returns the area for its content: inside the
+/// border, with one column of padding on each side.
+fn card(buf: &mut Buffer, area: Rect, title: &[Seg], right: &[Seg], border: Color) -> Rect {
+    let to_line = |segs: &[Seg]| {
+        Line::from(segs.iter().map(|(t, s)| Span::styled(t.clone(), *s)).collect::<Vec<_>>())
+    };
+    let mut block = Block::bordered()
+        .border_type(BorderType::Rounded)
+        .border_style(theme::color(border))
+        .title_top(to_line(title));
+    if !right.is_empty() {
+        block = block.title_top(to_line(right).right_aligned());
+    }
+    let inner = block.inner(area);
+    block.render(area, buf);
+    Rect {
+        x: inner.x + 1,
+        width: inner.width.saturating_sub(2),
+        ..inner
+    }
+}
+
+fn plain_title(text: &str) -> Vec<Seg> {
+    vec![seg(format!(" {text} "), theme::bold(theme::FG))]
+}
+
+fn count_title(done: usize, total: usize) -> Vec<Seg> {
+    vec![seg(format!(" {done}/{total} "), theme::color(theme::META))]
+}
+
+fn status_title(label: &str, tone: Color) -> Vec<Seg> {
+    vec![seg(" ● ", theme::bold(tone)), seg(format!("{label} "), theme::bold(tone))]
+}
+
+// ---------------------------------------------------------------- narrow
+
+/// Below the card width: the status in one line, with the active task if any.
+pub(super) fn status_line(view: &View, body: Rect, buf: &mut Buffer) {
+    if body.height == 0 {
+        return;
+    }
+    let segs = match view.screen {
+        Screen::NotARelayWorkspace => vec![seg("Não é um workspace Relay", theme::color(theme::META))],
+        Screen::State(RelayState::Inconsistent { violations }) => vec![
+            seg("● ", theme::bold(theme::RED)),
+            seg(theme::INCONSISTENT_LABEL, theme::bold(theme::RED)),
+            seg(format!("  {}", plural(violations.len(), "violação", "violações")), theme::color(theme::META)),
+        ],
+        Screen::State(RelayState::Ok(ok)) => {
+            let tone = theme::status_tone(ok.status);
+            let mut segs = vec![
+                seg("● ", theme::bold(tone)),
+                seg(theme::status_label(ok.status), theme::bold(tone)),
+            ];
+            if let Some(id) = &ok.active_backlog_id {
+                segs.push(seg(format!("  {id}"), theme::color(theme::ID)));
+            }
+            segs
+        }
+    };
+    put(buf, Rect { x: body.x + 1, width: body.width.saturating_sub(1), ..body }, 0, &segs);
+}
+
+// ----------------------------------------------------------------- cards
+
+pub(super) fn body(view: &View, area: Rect, buf: &mut Buffer) {
+    if area.height < 3 {
+        return;
+    }
+    match view.screen {
+        Screen::NotARelayWorkspace => not_relay_card(view, Rect { height: area.height.min(6), ..area }, buf),
+        Screen::State(RelayState::Inconsistent { violations }) => {
+            let rows = violation_rows(violations, area.width.saturating_sub(4) as usize);
+            violations_card(violations, Rect { height: area.height.min(rows as u16 + 2), ..area }, buf);
+        }
+        Screen::State(RelayState::Ok(ok)) => ok_body(view, ok, area, buf),
+    }
+}
+
+fn not_relay_card(view: &View, area: Rect, buf: &mut Buffer) {
+    let inner = card(buf, area, &plain_title("Não é um workspace Relay"), &[], theme::DIM);
+    put(buf, inner, 0, &[seg(view.workspace, theme::color(theme::META))]);
+    put(buf, inner, 2, &[seg("Não há .orchestration/ neste diretório.", theme::fg())]);
+    put(buf, inner, 3, &[seg("Continuo vigiando: ele aparece quando for criado.", theme::color(theme::META))]);
+}
+
+/// Rows one violation takes: its check, its detail (at most 3 lines) and its
+/// records.
+fn violation_height(v: &Violation, width: usize) -> usize {
+    2 + wrap_capped(&v.detail, width, 3).len()
+}
+
+/// Rows the whole list takes, with a blank row between violations.
+fn violation_rows(violations: &[Violation], width: usize) -> usize {
+    let heights: usize = violations.iter().map(|v| violation_height(v, width)).sum();
+    heights + violations.len().saturating_sub(1)
+}
+
+fn violations_card(violations: &[Violation], area: Rect, buf: &mut Buffer) {
+    let right = vec![seg(format!(" {} ", violations.len()), theme::color(theme::META))];
+    let title = vec![seg(" ● ", theme::bold(theme::RED)), seg(format!("{} ", theme::INCONSISTENT_LABEL), theme::bold(theme::RED))];
+    let inner = card(buf, area, &title, &right, theme::RED);
+    let capacity = inner.height as usize;
+    let mut row = 0;
+    for (index, v) in violations.iter().enumerate() {
+        let detail = wrap_capped(&v.detail, inner.width as usize, 3);
+        let height = violation_height(v, inner.width as usize);
+        let is_last = index + 1 == violations.len();
+        // One row stays free for "+N violações", unless this is the last one
+        // and it fits as it is.
+        let fits = if is_last { row + height <= capacity } else { row + height < capacity };
+        if !fits {
+            let hidden = violations.len() - index;
+            put(buf, inner, row, &[seg(format!("+{}", plural(hidden, "violação", "violações")), theme::color(theme::META))]);
+            return;
+        }
+        put(buf, inner, row, &[seg(&v.check, theme::bold(theme::RED))]);
+        for (i, line) in detail.iter().enumerate() {
+            put(buf, inner, row + 1 + i, &[seg(line, theme::fg())]);
+        }
+        put(buf, inner, row + 1 + detail.len(), &[seg(v.records.join(" · "), theme::color(theme::META))]);
+        row += height + 1;
+    }
+}
+
+// ------------------------------------------------------------------- ok
+
+fn ok_body(view: &View, ok: &OkState, area: Rect, buf: &mut Buffer) {
+    match ok.status {
+        WorkStatus::Idle => {
+            let inner = card(buf, Rect { height: area.height.min(3), ..area }, &plain_title("Sem trabalho"), &[], theme::DIM);
+            put(buf, inner, 0, &[seg("Nenhum backlog, TODO ou handoff neste workspace.", theme::fg())]);
+        }
+        WorkStatus::Done => done_card(ok, area, buf),
+        WorkStatus::Backlog => backlog_choose(ok, area, buf),
+        WorkStatus::Ready | WorkStatus::InProgress | WorkStatus::Blocked => {
+            work_body(view, ok, area, buf);
+        }
+    }
+}
+
+fn done_card(ok: &OkState, area: Rect, buf: &mut Buffer) {
+    let (done, total) = if ok.backlog.is_empty() {
+        (ok.completed, ok.total)
+    } else {
+        (ok.backlog.iter().filter(|e| e.marker == 'x').count(), ok.backlog.len())
+    };
+    let title = status_title(theme::status_label(WorkStatus::Done), theme::GREEN);
+    let inner = card(buf, Rect { height: area.height.min(3), ..area }, &title, &[], theme::GREEN);
+    let source = if ok.backlog.is_empty() { "do TODO" } else { "do backlog" };
+    put(
+        buf,
+        inner,
+        0,
+        &[
+            seg("✓ ", theme::bold(theme::GREEN)),
+            seg(format!("{done} de {total} itens {source} concluídos."), theme::fg()),
+        ],
+    );
+}
+
+fn work_body(view: &View, ok: &OkState, area: Rect, buf: &mut Buffer) {
+    let mut y = area.y;
+    let mut remaining = area.height;
+    let at = |y: u16, height: u16| Rect { y, height, ..area };
+
+    if let Some(handoff) = &ok.handoff {
+        let tone = theme::status_tone(ok.status);
+        let inner_width = area.width.saturating_sub(4) as usize;
+        // What the TODO and the Backlog need to still say something.
+        // The TODO and the Backlog, whole; and the least they need to still
+        // say something.
+        let todo_full = if ok.todo.is_empty() { 0 } else { ok.todo.len() as u16 + 4 };
+        let backlog_full = if ok.backlog.is_empty() { 0 } else { 3 };
+        let min_rest = if ok.todo.is_empty() { 0 } else { TODO_MIN } + u16::from(!ok.backlog.is_empty());
+        // The handoff takes the most text that still leaves everything else
+        // whole; failing that, the standard caps; failing that, one line per
+        // field.
+        let fits = |lines: &[Vec<Seg>], rest: u16| lines.len() as u16 + 2 + rest <= remaining;
+        let mut lines = handoff_lines(handoff, ok.status, inner_width, view.now_unix, Density::Full);
+        if !fits(&lines, todo_full + backlog_full) {
+            lines = handoff_lines(handoff, ok.status, inner_width, view.now_unix, Density::Standard);
+            if !fits(&lines, min_rest) {
+                lines = handoff_lines(handoff, ok.status, inner_width, view.now_unix, Density::Compact);
+            }
+        }
+        let height = (lines.len() as u16 + 2).min(remaining.saturating_sub(min_rest).max(3)).min(remaining);
+        lines.truncate(height.saturating_sub(2) as usize);
+        let inner = card(
+            buf,
+            at(y, height),
+            &plain_title("Handoff"),
+            &status_title(theme::status_label(ok.status), tone),
+            tone,
+        );
+        for (row, line) in lines.iter().enumerate() {
+            put(buf, inner, row, line);
+        }
+        y += height;
+        remaining -= height;
+    } else if ok.status == WorkStatus::Ready && remaining > 0 {
+        // No Handoff card to carry the status, so the line carries it.
+        let tone = theme::status_tone(ok.status);
+        put(
+            buf,
+            at(y, 1),
+            0,
+            &[
+                seg(" ● ", theme::bold(tone)),
+                seg(theme::status_label(ok.status), theme::bold(tone)),
+                seg("  Sem handoff ativo", theme::color(theme::META)),
+            ],
+        );
+        y += 1;
+        remaining -= 1;
+    }
+
+    if remaining == 0 {
+        return;
+    }
+
+    // The Backlog gives up its frame before the TODO is cut.
+    let todo_full = if ok.todo.is_empty() { 0 } else { ok.todo.len() as u16 + 4 };
+    let backlog_height: u16 = if ok.backlog.is_empty() {
+        0
+    } else if remaining >= todo_full + 3 {
+        3
+    } else {
+        1
+    };
+    let todo_height = remaining.saturating_sub(backlog_height).min(todo_full);
+    if !ok.todo.is_empty() && todo_height >= TODO_MIN {
+        todo_card(ok, at(y, todo_height), buf);
+        y += todo_height;
+    }
+    match backlog_height {
+        3 => backlog_card(ok, at(y, 3), buf),
+        1 => backlog_line(ok, at(y, 1), buf),
+        _ => {}
+    }
+}
+
+/// How much of the handoff text is shown: as much as the height allows, down
+/// to one line per field.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Density {
+    /// Room for everything else too: the fields nearly whole.
+    Full,
+    Standard,
+    Compact,
+}
+
+impl Density {
+    /// Lines for the objective, the next step and the blocker.
+    fn caps(self) -> (usize, usize, usize) {
+        match self {
+            Density::Full => (10, 10, 12),
+            Density::Standard => (3, 3, 4),
+            Density::Compact => (1, 1, 2),
+        }
+    }
+}
+
+fn handoff_lines(h: &Handoff, status: WorkStatus, width: usize, now: i64, density: Density) -> Vec<Vec<Seg>> {
+    const LABEL: usize = 10;
+    let dim = theme::color(theme::META);
+    let mut lines = vec![
+        vec![
+            seg(&h.backlog_id, theme::bold(theme::ID)),
+            seg(" · ", dim),
+            seg(&h.todo_id, theme::color(theme::ID)),
+            seg(format!(" · {} · {}", h.harness, relative_time(&h.updated, now)), dim),
+        ],
+    ];
+    if density != Density::Compact {
+        lines.push(vec![]);
+    }
+    let (objective, next, blocker) = density.caps();
+    let mut field = |label: &str, text: &str, cap: usize| {
+        let wrapped = wrap_capped(text, width.saturating_sub(LABEL), cap);
+        let wrapped = if wrapped.is_empty() { vec!["—".to_string()] } else { wrapped };
+        for (i, line) in wrapped.iter().enumerate() {
+            let lead = if i == 0 { format!("{label:<LABEL$}") } else { " ".repeat(LABEL) };
+            lines.push(vec![seg(lead, dim), seg(line, theme::fg())]);
+        }
+    };
+    field("Objetivo", &h.objective, objective);
+    field("Próximo", &h.next_step, next);
+    if status == WorkStatus::Blocked {
+        field("Bloqueio", &h.context, blocker);
+    }
+    lines
+}
+
+fn entry_tone(e: &ChecklistEntry) -> Color {
+    match e.marker {
+        'x' | '•' => theme::GREEN,
+        '!' => theme::YELLOW,
+        _ if e.available => theme::BLUE,
+        _ => theme::BAR_EMPTY,
+    }
+}
+
+fn todo_card(ok: &OkState, area: Rect, buf: &mut Buffer) {
+    let inner = card(buf, area, &plain_title("TODO"), &count_title(ok.completed, ok.total), theme::DIM);
+    let w = inner.width as usize;
+
+    // One segment per item, in the tone of its state: a count, never a percentage.
+    let n = ok.todo.len().min(w.max(1));
+    let gap = usize::from(n * 2 - 1 <= w);
+    let seg_w = ((w + gap) / n).saturating_sub(gap).clamp(1, 8);
+    let mut bar: Vec<Seg> = Vec::new();
+    for (i, entry) in ok.todo.iter().take(n).enumerate() {
+        if i > 0 && gap == 1 {
+            bar.push(seg(" ", Style::new()));
+        }
+        bar.push(seg("█".repeat(seg_w), theme::color(entry_tone(entry))));
+    }
+    put(buf, inner, 0, &bar);
+
+    let first = if inner.height >= 4 { 2 } else { 1 };
+    let rows = (inner.height as usize).saturating_sub(first);
+    let shown = if ok.todo.len() <= rows { ok.todo.len() } else { rows.saturating_sub(1) };
+    for (i, entry) in ok.todo.iter().take(shown).enumerate() {
+        put(buf, inner, first + i, &todo_item(entry, &ok.todo, w));
+    }
+    if shown < ok.todo.len() && rows > 0 {
+        let hidden = &ok.todo[shown..];
+        let mut segs = vec![seg(format!("+{}", plural(hidden.len(), "item", "itens")), theme::color(theme::META))];
+        if let Some(active) = hidden.iter().find(|e| e.marker == '•') {
+            segs.push(seg(format!(" · ● {} em andamento", active.id), theme::color(theme::META)));
+        }
+        put(buf, inner, first + shown, &segs);
+    }
+}
+
+fn todo_item(e: &ChecklistEntry, all: &[ChecklistEntry], width: usize) -> Vec<Seg> {
+    let (glyph, glyph_style, text_style) = match e.marker {
+        'x' => ("✓", theme::bold(theme::GREEN), theme::color(theme::META)),
+        '•' => ("●", theme::bold(theme::GREEN), theme::bold(theme::FG)),
+        '!' => ("!", theme::bold(theme::YELLOW), theme::fg()),
+        _ if e.available => ("○", theme::color(theme::BLUE), theme::fg()),
+        _ => ("◌", theme::color(theme::META), theme::color(theme::META)),
+    };
+    // Which needs are still open is a lookup in the same list; whether the
+    // item is available at all was decided by the core.
+    let suffix = match e.marker {
+        '!' => "  bloqueado".to_string(),
+        ' ' if !e.available => {
+            let open: Vec<&str> = e
+                .needs
+                .iter()
+                .filter(|n| all.iter().any(|o| &o.id == *n && o.marker != 'x'))
+                .map(String::as_str)
+                .collect();
+            if open.is_empty() { String::new() } else { format!("  após {}", open.join(", ")) }
+        }
+        _ => String::new(),
+    };
+    let head = [seg(format!("{glyph} "), glyph_style), seg(format!("{} ", e.id), theme::color(theme::ID))];
+    let used = seg_width(&head) + width_of(&suffix);
+    let text = truncate(&e.text, width.saturating_sub(used));
+    let mut segs = head.to_vec();
+    segs.push(seg(text, text_style));
+    if !suffix.is_empty() {
+        segs.push(seg(suffix, theme::color(theme::YELLOW)));
+    }
+    segs
+}
+
+fn width_of(s: &str) -> usize {
+    width(s)
+}
+
+// --------------------------------------------------------------- backlog
+
+struct Counts {
+    done: usize,
+    active: usize,
+    blocked: usize,
+    available: usize,
+    waiting: usize,
+}
+
+fn counts(ok: &OkState) -> Counts {
+    let mut c = Counts { done: 0, active: 0, blocked: 0, available: 0, waiting: 0 };
+    for e in &ok.backlog {
+        match e.marker {
+            'x' => c.done += 1,
+            '•' => c.active += 1,
+            '!' => c.blocked += 1,
+            _ if e.available => c.available += 1,
+            _ => c.waiting += 1,
+        }
+    }
+    c
+}
+
+/// `✓ 32 feitos · ● 1 em curso · …`, omitting what is zero. Falls back to the
+/// glyphs and numbers alone when the words do not fit.
+fn count_segments(c: &Counts, width: usize) -> Vec<Seg> {
+    let parts = [
+        (c.done, "✓", ("feito", "feitos"), theme::GREEN),
+        (c.active, "●", ("em curso", "em curso"), theme::GREEN),
+        (c.blocked, "!", ("bloqueado", "bloqueados"), theme::YELLOW),
+        (c.available, "○", ("disponível", "disponíveis"), theme::BLUE),
+        (c.waiting, "◌", ("aguardando", "aguardando"), theme::META),
+    ];
+    let build = |words: bool| {
+        let mut segs: Vec<Seg> = Vec::new();
+        for (n, glyph, word, tone) in parts.iter().filter(|p| p.0 > 0) {
+            if !segs.is_empty() {
+                segs.push(seg(" · ", theme::color(theme::META)));
+            }
+            segs.push(seg(format!("{glyph} "), theme::bold(*tone)));
+            let label = if words { plural(*n, word.0, word.1) } else { n.to_string() };
+            segs.push(seg(label, theme::fg()));
+        }
+        segs
+    };
+    let long = build(true);
+    if seg_width(&long) <= width { long } else { build(false) }
+}
+
+fn backlog_card(ok: &OkState, area: Rect, buf: &mut Buffer) {
+    let c = counts(ok);
+    let inner = card(buf, area, &plain_title("Backlog"), &count_title(c.done, ok.backlog.len()), theme::DIM);
+    put(buf, inner, 0, &count_segments(&c, inner.width as usize));
+}
+
+fn backlog_line(ok: &OkState, area: Rect, buf: &mut Buffer) {
+    let c = counts(ok);
+    let mut segs = vec![
+        seg(" Backlog", theme::bold(theme::FG)),
+        seg(format!(" {}/{}", c.done, ok.backlog.len()), theme::color(theme::META)),
+    ];
+    for (n, one, many) in [
+        (c.active, "em curso", "em curso"),
+        (c.blocked, "bloqueado", "bloqueados"),
+        (c.available, "disponível", "disponíveis"),
+        (c.waiting, "aguardando", "aguardando"),
+    ] {
+        let part = seg(format!(" · {}", plural(n, one, many)), theme::color(theme::META));
+        // A count that does not fit whole is left out, not cut in half.
+        if n > 0 && seg_width(&segs) + width(&part.0) <= area.width as usize {
+            segs.push(part);
+        }
+    }
+    put(buf, area, 0, &segs);
+}
+
+/// The `backlog` status ("A escolher"): no TODO and no handoff, so the card
+/// lists what can be picked.
+fn backlog_choose(ok: &OkState, area: Rect, buf: &mut Buffer) {
+    let c = counts(ok);
+    let tone = theme::status_tone(WorkStatus::Backlog);
+    let title = status_title(theme::status_label(WorkStatus::Backlog), tone);
+    let available: Vec<&ChecklistEntry> = ok.backlog.iter().filter(|e| e.available).collect();
+    // The counts line, then a blank row and the items when there are any.
+    let content = 1 + if available.is_empty() { 0 } else { 1 + available.len() };
+    let area = Rect { height: area.height.min(content as u16 + 2), ..area };
+    let inner = card(buf, area, &title, &count_title(c.done, ok.backlog.len()), tone);
+    put(buf, inner, 0, &count_segments(&c, inner.width as usize));
+
+    let rows = (inner.height as usize).saturating_sub(2);
+    let shown = if available.len() <= rows { available.len() } else { rows.saturating_sub(1) };
+    for (i, e) in available.iter().take(shown).enumerate() {
+        let head = [seg("○ ", theme::color(theme::BLUE)), seg(format!("{} ", e.id), theme::color(theme::ID))];
+        let text = truncate(&e.text, (inner.width as usize).saturating_sub(seg_width(&head)));
+        let mut segs = head.to_vec();
+        segs.push(seg(text, theme::fg()));
+        put(buf, inner, 2 + i, &segs);
+    }
+    if shown < available.len() && rows > 0 {
+        put(buf, inner, 2 + shown, &[seg(format!("+{}", plural(available.len() - shown, "item", "itens")), theme::color(theme::META))]);
+    }
+}

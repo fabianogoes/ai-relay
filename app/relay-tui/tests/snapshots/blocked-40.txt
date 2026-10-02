@@ -1,0 +1,50 @@
+ relay  ~/Developer/relay   ● atualizado
+
+╭ Handoff ──────────────── ● Bloqueado ╮
+│ B-004 · T-003 · opencode · há 10 min │
+│                                      │
+│ Objetivo  Scaffold da relay-ui com   │
+│           Vue 3.                     │
+│ Próximo   Resolvido o bloqueio,      │
+│           rodar a criação do projeto │
+│           Vite.                      │
+│ Bloqueio  Bloqueio: node_modules não │
+│           pode ser instalado sem     │
+│           acesso ao registro npm     │
+│           neste ambiente. Condição … │
+╰──────────────────────────────────────╯
+╭ TODO ─────────────────────────── 2/3 ╮
+│ ████████ ████████ ████████           │
+│                                      │
+│ ✓ T-001 Materializar os sete fixtur… │
+│ ✓ T-002 Escrever tokens.css          │
+│ ! T-003 Scaffold da rela…  bloqueado │
+╰──────────────────────────────────────╯
+ Backlog 0/1 · 1 disponível
+ q sair
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm...g.mmmmmmmmmm
+
+y.FFFFFFF.yyyyyyyyyyyyyyyy.Y.YYYYYYYYY.y
+y.IIIII.m.iiiii.m.mmmmmmmm.m.mm.mm.mmm.y
+y......................................y
+y.mmmmmmmm..ffffffff.ff.ffffffff.fff...y
+y...........fff.ff.....................y
+y.mmmmmmm...fffffffff.f.fffffffff......y
+y...........fffff.f.fffffff.ff.fffffff.y
+y...........fffff......................y
+y.mmmmmmmm..fffffffff.ffffffffffff.fff.y
+y...........ffff.fff.fffffffff.fff.....y
+y...........ffffff.ff.ffffffff.fff.....y
+y...........fffff.fffffffff.ffffffff.f.y
+yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
+d.FFFF.ddddddddddddddddddddddddddd.mmm.d
+d.gggggggg.gggggggg.yyyyyyyy...........d
+d......................................d
+d.G.iiiii.mmmmmmmmmmmm.mm.mmmm.mmmmmmm.d
+d.G.iiiii.mmmmmmmm.mmmmmmmmmm..........d
+d.Y.iiiii.ffffffff.ff.fffff..yyyyyyyyy.d
+dddddddddddddddddddddddddddddddddddddddd
+.FFFFFFF.mmm.m.m.mmmmmmmmmm
+.F.mmmm
