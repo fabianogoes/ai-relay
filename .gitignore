@@ -20,3 +20,6 @@ __pycache__/
 build/
 dist/
 node_modules/
+
+# Brainstorming companion mockups (local only)
+.superpowers/
