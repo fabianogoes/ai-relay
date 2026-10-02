@@ -1,0 +1,54 @@
+{
+  "kind": "ok",
+  "status": "in_progress",
+  "activeBacklogId": "B-001",
+  "handoff": {
+    "backlogId": "B-001",
+    "todoId": "T-002",
+    "spec": ".specs/20260907-001-ui-primeiro-marco-visual.md",
+    "harness": "claude-code",
+    "updated": "2026-09-07T06:49:14Z",
+    "objective": "Validar os fixtures contra o protocolo.",
+    "nextStep": "Rodar as verificações de integridade.",
+    "context": "T-001 concluída; o tipo está na ADR-0003."
+  },
+  "todo": [
+    {
+      "id": "T-001",
+      "text": "Escrever a ADR-0003",
+      "marker": "x",
+      "needs": [],
+      "available": false
+    },
+    {
+      "id": "T-002",
+      "text": "Validar os fixtures",
+      "marker": "•",
+      "needs": [
+        "T-001"
+      ],
+      "available": false
+    },
+    {
+      "id": "T-003",
+      "text": "Registrar no índice",
+      "marker": " ",
+      "needs": [
+        "T-001"
+      ],
+      "available": true
+    }
+  ],
+  "backlog": [
+    {
+      "id": "B-001",
+      "text": "Contrato do estado derivado",
+      "marker": " ",
+      "needs": [],
+      "available": true,
+      "spec": ".specs/20260907-001-ui-primeiro-marco-visual.md"
+    }
+  ],
+  "completed": 1,
+  "total": 3
+}

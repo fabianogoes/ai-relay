@@ -1,0 +1,12 @@
+{
+  "kind": "inconsistent",
+  "violations": [
+    {
+      "check": "needs-incomplete-on-done",
+      "detail": "T-001 está [x] mas precisa de T-002, não concluído.",
+      "records": [
+        "todo"
+      ]
+    }
+  ]
+}

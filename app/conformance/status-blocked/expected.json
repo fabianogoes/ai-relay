@@ -1,0 +1,53 @@
+{
+  "kind": "ok",
+  "status": "blocked",
+  "activeBacklogId": "B-004",
+  "handoff": {
+    "backlogId": "B-004",
+    "todoId": "T-003",
+    "spec": ".specs/20260907-001-ui-primeiro-marco-visual.md",
+    "harness": "opencode",
+    "updated": "2026-09-07T11:00:00-03:00",
+    "objective": "Scaffold da relay-ui com Vue 3.",
+    "nextStep": "Resolvido o bloqueio, rodar a criação do projeto Vite.",
+    "context": "Bloqueio: node_modules não pode ser instalado sem acesso ao registro npm neste ambiente. Condição de retomada: acesso ao registro npm restabelecido."
+  },
+  "todo": [
+    {
+      "id": "T-001",
+      "text": "Materializar os sete fixtures",
+      "marker": "x",
+      "needs": [],
+      "available": false
+    },
+    {
+      "id": "T-002",
+      "text": "Escrever tokens.css",
+      "marker": "x",
+      "needs": [],
+      "available": false
+    },
+    {
+      "id": "T-003",
+      "text": "Scaffold da relay-ui",
+      "marker": "!",
+      "needs": [
+        "T-001",
+        "T-002"
+      ],
+      "available": false
+    }
+  ],
+  "backlog": [
+    {
+      "id": "B-004",
+      "text": "Tela principal renderizando os sete fixtures",
+      "marker": " ",
+      "needs": [],
+      "available": true,
+      "spec": ".specs/20260907-001-ui-primeiro-marco-visual.md"
+    }
+  ],
+  "completed": 2,
+  "total": 3
+}

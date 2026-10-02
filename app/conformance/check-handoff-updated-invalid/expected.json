@@ -1,0 +1,12 @@
+{
+  "kind": "inconsistent",
+  "violations": [
+    {
+      "check": "handoff-updated-invalid",
+      "detail": "Updated inválido: \"ontem\".",
+      "records": [
+        "handoff"
+      ]
+    }
+  ]
+}
