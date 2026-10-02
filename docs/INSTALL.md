@@ -1,5 +1,7 @@
 # Install Relay
 
+> Português (Brasil): [INSTALL.pt-BR.md](INSTALL.pt-BR.md).
+
 Relay version one is a plugin/skill package. It has no `relay` command-line
 program: the skills read and write the protocol files directly. Other clients
 may read, validate, derive state, and launch a harness with a Relay skill, but
@@ -23,7 +25,7 @@ Test the checkout directly with:
 
 ```sh
 git clone https://github.com/fabianogoes/ai-relay.git
-claude --plugin-dir ./relay
+claude --plugin-dir ./ai-relay
 ```
 
 For a marketplace install, add the GitHub repository and install the `relay`

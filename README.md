@@ -29,7 +29,8 @@ Relay guarda esse contexto no repositorio:
 
 ## Documentos
 
-- Para saber mais sobre **Instalacao** veja [docs/INSTALL.md](docs/INSTALL.md).
+- Para saber mais sobre **Instalacao** veja [docs/INSTALL.pt-BR.md](docs/INSTALL.pt-BR.md)
+  (em ingles: [docs/INSTALL.md](docs/INSTALL.md)).
 - Para saber mais sobre **Arquivos, estados e regras** veja [docs/PROTOCOL.md](docs/PROTOCOL.md).
 
 ## Perguntas frequentes
