@@ -43,11 +43,13 @@ fn a_burst_of_real_writes_yields_one_dirty_and_one_settled() {
     let watcher = started(dir.path());
     quiet(&watcher);
 
+    let mut last_write = Instant::now();
     for i in 0..5 {
         fs::write(dir.path().join(".orchestration/TODO.md"), format!("# Active task: B-{i}\n")).unwrap();
+        // The reference is the last write, not the end of the sleep after it.
+        last_write = Instant::now();
         thread::sleep(Duration::from_millis(20));
     }
-    let last_write = Instant::now();
 
     assert_eq!(next(&watcher, LONG), Some(Dirty));
     assert_eq!(next(&watcher, LONG), Some(Settled));
