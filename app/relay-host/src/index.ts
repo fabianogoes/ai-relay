@@ -4,13 +4,41 @@ import { fileURLToPath } from 'node:url'
 import { readWorkspace } from './reader.ts'
 import { buildPayload } from './state.ts'
 import { listSpecs } from './specs.ts'
-import { detectHarnesses } from './harness.ts'
+import { detectHarnesses, type Harness } from './harness.ts'
 import { launch, preview } from './launcher.ts'
 import { watchWorkspace } from './watcher.ts'
-import { getRun, startExec, listActiveRuns, executorEvents } from './executor.ts'
+import { discoveryPort, startDiscoveryBeacon, type DiscoveryBeacon } from './discovery.ts'
+import { getRun, startExec, listActiveRuns, closeRun, executorEvents, type EmbeddedRun } from './executor.ts'
 import { createRelayServer, type RelayServer, type ServerDeps } from './server.ts'
 import { parseChangelog, type ChangelogRecord, type Environment } from 'relay-core'
 import type { RunInfo } from './pty.ts'
+
+export interface RunLifecycleServer {
+  termBroadcast(runId: string, data: string): void
+  termExit(runId: string, code: number | null): void
+  termDisk(runId: string, entries: unknown): void
+}
+
+/**
+ * Encadeia a saída de dados e o fim de uma run ao servidor. No exit, o
+ * último diff é calculado e enviado por `termDisk` **antes** de `termExit`
+ * — anunciar `exited` sem garantir o flush final seria a run "perder"
+ * a última escrita (A-007).
+ */
+export function resolveHarnessName(harnesses: Harness[], harnessId: string): string {
+  return harnesses.find((h) => h.id === harnessId)?.name ?? harnessId
+}
+
+export function wireRunLifecycle(run: EmbeddedRun, server: RunLifecycleServer): void {
+  run.handle.onData((chunk) =>
+    server.termBroadcast(run.runId, JSON.stringify({ kind: 'data', runId: run.runId, data: chunk })),
+  )
+  run.handle.onExit((code) => {
+    const finalDiff = run.disk.diff()
+    if (finalDiff.length > 0) server.termDisk(run.runId, finalDiff)
+    server.termExit(run.runId, code)
+  })
+}
 
 export interface StartOptions {
   workspace: string
@@ -74,7 +102,8 @@ export function makeDeps(workspace: string, environment: Environment): ServerDep
     launchEmbedded(request) {
       try {
         const plan = preview(request, workspace)
-        const run = startExec(plan)
+        const harnessName = resolveHarnessName(detectHarnesses(), request.harness)
+        const run = startExec(plan, request.harness, harnessName)
         if (!run) return null
         return { runId: run.runId, scrollback: run.handle.scrollback() }
       } catch {
@@ -89,6 +118,9 @@ export function makeDeps(workspace: string, environment: Environment): ServerDep
         status: run.handle.status(),
         exitCode: run.handle.exitCode(),
         startedAt: run.handle.startedAt(),
+        harnessId: run.harnessId,
+        harnessName: run.harnessName,
+        processName: run.processName,
       }
     },
     runWrite(runId, data) {
@@ -97,11 +129,15 @@ export function makeDeps(workspace: string, environment: Environment): ServerDep
     runTerminate(runId) {
       getRun(runId)?.handle.terminate()
     },
+    runClose(runId) {
+      return closeRun(runId)
+    },
     runScrollback(runId) {
       return getRun(runId)?.handle.scrollback() ?? null
     },
     runDiskEntries(runId) {
-      return getRun(runId)?.disk.entries() ?? []
+      const run = getRun(runId)
+      return run ? run.disk.entries() : null
     },
     runs() {
       const info: RunInfo[] = []
@@ -111,6 +147,9 @@ export function makeDeps(workspace: string, environment: Environment): ServerDep
           status: run.handle.status(),
           exitCode: run.handle.exitCode(),
           startedAt: run.handle.startedAt(),
+          harnessId: run.harnessId,
+          harnessName: run.harnessName,
+          processName: run.processName,
         })
       }
       return info
@@ -121,13 +160,24 @@ export function makeDeps(workspace: string, environment: Environment): ServerDep
 export async function start(options: StartOptions): Promise<RelayServer> {
   const token = randomBytes(32).toString('base64url')
   const environment: Environment = { workspace: options.workspace, execEnabled: options.execEnabled }
+  const beaconPort = discoveryPort(options.workspace)
   const server = await createRelayServer({
     workspace: options.workspace,
     execEnabled: options.execEnabled,
     token,
+    discoveryPort: beaconPort,
     port: options.port,
     deps: makeDeps(options.workspace, environment),
   })
+  let beacon: DiscoveryBeacon
+  try {
+    beacon = await startDiscoveryBeacon(options.workspace, server.port)
+  } catch (err) {
+    await server.close()
+    throw new Error(
+      `farol de descoberta: porta ${beaconPort} (derivada do workspace) já está em uso — ${(err as Error).message}`,
+    )
+  }
   const watcher = watchWorkspace(options.workspace, {
     onDirty: () => server.broadcastRefreshing(),
     onSettled: () => {
@@ -138,16 +188,11 @@ export async function start(options: StartOptions): Promise<RelayServer> {
       }
     },
   })
-  executorEvents.runStarted = (run) => {
-    run.handle.onData((chunk) =>
-      server.termBroadcast(run.runId, JSON.stringify({ kind: 'data', runId: run.runId, data: chunk })),
-    )
-    run.handle.onExit((code) => server.termExit(run.runId, code))
-  }
+  executorEvents.runStarted = (run) => wireRunLifecycle(run, server)
   const originalClose = server.close.bind(server)
   server.close = () => {
     watcher.close()
-    return originalClose()
+    return Promise.all([beacon.close(), originalClose()]).then(() => {})
   }
   return server
 }

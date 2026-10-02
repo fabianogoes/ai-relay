@@ -33,6 +33,20 @@ const MEANING: Record<string, string> = {
   'CHANGELOG.md': 'Um registro de trabalho foi acrescentado.',
 }
 
+// Estado vazio canônico de TODO.md e HANDOFF.md é texto ("No active
+// task."/"No active handoff."), nunca string vazia — só esses dois registros
+// têm um template de vazio; BACKLOG.md e CHANGELOG.md não têm equivalente.
+const CANONICAL_EMPTY: Record<string, RegExp> = {
+  'TODO.md': /No active task\.?/,
+  'HANDOFF.md': /No active handoff\.?/,
+}
+
+function isCleared(name: string, content: string): boolean {
+  const pattern = CANONICAL_EMPTY[name]
+  if (pattern) return pattern.test(content)
+  return content === ''
+}
+
 let counter = 0
 
 export function startDiskTracker(workspace: string): DiskTracker {
@@ -52,7 +66,7 @@ export function startDiskTracker(workspace: string): DiskTracker {
         counter += 1
         const entry: DiskEntry = {
           id: counter,
-          type: after === '' ? 'cleared' : 'updated',
+          type: isCleared(name, after) ? 'cleared' : 'updated',
           path: `.orchestration/${name}`,
           at: new Date().toISOString(),
           meaning: MEANING[name] ?? 'Registro mudou em disco.',

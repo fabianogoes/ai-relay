@@ -62,6 +62,7 @@ test('server: bind em 127.0.0.1, porta efêmera', async () => {
     workspace: ws.dir,
     execEnabled: true,
     token: TOKEN,
+    discoveryPort: 41234,
     deps: makeDeps(ws.dir),
   })
   try {
@@ -75,7 +76,7 @@ test('server: bind em 127.0.0.1, porta efêmera', async () => {
 
 test('GET / é o bootstrap: sem token, entrega HTML com token e workspace', async () => {
   const ws = makeWorkspace()
-  const server = await createRelayServer({ workspace: ws.dir, execEnabled: true, token: TOKEN, deps: makeDeps(ws.dir) })
+  const server = await createRelayServer({ workspace: ws.dir, execEnabled: true, token: TOKEN, discoveryPort: 41234, deps: makeDeps(ws.dir) })
   try {
     const res = await fetch(`http://127.0.0.1:${server.port}/`)
     assert.equal(res.status, 200)
@@ -90,7 +91,7 @@ test('GET / é o bootstrap: sem token, entrega HTML com token e workspace', asyn
 
 test('servir a UI construída: metas injetadas e assets estáticos resolvem', async () => {
   const ws = makeWorkspace()
-  const server = await createRelayServer({ workspace: ws.dir, execEnabled: true, token: TOKEN, deps: makeDeps(ws.dir) })
+  const server = await createRelayServer({ workspace: ws.dir, execEnabled: true, token: TOKEN, discoveryPort: 41234, deps: makeDeps(ws.dir) })
   const base = `http://127.0.0.1:${server.port}`
   try {
     const res = await fetch(`${base}/`)
@@ -112,7 +113,7 @@ test('servir a UI construída: metas injetadas e assets estáticos resolvem', as
 
 test('API sem token ou sem same-origin é 403', async () => {
   const ws = makeWorkspace()
-  const server = await createRelayServer({ workspace: ws.dir, execEnabled: true, token: TOKEN, deps: makeDeps(ws.dir) })
+  const server = await createRelayServer({ workspace: ws.dir, execEnabled: true, token: TOKEN, discoveryPort: 41234, deps: makeDeps(ws.dir) })
   const base = `http://127.0.0.1:${server.port}`
   try {
     assert.equal((await request(base, '/api/state')).status, 403)
@@ -127,7 +128,7 @@ test('API sem token ou sem same-origin é 403', async () => {
 
 test('API com token e same-origin devolve dado', async () => {
   const ws = makeWorkspace()
-  const server = await createRelayServer({ workspace: ws.dir, execEnabled: true, token: TOKEN, deps: makeDeps(ws.dir) })
+  const server = await createRelayServer({ workspace: ws.dir, execEnabled: true, token: TOKEN, discoveryPort: 41234, deps: makeDeps(ws.dir) })
   const base = `http://127.0.0.1:${server.port}`
   try {
     const state = await request(base, '/api/state', { token: TOKEN, fetchSite: 'same-origin' })
@@ -160,7 +161,7 @@ test('GET /api/changelog/entries devolve registros estruturados por backlog', as
       '# Change log\n\n## 2026-09-10 - T-001 - Titulo do registro\n- Backlog: B-001\n- Spec: .specs/20260907-001-teste.md\n- Result: breve.\n- Evidence: vitest 4/4\n- Criteria: A-001\n',
     ],
   ])
-  const server = await createRelayServer({ workspace: ws.dir, execEnabled: true, token: TOKEN, deps: makeDeps(ws.dir) })
+  const server = await createRelayServer({ workspace: ws.dir, execEnabled: true, token: TOKEN, discoveryPort: 41234, deps: makeDeps(ws.dir) })
   const base = `http://127.0.0.1:${server.port}`
   try {
     const res = await request(base, '/api/changelog/entries', { token: TOKEN, fetchSite: 'same-origin' })
@@ -185,7 +186,7 @@ test('GET /api/changelog/entries devolve registros estruturados por backlog', as
 
 test('rota de lançamento: POST /api/launch/preview compõe o plano, sem shell', async () => {
   const ws = makeWorkspace()
-  const server = await createRelayServer({ workspace: ws.dir, execEnabled: true, token: TOKEN, deps: makeDeps(ws.dir) })
+  const server = await createRelayServer({ workspace: ws.dir, execEnabled: true, token: TOKEN, discoveryPort: 41234, deps: makeDeps(ws.dir) })
   const base = `http://127.0.0.1:${server.port}`
   try {
     const res = await request(base, '/api/launch/preview', {
@@ -224,9 +225,9 @@ test('rota de lançamento: POST /api/launch/preview compõe o plano, sem shell',
   }
 })
 
-test('sob --no-exec a rota de lançamento também é 404, não 403 (A-004)', async () => {
+test('sob --no-exec a rota de lançamento também é 404, não 403 (A-011)', async () => {
   const ws = makeWorkspace()
-  const server = await createRelayServer({ workspace: ws.dir, execEnabled: false, token: TOKEN, deps: makeDeps(ws.dir) })
+  const server = await createRelayServer({ workspace: ws.dir, execEnabled: false, token: TOKEN, discoveryPort: 41234, deps: makeDeps(ws.dir) })
   const base = `http://127.0.0.1:${server.port}`
   try {
     const res = await request(base, '/api/launch', { method: 'POST', token: TOKEN, fetchSite: 'same-origin' })
@@ -237,10 +238,69 @@ test('sob --no-exec a rota de lançamento também é 404, não 403 (A-004)', asy
   }
 })
 
+test('sob --no-exec, GET /api/runs, GET /api/run/<id> e /disk não existem: 404 com auth válida (A-011)', async () => {
+  const ws = makeWorkspace()
+  const deps: ServerDeps = {
+    ...makeDeps(ws.dir),
+    runs: () => [],
+    runInfo: () => ({
+      runId: 'run-1',
+      status: 'running',
+      exitCode: null,
+      startedAt: '',
+      harnessId: 'claude-code',
+      harnessName: 'Claude Code',
+      processName: 'p',
+    }),
+    runDiskEntries: () => [],
+  }
+  const server = await createRelayServer({ workspace: ws.dir, execEnabled: false, token: TOKEN, discoveryPort: 41234, deps })
+  const base = `http://127.0.0.1:${server.port}`
+  try {
+    assert.equal((await request(base, '/api/runs', { token: TOKEN, fetchSite: 'same-origin' })).status, 404)
+    assert.equal((await request(base, '/api/run/run-1', { token: TOKEN, fetchSite: 'same-origin' })).status, 404)
+    assert.equal((await request(base, '/api/run/run-1/disk', { token: TOKEN, fetchSite: 'same-origin' })).status, 404)
+  } finally {
+    await server.close()
+    ws.cleanup()
+  }
+})
+
+test('sob --no-exec, o WebSocket /ws/term não existe: handshake com origem e token válidos recebe 404 (A-011)', async () => {
+  const ws = makeWorkspace()
+  const server = await createRelayServer({ workspace: ws.dir, execEnabled: false, token: TOKEN, discoveryPort: 41234, deps: makeDeps(ws.dir) })
+  try {
+    const attempt = new Promise<number>((resolve, reject) => {
+      const client = new WebSocket(`ws://127.0.0.1:${server.port}/ws/term`, `relay.${TOKEN}`, {
+        origin: `http://127.0.0.1:${server.port}`,
+      })
+      client.once('unexpected-response', (_req, res) => {
+        resolve(res.statusCode ?? 0)
+        client.terminate()
+      })
+      client.once('open', () => {
+        client.terminate()
+        reject(new Error('handshake deveria falhar sob --no-exec, não abrir'))
+      })
+      client.once('error', () => {
+        // 'error' pode disparar junto de 'unexpected-response' dependendo da lib; ignora aqui
+      })
+    })
+    const timeout = new Promise<number>((_, reject) =>
+      setTimeout(() => reject(new Error('handshake de /ws/term não respondeu em 2s')), 2000),
+    )
+    const status = await Promise.race([attempt, timeout])
+    assert.equal(status, 404)
+  } finally {
+    await server.close()
+    ws.cleanup()
+  }
+})
+
 test('rota embutida exige exec ligado e launchEmbedded; sem ela, 404', async () => {
   const ws = makeWorkspace()
   // com exec ligado mas sem launchEmbedded no deps, devolve 404 (superfície reservada)
-  const server = await createRelayServer({ workspace: ws.dir, execEnabled: true, token: TOKEN, deps: makeDeps(ws.dir) })
+  const server = await createRelayServer({ workspace: ws.dir, execEnabled: true, token: TOKEN, discoveryPort: 41234, deps: makeDeps(ws.dir) })
   const base = `http://127.0.0.1:${server.port}`
   try {
     const res = await request(base, '/api/launch/embedded', {
@@ -250,6 +310,144 @@ test('rota embutida exige exec ligado e launchEmbedded; sem ela, 404', async () 
       body: { harness: 'claude-code', skill: 'relay-session', intent: 'x' },
     })
     assert.equal(res.status, 404)
+  } finally {
+    await server.close()
+    ws.cleanup()
+  }
+})
+
+test('GET /api/run/<id> e /disk devolvem dado da run existente e 404 para run desconhecida (A-005)', async () => {
+  const ws = makeWorkspace()
+  const deps: ServerDeps = {
+    ...makeDeps(ws.dir),
+    runInfo: (runId) =>
+      runId === 'run-1'
+        ? {
+            runId,
+            status: 'running',
+            exitCode: null,
+            startedAt: '2026-01-01T00:00:00Z',
+            harnessId: 'claude-code',
+            harnessName: 'Claude Code',
+            processName: 'claude · relay-session',
+          }
+        : null,
+    runDiskEntries: (runId) => (runId === 'run-1' ? [{ path: 'a', type: 'updated' }] : null),
+  }
+  const server = await createRelayServer({ workspace: ws.dir, execEnabled: true, token: TOKEN, discoveryPort: 41234, deps })
+  const base = `http://127.0.0.1:${server.port}`
+  try {
+    const info = await request(base, '/api/run/run-1', { token: TOKEN, fetchSite: 'same-origin' })
+    assert.equal(info.status, 200)
+    assert.deepEqual(await info.json(), {
+      runId: 'run-1',
+      status: 'running',
+      exitCode: null,
+      startedAt: '2026-01-01T00:00:00Z',
+      harnessId: 'claude-code',
+      harnessName: 'Claude Code',
+      processName: 'claude · relay-session',
+    })
+
+    const disk = await request(base, '/api/run/run-1/disk', { token: TOKEN, fetchSite: 'same-origin' })
+    assert.equal(disk.status, 200)
+    assert.deepEqual(await disk.json(), [{ path: 'a', type: 'updated' }])
+
+    const missingInfo = await request(base, '/api/run/run-nao-existe', { token: TOKEN, fetchSite: 'same-origin' })
+    assert.equal(missingInfo.status, 404)
+
+    const missingDisk = await request(base, '/api/run/run-nao-existe/disk', { token: TOKEN, fetchSite: 'same-origin' })
+    assert.equal(missingDisk.status, 404)
+  } finally {
+    await server.close()
+    ws.cleanup()
+  }
+})
+
+test('POST /api/run/<id> terminate: run existente termina, run desconhecida devolve 404 (A-008)', async () => {
+  const ws = makeWorkspace()
+  let terminated: string | null = null
+  const deps: ServerDeps = {
+    ...makeDeps(ws.dir),
+    runInfo: (runId) =>
+      runId === 'run-1'
+        ? {
+            runId,
+            status: 'running',
+            exitCode: null,
+            startedAt: '2026-01-01T00:00:00Z',
+            harnessId: 'claude-code',
+            harnessName: 'Claude Code',
+            processName: 'claude · relay-session',
+          }
+        : null,
+    runTerminate: (runId) => {
+      terminated = runId
+    },
+  }
+  const server = await createRelayServer({ workspace: ws.dir, execEnabled: true, token: TOKEN, discoveryPort: 41234, deps })
+  const base = `http://127.0.0.1:${server.port}`
+  try {
+    const ok = await request(base, '/api/run/run-1', {
+      method: 'POST',
+      token: TOKEN,
+      fetchSite: 'same-origin',
+      body: { action: 'terminate' },
+    })
+    assert.equal(ok.status, 200)
+    assert.equal(terminated, 'run-1')
+
+    const missing = await request(base, '/api/run/run-nao-existe', {
+      method: 'POST',
+      token: TOKEN,
+      fetchSite: 'same-origin',
+      body: { action: 'terminate' },
+    })
+    assert.equal(missing.status, 404)
+  } finally {
+    await server.close()
+    ws.cleanup()
+  }
+})
+
+test('POST /api/run/<id> close: fecha run existente e devolve o registro; run desconhecida/já fechada é 404 (A-006/A-007)', async () => {
+  const ws = makeWorkspace()
+  let closed: string | null = null
+  const deps: ServerDeps = {
+    ...makeDeps(ws.dir),
+    runClose: (runId) => {
+      if (runId !== 'run-1' || closed !== null) return false
+      closed = runId
+      return true
+    },
+  }
+  const server = await createRelayServer({ workspace: ws.dir, execEnabled: true, token: TOKEN, discoveryPort: 41234, deps })
+  const base = `http://127.0.0.1:${server.port}`
+  try {
+    const ok = await request(base, '/api/run/run-1', {
+      method: 'POST',
+      token: TOKEN,
+      fetchSite: 'same-origin',
+      body: { action: 'close' },
+    })
+    assert.equal(ok.status, 200)
+    assert.equal(closed, 'run-1')
+
+    const again = await request(base, '/api/run/run-1', {
+      method: 'POST',
+      token: TOKEN,
+      fetchSite: 'same-origin',
+      body: { action: 'close' },
+    })
+    assert.equal(again.status, 404)
+
+    const missing = await request(base, '/api/run/run-nao-existe', {
+      method: 'POST',
+      token: TOKEN,
+      fetchSite: 'same-origin',
+      body: { action: 'close' },
+    })
+    assert.equal(missing.status, 404)
   } finally {
     await server.close()
     ws.cleanup()
@@ -306,7 +504,7 @@ async function waitForMessage(
 
 test('WebSocket entrega snapshot envelopado na conexao e sinaliza refreshing', async () => {
   const ws = makeWorkspace()
-  const server = await createRelayServer({ workspace: ws.dir, execEnabled: true, token: TOKEN, deps: makeDeps(ws.dir) })
+  const server = await createRelayServer({ workspace: ws.dir, execEnabled: true, token: TOKEN, discoveryPort: 41234, deps: makeDeps(ws.dir) })
   const url = `ws://127.0.0.1:${server.port}/ws`
   try {
     const client = await connectWs(url, TOKEN)
@@ -328,7 +526,7 @@ test('WebSocket entrega snapshot envelopado na conexao e sinaliza refreshing', a
 
 test('cliente que conecta durante transicao recebe refreshing antes do proximo snapshot', async () => {
   const ws = makeWorkspace()
-  const server = await createRelayServer({ workspace: ws.dir, execEnabled: false, token: TOKEN, deps: makeDeps(ws.dir) })
+  const server = await createRelayServer({ workspace: ws.dir, execEnabled: false, token: TOKEN, discoveryPort: 41234, deps: makeDeps(ws.dir) })
   const url = `ws://127.0.0.1:${server.port}/ws`
   try {
     server.broadcastRefreshing()
@@ -339,6 +537,67 @@ test('cliente que conecta durante transicao recebe refreshing antes do proximo s
     server.broadcast()
     const snapshot = await waitForMessage(client.messages, (message) => message.kind === 'snapshot')
     assert.equal(snapshot.kind, 'snapshot')
+    client.ws.close()
+  } finally {
+    await server.close()
+    ws.cleanup()
+  }
+})
+
+type TermMessage = { kind: string; runId?: string; data?: string; entries?: unknown; exitCode?: number | null }
+
+function connectTermWs(url: string, token: string): Promise<{ ws: WebSocket; messages: TermMessage[] }> {
+  return new Promise((resolve, reject) => {
+    const ws = new WebSocket(url, `relay.${token}`, { origin: `http://127.0.0.1:${new URL(url).port}` })
+    const messages: TermMessage[] = []
+    ws.on('message', (data) => messages.push(JSON.parse(data.toString()) as TermMessage))
+    ws.once('open', () => resolve({ ws, messages }))
+    ws.once('error', reject)
+  })
+}
+
+async function waitForTermMessage(
+  messages: TermMessage[],
+  predicate: (message: TermMessage) => boolean,
+): Promise<TermMessage> {
+  const existing = messages.find(predicate)
+  if (existing) return existing
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      clearInterval(iv)
+      reject(new Error('waitForTermMessage: nenhuma mensagem casou o predicado em 2s'))
+    }, 2000)
+    const iv = setInterval(() => {
+      const match = messages.find(predicate)
+      if (match) {
+        clearInterval(iv)
+        clearTimeout(timeout)
+        resolve(match)
+      }
+    }, 5)
+  })
+}
+
+test('anexar ao terminal reenvia scrollback e os diffs de disco acumulados, não só scrollback (A-006)', async () => {
+  const ws = makeWorkspace()
+  const deps: ServerDeps = {
+    ...makeDeps(ws.dir),
+    runScrollback: (runId) => (runId === 'run-1' ? 'scrollback previo' : null),
+    runDiskEntries: (runId) =>
+      runId === 'run-1' ? [{ id: 1, type: 'updated', path: 'a', at: '', meaning: '', before: '', after: '' }] : null,
+  }
+  const server = await createRelayServer({ workspace: ws.dir, execEnabled: true, token: TOKEN, discoveryPort: 41234, deps })
+  const url = `ws://127.0.0.1:${server.port}/ws/term`
+  try {
+    const client = await connectTermWs(url, TOKEN)
+    client.ws.send(JSON.stringify({ kind: 'attach', runId: 'run-1' }))
+
+    const dataMsg = await waitForTermMessage(client.messages, (m) => m.kind === 'data')
+    assert.equal(dataMsg.data, 'scrollback previo')
+
+    const diskMsg = await waitForTermMessage(client.messages, (m) => m.kind === 'disk')
+    assert.deepEqual(diskMsg.entries, [{ id: 1, type: 'updated', path: 'a', at: '', meaning: '', before: '', after: '' }])
+
     client.ws.close()
   } finally {
     await server.close()

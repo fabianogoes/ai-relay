@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { readFileSync, statSync } from 'node:fs'
 
 import { buildWrapperScript, launch, preview, shellQuote } from '../src/launcher.ts'
 import { composePrompt, buildLaunchArgv } from '../src/harness.ts'
@@ -42,21 +42,44 @@ test('launch grava script wrapper com argv entre aspas e PID/exit pelo próprio 
   const result = launch(
     { harness: 'claude-code', skill: 'relay-session', intent: "it's $HOME" },
     '/ws',
-    { openExternal: (p) => (opened = p) },
+    { openExternal: (p) => ((opened = p), true) },
   )
   assert.ok(result.runId.length > 0)
   assert.ok(opened !== null)
   const script = readFileSync(opened as string, 'utf8')
+  assert.ok(script.includes(`cd '/ws' || exit 1`))
   assert.ok(script.includes(`echo $$ > '${result.scratchDir}/pid'`))
   assert.ok(script.includes(`echo $? > '${result.scratchDir}/exit'`))
   assert.ok(script.includes(`'claude' '-p' '/relay-session it'\\''s $HOME'`))
   assert.equal(result.plan.prompt, "/relay-session it's $HOME")
 })
 
-test('buildWrapperScript cita cada elemento de argv separadamente', () => {
-  const script = buildWrapperScript(['bin', 'a b', "c'd"], '/r/pid', '/r/exit')
+test('launch cria o diretorio de scratch e o script com permissoes restritas ao dono (A-003)', () => {
+  const result = launch(
+    { harness: 'claude-code', skill: 'relay-session', intent: 'x' },
+    '/ws',
+    { openExternal: () => true },
+  )
+  const dirMode = statSync(result.scratchDir).mode & 0o777
+  const scriptMode = statSync(`${result.scratchDir}/launch.sh`).mode & 0o777
+  assert.equal(dirMode, 0o700)
+  assert.equal(scriptMode, 0o700)
+})
+
+test('launch falha de forma observável quando nenhum terminal é aberto (A-003)', () => {
+  assert.throws(() =>
+    launch({ harness: 'claude-code', skill: 'relay-session', intent: 'x' }, '/ws', {
+      openExternal: () => false,
+    }),
+  )
+})
+
+test('buildWrapperScript entra no cwd aprovado antes de rodar o comando e restringe artefatos (A-003)', () => {
+  const script = buildWrapperScript(['bin', 'a b', "c'd"], '/aprovado', '/r/pid', '/r/exit')
   assert.equal(script, [
     '#!/bin/sh',
+    'umask 077',
+    `cd '/aprovado' || exit 1`,
     `echo $$ > '/r/pid'`,
     `'bin' 'a b' 'c'\\''d'`,
     `echo $? > '/r/exit'`,

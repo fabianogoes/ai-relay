@@ -54,6 +54,7 @@ test('mudancas agrupadas sinalizam refreshing e publicam um snapshot apos 150 ms
     workspace: ws.dir,
     execEnabled: true,
     token: TOKEN,
+    discoveryPort: 41234,
     deps: makeDeps(ws.dir, { workspace: ws.dir, execEnabled: true }),
   })
   const watcher = watchWorkspace(ws.dir, {
@@ -101,6 +102,96 @@ test('mudancas agrupadas sinalizam refreshing e publicam um snapshot apos 150 ms
     client.ws.close()
   } finally {
     watcher.close()
+    await server.close()
+    ws.cleanup()
+  }
+})
+
+test('mudanca em .specs/ tambem sinaliza transicao e publica snapshot', async () => {
+  const ws = makeWorkspace()
+  const server = await createRelayServer({
+    workspace: ws.dir,
+    execEnabled: false,
+    token: TOKEN,
+    discoveryPort: 41234,
+    deps: makeDeps(ws.dir, { workspace: ws.dir, execEnabled: false }),
+  })
+  const watcher = watchWorkspace(ws.dir, {
+    onDirty: () => server.broadcastRefreshing(),
+    onSettled: () => server.broadcast(),
+  })
+  try {
+    const client = await connectWs(`ws://127.0.0.1:${server.port}/ws`)
+    await waitFor(client.messages, (message) => message.kind === 'snapshot', 'snapshot inicial')
+    const before = client.messages.filter((message) => message.kind === 'refreshing').length
+
+    ws.write(
+      '.specs/20260907-001-teste.md',
+      '# 20260907-001 - Teste\n\n## Acceptance criteria\n- A-001 - um\n- A-002 - dois\n',
+    )
+
+    await waitFor(client.messages, (message) => message.kind === 'refreshing', 'refreshing do .specs')
+    assert.ok(client.messages.filter((message) => message.kind === 'refreshing').length > before)
+    client.ws.close()
+  } finally {
+    watcher.close()
+    await server.close()
+    ws.cleanup()
+  }
+})
+
+test('workspace inconsistente entrega snapshot inconsistent em read-only', async () => {
+  const handoff = [
+    '# Handoff',
+    '',
+    '- Status: in_progress',
+    '- Backlog: B-001',
+    '- TODO: T-002',
+    '- Spec: .specs/20260907-001-teste.md',
+    '- Harness: opencode',
+    '- Updated: 2026-09-11T00:00:00Z',
+    '',
+    '## Objective',
+    'x',
+    '',
+    '## Next step',
+    'y',
+    '',
+    '## Context',
+    'z',
+    '',
+  ].join('\n')
+  const changelog = [
+    '# Change log',
+    '',
+    '## 2026-09-11 - T-001 - Registro',
+    '- Backlog: B-001',
+    '- Spec: .specs/20260907-001-teste.md',
+    '- Criteria: none',
+    '',
+  ].join('\n')
+  const ws = makeWorkspace([
+    ['.orchestration/TODO.md', '# Active task: B-001\n\n- [x] T-001 - feito\n'],
+    ['.orchestration/HANDOFF.md', handoff],
+    ['.orchestration/CHANGELOG.md', changelog],
+  ])
+  const server = await createRelayServer({
+    workspace: ws.dir,
+    execEnabled: false,
+    token: TOKEN,
+    discoveryPort: 41234,
+    deps: makeDeps(ws.dir, { workspace: ws.dir, execEnabled: false }),
+  })
+  try {
+    const client = await connectWs(`ws://127.0.0.1:${server.port}/ws`)
+    const snapshot = await waitFor(client.messages, (message) => message.kind === 'snapshot', 'snapshot inicial')
+    assert.equal(snapshot.kind, 'snapshot')
+    if (snapshot.kind === 'snapshot') {
+      assert.equal(snapshot.payload.state.kind, 'inconsistent')
+      assert.equal(snapshot.payload.environment.execEnabled, false)
+    }
+    client.ws.close()
+  } finally {
     await server.close()
     ws.cleanup()
   }
