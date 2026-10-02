@@ -36,6 +36,22 @@ Write one when a decision affects structure, an architecture characteristic, a
 dependency, an interface, or a construction technique. Record the reasoning,
 not only the choice.
 
+- `docs/adr/0009-relay-tui-observador-de-terminal-em-rust.md` — Accepted —
+  `relay-tui`, a read-only, passive terminal observer in Rust (`ratatui`),
+  shipped as a single downloadable binary from a GitHub Release (macOS
+  is the requirement; Linux and Windows are best effort). It
+  carries a second implementation of the core, held in line with `relay-core` by
+  a language-neutral conformance suite in `app/conformance/`; it revises
+  ADR-0001 decision 2 and the repository-only distribution premise for the TUI
+  alone, and keeps decision 5 (the app never writes a record). It is not a Relay
+  CLI. A file-based question channel between harness and TUI is recorded as a
+  considered evolution, gated on a protocol amendment and a Claude Code spike.
+- `docs/adr/0008-testes-de-ui-com-vitest.md` — Accepted — UI component tests
+  use Vitest + `@vue/test-utils` + `jsdom`, as a `devDependency` of
+  `app/relay-ui` only, alongside (not replacing) the existing `node --test`
+  suite; Playwright and Testing Library were considered and rejected because
+  none of spec 013's six regression scenarios need a real browser or a second
+  DOM-query layer.
 - `docs/adr/0006-contrato-http-ws-do-relay-host.md` — Accepted — the HTTP/WS
   surface between `relay-host` and `relay-ui`: bind only on `127.0.0.1` on an
   ephemeral port, a per-execution token delivered in the initial HTML (never
@@ -120,5 +136,7 @@ not only the choice.
 
 Read `.orchestration/HANDOFF.md`, `.orchestration/TODO.md`,
 `.orchestration/BACKLOG.md`, and the spec they reference in `.specs/` before
-starting work. Clients and interfaces may read, validate, derive state, and
-launch a harness, but only Relay skills may mutate the five protocol records.
+starting Relay work. Work the user requests directly may skip the flow; see
+"Work outside the flow" in `docs/PROTOCOL.md`. Clients and interfaces may read,
+validate, derive state, and launch a harness, but only Relay skills may mutate
+the five protocol records.

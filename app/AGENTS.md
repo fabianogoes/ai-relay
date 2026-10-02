@@ -18,6 +18,8 @@ A estrutura e a fronteira desta pasta estão em
 4. `../docs/adr/0001-arquitetura-inicial-da-ui.md` — a fronteira
    `relay-core` / `relay-host` / `relay-ui` e a regra de que a aplicação nunca
    escreve um registro do protocolo.
+5. `relay-tui/README.md` e `../docs/adr/0009-relay-tui-observador-de-terminal-em-rust.md`
+   — o painel de terminal em Rust, só de leitura, que se instala por download.
 
 ## O que esta pasta não pode fazer
 
@@ -28,13 +30,21 @@ A estrutura e a fronteira desta pasta estão em
   `app/package.json`. Instalar o Relay não pode exigir `npm install`.
 - **Nunca fazer a raiz depender daqui.** `rm -rf app/` tem de devolver o
   repositório a um estado funcional; o único vínculo permitido é o ponteiro de
-  uma linha no `AGENTS.md` da raiz.
+  uma linha no `AGENTS.md` da raiz, mais os dois workflows do `relay-tui` em
+  `.github/workflows/` (exceção da ADR-0009 decisão 4: sem `app/` eles não
+  disparam).
 - **Nunca calcular o que o `relay-core` deriva.** `available`, status e contagem
   chegam prontos. Recalcular na view cria uma segunda implementação do
-  protocolo, que é o risco que a ADR-0001 nomeia como dominante.
+  protocolo, que é o risco que a ADR-0001 nomeia como dominante. *Exceção
+  deliberada, da [ADR-0009](../docs/adr/0009-relay-tui-observador-de-terminal-em-rust.md):
+  o `relay-tui/src/core/` é um segundo core, em Rust, mantido igual ao
+  `relay-core` pela suíte de `conformance/`. Mudar a gramática do protocolo
+  exige mudar os dois e a suíte; a `view` do `relay-tui` continua sem calcular
+  nada.*
 
 ## Camadas
 
 `skills/` é superfície de pacote e vai pelos manifestos. `app/` é produto e vai
-por clone. `.agents/`, `.claude/` e `.opencode/plugin/` são ferramenta deste
-repositório e não vão a lugar nenhum.
+por clone; o `relay-tui` vai também por download de binário, em Release.
+`.agents/`, `.claude/` e `.opencode/plugin/` são ferramenta deste repositório e
+não vão a lugar nenhum.

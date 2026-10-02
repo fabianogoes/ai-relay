@@ -1,6 +1,6 @@
 # Design System do Relay
 
-**Data:** 2026-09-06 · revisado em 2026-09-11
+**Data:** 2026-09-06 · revisado em 2026-09-11 e 2026-10-02 (seção 10, meio terminal)
 **Autor:** Claude Code
 **Status:** vigente — descreve a interface **implementada**
 
@@ -29,8 +29,9 @@ Este documento não repete a arquitetura; ele padroniza o desenho da superfície
 | --- | --- | --- |
 | `README.md` (este) | fonte de verdade do design system: tokens, componentes e regras | ler antes de qualquer mudança de interface |
 | [`ui-proposal.md`](ui-proposal.md) | análise exploratória e arquitetura da UI (raciocínio e alternativas descartadas) | ler só quando a decisão de desenho não estiver na ADR |
-| [`design-system.html`](design-system.html) | exemplo visual **derivado** deste README | abrir no browser; nunca ler por agente. Regenerado em 2026-09-11 a partir deste documento, com todos os tokens e os componentes da seção 6 |
+| [`design-system.html`](design-system.html) | exemplo visual **derivado** deste README | abrir no browser; nunca ler por agente. Regenerado em 2026-09-11 a partir deste documento, com todos os tokens **web** e os componentes da seção 6. Não cobre a seção 10 (meio terminal): ali não há CSS a derivar |
 | [`prototypes/`](prototypes/) | protótipos históricos, ~350 KB cada | **nunca abrir num agente**; só referência visual no browser. Superados pela interface implementada — servem para ver de onde veio uma decisão, nunca para decidir |
+| [`audit-2026-09-11.md`](audit-2026-09-11.md) | auditoria final por componente (A-015 da spec 013): contraste, cor+rótulo, foco, alvo, hierarquia, semântica, responsividade | ler para saber o que já foi verificado e o que ficou registrado como lacuna aceita, antes de reabrir uma auditoria do zero |
 
 > **Nunca leia os `.html`** (`design-system.html` e `prototypes/*.html`) num
 > agente. O `design-system.html` duplica tokens deste README em CSS e o que há
@@ -77,7 +78,15 @@ conflitar com um princípio, o princípio vence.
 10. **Dado antigo se declara antigo.** Durante uma transição entre arquivos, a
     UI mantém o último snapshot estável com o rótulo "Atualizando". Quando a
     conexão cai, mantém o conteúdo para consulta com o rótulo "Desatualizado"
-    até receber um novo snapshot; nunca parece atual sem evidência.
+    até receber um novo snapshot; nunca parece atual sem evidência. Declarar
+    não basta: nenhum botão que lança execução (▶ Começar, ▶ Retomar, em
+    qualquer uma das três telas) fica clicável enquanto o rótulo é
+    "Desatualizado" — o dado que a ação usaria (handoff, harness, ID) pode já
+    não ser real. O botão continua visível, só ganha `disabled` e um texto
+    curto explicando por quê (nunca cinza silencioso); volta a habilitar
+    sozinho quando um snapshot novo chega. Vale só para "Desatualizado"
+    (conexão caiu de fato) — "Atualizando" é uma transição breve entre
+    arquivos com dado ainda válido, não desabilita nada.
 
 ---
 
@@ -99,6 +108,7 @@ de harness, em que este documento diverge do protótipo de propósito.
 | `--meta` | `#9ba6b4` | metadados: caminhos, timestamps, IDs |
 | `--line` | `rgba(255,255,255,.10)` | bordas padrão |
 | `--line-2` | `rgba(255,255,255,.16)` | bordas de destaque e hover |
+| `--scrim` | `rgba(0,0,0,.55)` | véu que separa uma sobreposição (modal, seletor) do conteúdo de trás |
 
 Acentos semânticos — cada um com três variantes (tinta, fundo suave, linha):
 
@@ -135,15 +145,15 @@ Toda cor que carrega informação (texto, IDs, caminhos, timestamps) deve atingi
 
 ## 3. Mapeamento de status → tom
 
-| Status | Tom | Nota |
-| --- | --- | --- |
-| `in_progress` | green | ação primária: retomar |
-| `blocked` | amber | requer `Context` com o bloqueio e a condição de retomada |
-| `inconsistent` | amber | tela de reparo dura; restringe o resto |
-| `ready` | blue | selecionável |
-| `backlog` | blue | selecionável |
-| `done` | green | conclusão |
-| `idle` | meta (fundo transparente, linha `--line`) | sem trabalho ativo |
+| Status | Rótulo na interface | Tom | Nota |
+| --- | --- | --- | --- |
+| `in_progress` | Em andamento | green | ação primária: retomar |
+| `blocked` | Bloqueado | amber | requer `Context` com o bloqueio e a condição de retomada |
+| `inconsistent` | Inconsistente | amber | tela de reparo dura; restringe o resto |
+| `ready` | Pronto | blue | selecionável |
+| `backlog` | A escolher | blue | selecionável |
+| `done` | Concluído | green | conclusão |
+| `idle` | Sem trabalho | meta (fundo transparente, linha `--line`) | sem trabalho ativo |
 
 Todo marcador de status combina **tom + rótulo textual** — essa é a regra
 inegociável, e vale em qualquer lugar que exiba status.
@@ -222,6 +232,28 @@ subtarefas) — depende da altura real da janela, não de um valor de desenho
 fixo. A lista de subtarefas usa o espaço flexível restante (`flex: 1`) com a
 mesma rolagem interna, em vez de um segundo valor fixo.
 
+### Viewport estreita e safe areas
+
+Em **760px ou menos**, a interface deixa de tentar preservar as grades largas:
+o Header quebra em linhas, as duas caixas do HandoffCard e as três colunas da
+aba Trabalho passam a uma coluna, e terminal + registro de disco do modo de
+execução empilham verticalmente. A leitura segue a mesma ordem do desktop;
+não existe uma segunda navegação ou uma versão móvel com menos informação.
+
+O container da aplicação, overlays e modo de execução respeitam
+`safe-area-inset-top`, `safe-area-inset-right`, `safe-area-inset-bottom` e
+`safe-area-inset-left`, sempre conservando ao menos o respiro da escala de
+espaçamento. Caminhos longos truncam no Header e quebram dentro de cartões;
+ações quebram em linhas em vez de sair da viewport. Modais ocupam apenas a
+altura dinâmica disponível e rolam internamente. Na aba Trabalho, cada lista
+mantém rolagem própria com teto relativo à viewport para que uma coluna longa
+não esconda as demais.
+
+O breakpoint é regra de layout, não token: custom properties não participam de
+media queries. Acima de 760px permanecem a grade de três colunas e as duas
+colunas do HandoffCard; abaixo dele, `100dvh` é a referência de altura para
+evitar que as barras móveis do navegador ocultem controles.
+
 ### As três telas
 
 | Tela | Quando | Ação primária única |
@@ -299,7 +331,10 @@ especificar uma ideia nova ("Iniciar entrevista"); não há ação primária ún
 aqui, há uma por linha, porque escolher é o trabalho. Em read-only a lista e a
 explicação permanecem e só as ações somem: o que a tela existe para responder
 é "o que há para escolher", e isso não depende de poder lançar. Empty state de
-verdade é só quando não há nenhuma tarefa disponível.
+verdade é só quando não há nenhuma tarefa disponível. Com dado desatualizado
+(princípio 10), cada botão "▶ Começar" some da lista de ações possíveis? Não —
+fica visível e desabilitado, com o motivo em texto, porque a lista em si
+continua sendo leitura válida do último snapshot; só a ação de lançar não é.
 
 Enquanto uma execução está anexada, a UI entra em **modo de execução** e ocupa
 a viewport inteira: as abas Agora/Trabalho desaparecem e não há navegação
@@ -314,6 +349,16 @@ navegação.
 - Raio padrão de cartão: `--radius-3` (12px); controles: `--radius-2` (10px);
   chips e pills: `--radius-1` (8px).
 - Borda padrão: `1px solid var(--line)`; destaque: `var(--line-2)`.
+- **Selos que dividem uma linha usam a mesma altura, não só a mesma faixa.**
+  `--control-height-sm` é um valor único, não um intervalo por componente: o
+  `StatusPill`, o selo "Atualizado"/"Desatualizado" e o selo de harness do
+  Header ficam lado a lado e por isso têm todos `height: var(--control-height-sm)`
+  — nenhum deriva a própria altura de `padding` mais o conteúdo, porque duas
+  fontes de altura na mesma linha é o que produz a régua desalinhada. Um selo
+  cujo conteúdo pode variar (nome de harness longo, por exemplo) encolhe por
+  `text-overflow: ellipsis` dentro dessa altura fixa, nunca crescendo a
+  moldura nem esticando por `flex-grow` para preencher a linha — largura segue
+  o próprio conteúdo, como os selos vizinhos.
 
 ---
 
@@ -331,13 +376,17 @@ na própria moldura: `in_progress` usa borda `--green-line` sobre um véu
 propósito — nunca substitui o rótulo textual, só torna o objeto central
 reconhecível à distância.
 
-Cabeçalho com **proveniência** em destaque — avatar com as iniciais do
-harness no tom de identidade dele, e "Escrito no {harness} · {tempo
+Cabeçalho com **proveniência** em destaque — avatar com o ícone do harness
+(seção 6, "Lista de harnesses"), e "Escrito no {harness} · {tempo
 relativo}" em **sans, tamanho de subtítulo**, não em mono de metadado: é a
 primeira frase que a tela responde ("quem parou aqui, e quando"). O timestamp
-absoluto (`YYYY-MM-DD HH:MM`) junto dos IDs (`B-002 / T-002`) vem numa linha
-mono de metadado logo abaixo. Título do objetivo em destaque
-(`OBJETIVO · {backlogId} / {todoId}` como rótulo pequeno acima).
+absoluto, localizado em português por `Intl.DateTimeFormat`, junto dos IDs
+(`B-002 / T-002`) vem numa linha mono de metadado logo abaixo. O tempo relativo
+usa `Intl.RelativeTimeFormat` no mesmo idioma. Título do objetivo em destaque
+(`OBJETIVO · {backlogId} / {todoId}` como rótulo pequeno acima), truncado em
+3 linhas (`line-clamp`) — é o resumo de uma frase do que a subtarefa precisa
+alcançar, não o lugar para o raciocínio completo; o "Contexto deixado" ao lado
+é que existe para isso.
 
 Corpo em **duas colunas lado a lado**, cada uma sua própria caixa (borda
 `--line`, fundo `--bg-deep`, `--radius-2`) — "Próximo passo" e "Contexto
@@ -359,7 +408,9 @@ Rodapé: **um** botão primário ("▶ Retomar {todoId} no {harness}", nomeando 
 harness), um botão secundário ("Trocar harness") e o caminho da spec em mono,
 alinhado à direita. O card nunca mostra fila, posição ou percentual; mostra o
 contador verdadeiro (`2 de 4`) quando houver subtarefas, num rótulo acima da
-lista de subtarefas associada, não dentro do card.
+lista de subtarefas associada, não dentro do card. O botão "▶ Retomar" segue o
+princípio 10: desabilita com dado "Desatualizado", porque retomar dispara
+execução a partir de um handoff que pode já ter mudado.
 
 ### Botão primário
 Uma ação primária por tela. Tom sólido (`--green` ou o tom da ação), texto
@@ -455,10 +506,12 @@ Corpo do cartão com o texto da entrada. O rodapé tem sempre o botão secundár
 **"Tarefas"**, que abre o modal descrito abaixo — é leitura, não execução, e
 por isso existe também em read-only. Quando execução estiver habilitada, o
 rodapé ganha ao lado dele o botão que nomeia a ação — `▶ Retomar` (no tom)
-para `[•]`, `▶ Começar` (primário sólido) para `[ ]` disponível. O cartão
-nunca reordena por status: a ordem é a do `BACKLOG.md` filtrado, invertida
-(seção 5), e nada além disso a altera — uma tarefa não sobe por estar em
-curso nem desce por estar feita.
+para `[•]`, `▶ Começar` (primário sólido) para `[ ]` disponível — desabilitado
+com dado "Desatualizado" (princípio 10), igual ao Retomar do HandoffCard e ao
+Começar da tela Escolher; "Tarefas" continua sempre clicável, porque é
+leitura. O cartão nunca reordena por status: a ordem é a do `BACKLOG.md`
+filtrado, invertida (seção 5), e nada além disso a altera — uma tarefa não
+sobe por estar em curso nem desce por estar feita.
 
 O cartão é selecionável e a seleção governa a coluna de changelog, então a
 área clicável de seleção é o corpo do cartão (ID, status e texto), nunca o
@@ -501,7 +554,7 @@ backlog selecionado na coluna ao lado — nunca o documento inteiro. **Não é u
 caixa**: é uma régua vertical de acento (`--green-line`) à esquerda, sem borda
 nem fundo. Changelog é histórico, não trabalho selecionável; dar a ele a mesma
 moldura do cartão de backlog sugeriria que se pode agir nele. Cabeçalho em
-mono com `{data} · {T-ID} · {B-ID}`; corpo com o título do registro (a
+mono com `{data localizada por Intl} · {T-ID} · {B-ID}`; corpo com o título do registro (a
 mesma frase do cabeçalho `## <data> - <T-ID> - <título>` do changelog) em
 destaque; rodapé com uma linha mono "evidência: {texto}". Mais recentes primeiro,
 na mesma ordem em que `relay-core` devolve os registros (o arquivo já os
@@ -518,6 +571,15 @@ item `[•]` ativo tem fundo destacado (`--panel-2` ou tom sutil do status),
 distinguindo-o visualmente sem depender só do rótulo. O cabeçalho da lista
 mostra o contador verdadeiro ("N de M concluídas"), nunca percentual.
 
+Toda linha tem a **mesma altura**, independente do tamanho do texto da
+subtarefa: o texto trunca em duas linhas (`line-clamp`) e o item tem um piso
+de altura para as duas linhas cabendo, com o conteúdo centralizado
+verticalmente quando ocupa só uma. Uma lista onde cada linha tem a altura do
+próprio texto perde o ritmo de leitura — a régua de linhas uniformes é o que
+deixa a lista escaneável mesmo com descrições de tamanhos diferentes. A mesma
+regra vale para o modal de tarefas do backlog (seção 6, "Modal de tarefas"),
+que reusa esta lista.
+
 Na tela principal (aba **Agora**), a lista renderiza em **ordem decrescente**
 — a subtarefa mais recente (a atual, `[•]`, quando existir) sempre no topo,
 independentemente da ordem textual do `TODO.md`, que continua sem carregar
@@ -532,8 +594,16 @@ lista caibam juntos numa única viewport sem rolagem de página.
 - **Externo**: lançado via script wrapper (o script é o contrato, não a linha de
   comando); PID e exit code gravados pelo próprio script.
 - Fechar o painel **desanexa**, não mata; reabrir **reanexa** com replay.
-- Na primeira execução, avisar do conflito de teclado (`Cmd+W`, `Cmd+T`) e
-  oferecer o modo externo.
+- A escolha embutido/externo acontece **antes** do lançamento, dentro do
+  próprio preflight: na primeira execução da sessão, confirmar mostra o
+  aviso de conflito de teclado (`Cmd+W`, `Cmd+T`) com as duas opções: nenhum
+  processo é iniciado até a escolha, e escolher externo nunca chega a
+  lançar nem deixar viva uma execução embutida. Runs seguintes na mesma
+  sessão lançam embutido direto, sem repetir a pergunta.
+- Uma execução já viva encontrada ao reabrir a aba (reanexo automático) não
+  passa por essa escolha — não há processo para (re)lançar. Nesse caso, o
+  aviso de teclado aparece apenas como reconhecimento (sem opção de modo);
+  trocar de modo depois de iniciado é Encerrar processo e lançar de novo.
 
 O terminal nunca aparece sozinho. No modo de execução ele ocupa a coluna
 esquerda e o painel "Gravado em disco" ocupa a direita — o Canal A e o Canal B
@@ -585,16 +655,38 @@ O estado desabilitado do OpenCode aparece lá como `#48525f`, vizinho dos
 cinzas proibidos da seção 2 — ali é só o preenchimento de um quadrado, mas
 nenhum texto informativo pode herdar esse valor.
 
+**Ícone real em vez de iniciais, decidido em 2026-09-11.** O avatar de 28px
+(Header, HandoffCard, seletor de harness, modo de execução) passou a
+desenhar o glifo original de cada harness reconhecido — Claude Code, Codex,
+OpenCode — em vez das iniciais coloridas. O glifo mantém as cores próprias da
+marca (o laranja do Claude Code, o branco+gradiente do Codex); a moldura do
+avatar deixa de levar o fundo `-soft`/borda `-line` tonalizados descritos
+acima, porque colorir a moldura *e* mostrar o ícone com a cor real da marca
+repete a mesma identidade duas vezes — a moldura agora é neutra
+(`--panel-2`/`--line`) para qualquer harness com ícone próprio. O OpenCode,
+cujo glifo é um traço sólido sem cor de marca, herda `--meta` via
+`currentColor`, a mesma regra de "sem tom próprio" que já valia para as
+iniciais dele. Um harness sem glifo cadastrado cai num ícone genérico (um
+terminal simples), também em `--meta` — nunca inventa iniciais nem tom para
+uma marca não reconhecida. `--purple`/`--orange` só existiam no código para
+colorir essa moldura (nenhuma outra superfície os usava); com o avatar neutro,
+as classes `.harness-avatar--purple`/`--orange` e a função que as escolhia
+saem do código. Os tokens continuam declarados na seção 2 como cor de
+identidade reservada, para o dia em que outra superfície precisar deles.
+
 ### Header
 Logotipo "Relay" com nome do workspace e caminho completo, abas **Agora** /
 **Trabalho** para alternar tela principal e segunda visão e o estado derivado
 em StatusPill à direita. A aba escolhida sobrevive a um reload — guardada em
 `sessionStorage`, por aba do browser, nunca na URL: a segunda visão é um
 painel, não uma rota, e o non-goal contra roteador client-side continua de pé. Quando execução estiver habilitada, inclui também um
-selo compacto do harness ativo — iniciais coloridas, nome, "sessão"/escopo do
-consentimento — que abre o **seletor de harness e consentimento** ao clicar.
-No produto read-only esse selo não é montado; a proveniência escrita no handoff
-continua visível. O Header não carrega ação primária.
+selo compacto do harness ativo — ícone da marca (seção 6, "Lista de
+harnesses") e nome — que abre o **seletor de harness e consentimento** ao
+clicar. O escopo do consentimento ("não grava" / "sessão" / "workspace")
+aparece dentro do seletor, junto de cada opção — repeti-lo no selo compacto do
+Header era ruído para quem só quer saber qual harness está ativo. No produto
+read-only esse selo não é montado; a proveniência escrita no handoff continua
+visível. O Header não carrega ação primária.
 
 ### Estado de atualização e conexão
 
@@ -653,3 +745,156 @@ só quando não há nem trabalho a escolher.
 - **Regra invariante da UI:** nada neste documento autoriza a aplicação a
   escrever nos cinco registros do protocolo. Ação de escrita, quando existir,
   é sempre por skill em harness (ADR-0001, ponto 5).
+
+---
+
+## 10. Meio terminal (`relay-tui`)
+
+**Status:** decidida em 2026-10-02 (ADR-0009, spec `20261002-001`), **ainda não
+implementada**. As seções 2 a 7 continuam descrevendo só a interface web; esta
+seção acrescenta um segundo meio sem substituir nada ali. `tokens.css` não muda.
+
+O `relay-tui` é um painel passivo e estreito, pensado para dividir o terminal
+com o harness. Valem para ele os princípios 2, 7, 8, 9 e 10: lê e nunca
+escreve, estado nunca só por cor, sem percentual nem fila numerada, sem
+superfície de execução, dado antigo se declara antigo. A paleta é própria do
+terminal porque um terminal não tem `rgba`, fundo próprio nem fonte escolhida
+pela aplicação.
+
+### Fundo e contraste
+
+A TUI **não pinta o fundo**: herda o do terminal, para casar com o painel do
+harness ao lado. Por isso o contraste depende de um fundo que o Relay não
+controla. Os valores abaixo foram medidos contra `#282c34` (fundo do One Dark)
+e a paleta presume terminal escuro; tema claro fica fora da primeira versão.
+
+### Paleta
+
+| Papel | Valor | Contraste | Uso |
+| --- | --- | --- | --- |
+| `fg` | `#abb2bf` | 6,6:1 | texto primário |
+| `meta` | `#9ba6b4` | 5,7:1 | texto secundário e metadados; **é o `--meta` da web**, mantido de propósito |
+| `green` | `#98c379` | 6,9:1 | `in_progress`, `done`, sucesso |
+| `blue` | `#61afef` | 5,9:1 | `ready`, `backlog`, item disponível |
+| `yellow` | `#e5c07b` | 8,1:1 | `blocked`, atenção, dependência pendente |
+| `red` | `#e06c75` | 4,4:1 | `inconsistent`, violação |
+| `id` | `#ff75bf` | 5,7:1 | identificadores `B-NNN`, `T-NNN` (acento rosa do tema Charm) |
+| `dim` | `#5c6370` | 2,3:1 | **só** bordas e traços decorativos — nunca texto |
+| `bar_empty` | `#3e4451` | 1,4:1 | **só** segmento vazio da barra do TODO — nunca texto |
+
+Os nove valores base vêm do One Dark, o tema padrão do `ai-usagebar`; `meta` e
+`id` são decisões deste documento, e o laranja do One Dark fica sem uso.
+
+Duas regras que a medição impôs:
+
+- **`dim` cai na mesma proibição da seção 2.** Com 2,3:1 ele é o mesmo caso dos
+  cinzas `#4a5462` e `#5d6675` vetados lá: não atinge AA e não pode carregar
+  informação. O One Dark o usa para texto secundário; aqui esse papel é do
+  `meta`, que o One Dark não tem em AA (`#828997` dá 4,0:1).
+- **Lacuna aceita: `red` com 4,4:1** está abaixo de 4,5:1 sobre `#282c34`, e
+  passa em fundos mais escuros (5,2:1 sobre `#1e1e1e`). Mitigação: o vermelho
+  nunca está sozinho — vai sempre em negrito, com o glifo e o rótulo
+  "Inconsistente"; o corpo das violações usa `fg`.
+
+### Status
+
+| Status | Rótulo | Tom |
+| --- | --- | --- |
+| `in_progress` | Em andamento | green |
+| `blocked` | Bloqueado | yellow |
+| `inconsistent` | Inconsistente | **red** |
+| `ready` | Pronto | blue |
+| `backlog` | A escolher | blue |
+| `done` | Concluído | green |
+| `idle` | Sem trabalho | `meta` |
+
+Os rótulos são os da seção 3. **Divergência deliberada: `inconsistent` é
+vermelho aqui e âmbar na web.** Na web ele divide o âmbar com `blocked`; o
+terminal tem um vermelho disponível e o estado que trava o resto da tela ganha
+um tom só dele. Tom e rótulo textual continuam obrigatórios (princípio 7).
+
+### Estrutura
+
+- **Cartões** com borda arredondada (`╭ ╮ ╰ ╯`) e o título na própria borda:
+  cabeçalho, Handoff, TODO e Backlog. A borda é `dim`; a do Handoff herda o
+  tom do status. Em `inconsistent`, um cartão de violações (`check` e `detail`)
+  substitui o conteúdo.
+- **Marcadores do TODO** acompanham o protocolo e sempre trazem texto ao lado:
+  `✓` concluído, `●` em andamento, `○` disponível, `◌` indisponível com
+  "após T-NNN". Os glifos são Unicode; a primeira versão não define fallback
+  ASCII.
+- **Barra do TODO** com um segmento por item, no tom do item. É contagem e
+  nunca porcentagem (princípio 8; ADR-0003).
+- **Frescor em texto:** `atualizado` ou `atualizando`, no cabeçalho.
+- **Largura de referência: 58 colunas.** Sem rolagem: faltando altura, o TODO
+  trunca em "+N itens" e o Backlog reduz-se a uma linha de contagem; abaixo de
+  cerca de 40 colunas aparecem só o cabeçalho e o status.
+- **Teclas:** `q`, `Esc` e `Ctrl-C` saem. O rodapé diz `q sair`.
+
+### View
+
+A tela é função pura do estado derivado, do frescor e do relógio: nenhum
+cálculo do protocolo (princípio 2; `app/AGENTS.md`). De cima para baixo:
+
+1. **Cabeçalho**, uma linha: o selo `relay` (fundo `green`, texto `#282c34`), o
+   caminho do workspace em `meta` e, à direita, o frescor — `● atualizado` ou
+   `● atualizando`. O ponto é `green` ou `yellow`; a palavra, em `meta`, é quem
+   informa. O selo é a marca do aplicativo, constante, e não um status.
+2. **Cartão Handoff**, quando há handoff. Título `Handoff`; à direita o status
+   em negrito no seu tom (`● Em andamento`, `● Bloqueado`); a borda herda o tom.
+   Primeira linha: `B-NNN · T-NNN · <harness> · há 4 min`, com os IDs em `id` e o
+   resto em `meta`. Depois `Objetivo` e `Próximo`, rótulos em `meta` e texto em
+   `fg`, quebrado com recuo alinhado ao texto. Em `blocked` entra também
+   `Bloqueio`, com o `Context` do handoff, que traz o bloqueio e a condição de
+   retomada. O teto de linhas de cada campo acompanha a altura: havendo espaço para o TODO e
+o Backlog inteiros, o Handoff mostra os campos quase por inteiro (até 10 linhas,
+12 no `Bloqueio`); sem essa folga, 3 linhas (4 no `Bloqueio`); e, se nem isso
+couber, a versão compacta abaixo. O que passa do teto termina em `…`.
+3. **Cartão TODO**, quando há TODO. Título `TODO`; à direita `feitos/total`. A
+   barra tem um segmento por item, no tom do estado do item (`green` feito ou em
+   andamento, `blue` disponível, `bar_empty` indisponível) — é contagem, nunca
+   porcentagem. Cada item: marcador, ID em `id` e texto; feito em `meta`, em
+   andamento em `fg` negrito, indisponível com `após T-NNN` em `yellow`.
+4. **Cartão Backlog**, quando há backlog. Título `Backlog`; à direita
+   `feitos/total`. Uma linha de contagens com palavra: `N feitos · N em curso ·
+   N disponíveis · N aguardando · N bloqueados`, omitindo as que são zero. Em
+   `backlog` (A escolher), onde não há TODO nem handoff, o cartão lista antes
+   os itens disponíveis (ID em `id` e texto).
+5. **Rodapé**, uma linha em `meta`: `q sair`.
+
+**Estados sem handoff.** `ready` mostra, no lugar do Handoff, uma linha que
+leva o status — `● Pronto` em negrito `blue` — e `Sem handoff ativo` em `meta`,
+sobre o cartão TODO. `done` mostra um cartão
+`Concluído` em `green` com a contagem do backlog. `idle` mostra um cartão
+`Sem trabalho` com `Nenhum backlog, TODO ou handoff neste workspace.`. Um
+diretório sem `.orchestration/` mostra `Não é um workspace Relay`, com o caminho
+observado, e continua vigiando.
+
+**Tamanho.** Os cartões de um só assunto (`Sem trabalho`, `Concluído`, `A
+escolher`, `Inconsistente`, `Não é um workspace Relay`) têm a altura do próprio
+conteúdo, não a da tela; sobra espaço vazio embaixo, nunca moldura vazia.
+
+**Inconsistente.** O cartão `Inconsistente` (borda e título em `red`) substitui
+os demais. Cada violação: o `check` em negrito `red`, o `detail` em `fg` quebrado
+e os `records` em `meta`, separados por ` · `. O corpo nunca é vermelho (ver a
+lacuna aceita acima).
+
+**Tempo relativo**, do `Updated` do handoff e do relógio injetado: `agora` (menos
+de um minuto), `há N min`, `há N h` (menos de um dia), `há N d`. Um `Updated` no
+futuro, por relógio desajustado, também é `agora`.
+
+**Altura.** Não há rolagem. O cabeçalho tem prioridade. Faltando altura, cede
+primeiro o Backlog, que perde a moldura e vira uma linha (`Backlog 32/37 · 1 em
+curso · 3 disponíveis`, omitindo o que não cabe inteiro); depois o Handoff, que
+perde o espaço extra e, se preciso, se compacta — sem a linha em branco e com
+uma linha por campo — para deixar o mínimo do TODO (moldura, barra e uma linha); por fim o TODO corta em `+N itens`,
+e a linha de corte também mostra o ID do item em andamento, se ele ficou fora.
+Abaixo de 6 linhas, só cabeçalho e rodapé.
+
+**Plural.** As palavras concordam com o número (`1 feito`, `2 feitos`; `1
+disponível`, `3 disponíveis`; `+1 item`, `+4 itens`; `+1 violação`).
+
+**Largura.** A referência é de 58 colunas. Texto longo quebra (campos do handoff)
+ou termina em `…` (itens, caminho); nunca estoura a moldura. Abaixo de 40
+colunas só aparecem o cabeçalho e o status em uma linha (`● Em andamento  B-034`),
+sem cartões.
