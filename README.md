@@ -66,7 +66,7 @@ trabalhando em cima de um estado incoerente.
 Nao. Relay e Markdown no repositorio mais skills para Claude Code, Codex e
 OpenCode. Interfaces podem exibir o estado, mas nunca escrevem nos registros.
 Para acompanhar o estado num split de terminal existe o `relay-tui`, um binario
-so de leitura baixado em https://github.com/fabianogoes/relay/releases (macOS;
+so de leitura baixado em https://github.com/fabianogoes/ai-relay/releases (macOS;
 Linux em melhor esforco; Windows fora por enquanto).
 
 **Relay substitui meu gerenciador de projetos?**

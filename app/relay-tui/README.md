@@ -28,7 +28,7 @@ processo. Quem escreve nos registros são as skills, dentro de um harness.
 ## Instalar
 
 Um download, sem Node, sem repositório e sem gerenciador de pacotes. Os binários
-estão na [página de releases](https://github.com/fabianogoes/relay/releases),
+estão na [página de releases](https://github.com/fabianogoes/ai-relay/releases),
 um arquivo por alvo:
 
 | Alvo | Arquivo | Situação |
@@ -59,7 +59,7 @@ recebe o atributo `com.apple.quarantine`, e o macOS não o executa. Duas saídas
 - baixar com `curl`, que não aplica a quarentena:
 
   ```sh
-  curl -fLO https://github.com/fabianogoes/relay/releases/download/relay-tui-v<versão>/relay-tui-<versão>-<alvo>.tar.gz
+  curl -fLO https://github.com/fabianogoes/ai-relay/releases/download/relay-tui-v<versão>/relay-tui-<versão>-<alvo>.tar.gz
   ```
 
 - ou remover o atributo depois de baixar:

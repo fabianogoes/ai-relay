@@ -5,7 +5,7 @@ program: the skills read and write the protocol files directly. Other clients
 may read, validate, derive state, and launch a harness with a Relay skill, but
 they do not mutate the five protocol records themselves.
 
-The public repository is `https://github.com/fabianogoes/relay`.
+The public repository is `https://github.com/fabianogoes/ai-relay`.
 
 For local development, replace `/absolute/path/to/relay` below with this
 checkout's absolute path.
@@ -22,7 +22,7 @@ Claude Code plugins discover skills under the plugin's `skills/` directory.
 Test the checkout directly with:
 
 ```sh
-git clone https://github.com/fabianogoes/relay.git
+git clone https://github.com/fabianogoes/ai-relay.git
 claude --plugin-dir ./relay
 ```
 
@@ -30,7 +30,7 @@ For a marketplace install, add the GitHub repository and install the `relay`
 entry:
 
 ```text
-/plugin marketplace add fabianogoes/relay
+/plugin marketplace add fabianogoes/ai-relay
 /plugin install relay@relay
 ```
 
@@ -70,7 +70,7 @@ OpenCode uses native Agent Skills discovery. Execute these commands to install
 Relay from GitHub globally for your user:
 
 ```sh
-git clone https://github.com/fabianogoes/relay.git ~/.config/opencode/relay
+git clone https://github.com/fabianogoes/ai-relay.git ~/.config/opencode/relay
 mkdir -p ~/.config/opencode/skills
 for skill in relay-setup relay-spec relay-status relay-continue relay-session; do
   ln -s ~/.config/opencode/relay/skills/"$skill" ~/.config/opencode/skills/"$skill"

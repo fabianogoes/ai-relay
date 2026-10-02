@@ -8,7 +8,7 @@
       "name": "relay",
       "source": {
         "source": "github",
-        "repo": "fabianogoes/relay"
+        "repo": "fabianogoes/ai-relay"
       },
       "policy": {
         "installation": "AVAILABLE",
