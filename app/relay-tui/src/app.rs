@@ -38,7 +38,13 @@ pub struct App {
 pub fn display_path(path: &Path, home: Option<&Path>) -> String {
     match home.and_then(|h| path.strip_prefix(h).ok()) {
         Some(rest) if rest.as_os_str().is_empty() => "~".to_string(),
-        Some(rest) => format!("~{}{}", std::path::MAIN_SEPARATOR, rest.display()),
+        Some(rest) => {
+            // Rebuilt from components so every separator is the platform's own
+            // (a path given with `/` on Windows would otherwise mix both).
+            let sep = std::path::MAIN_SEPARATOR_STR;
+            let tail: Vec<_> = rest.components().map(|c| c.as_os_str().to_string_lossy()).collect();
+            format!("~{sep}{}", tail.join(sep))
+        }
         None => path.display().to_string(),
     }
 }
@@ -266,7 +272,11 @@ mod tests {
     #[test]
     fn the_home_directory_is_written_as_a_tilde() {
         let home = Path::new("/Users/me");
-        assert_eq!(display_path(Path::new("/Users/me/Developer/relay"), Some(home)), "~/Developer/relay");
+        let sep = std::path::MAIN_SEPARATOR_STR;
+        assert_eq!(
+            display_path(Path::new("/Users/me/Developer/relay"), Some(home)),
+            format!("~{sep}Developer{sep}relay")
+        );
         assert_eq!(display_path(Path::new("/Users/me"), Some(home)), "~");
         assert_eq!(display_path(Path::new("/srv/relay"), Some(home)), "/srv/relay");
         assert_eq!(display_path(Path::new("/Users/me/x"), None), "/Users/me/x");
