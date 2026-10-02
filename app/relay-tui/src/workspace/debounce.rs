@@ -107,11 +107,14 @@ mod tests {
     #[test]
     fn a_burst_of_writes_yields_one_dirty_and_one_settled_after_the_quiescence() {
         let rig = start(QUIESCENCE, || false);
+        let mut last_write = Instant::now();
         for _ in 0..5 {
             rig.raw.send(()).unwrap();
+            // The reference is the last write itself, not the end of the sleep
+            // after it: on a loaded runner that sleep can overshoot by a lot.
+            last_write = Instant::now();
             thread::sleep(Duration::from_millis(10));
         }
-        let last_write = Instant::now();
 
         assert_eq!(next(&rig, LONG), Some(Dirty));
         assert_eq!(next(&rig, LONG), Some(Settled));

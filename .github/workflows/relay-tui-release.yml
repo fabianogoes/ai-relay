@@ -31,6 +31,8 @@ jobs:
     needs: version
     runs-on: macos-latest
     strategy:
+      # Both are required, but one failing must not hide why the other did.
+      fail-fast: false
       matrix:
         target: [aarch64-apple-darwin, x86_64-apple-darwin]
     steps:
