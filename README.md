@@ -27,6 +27,59 @@ Relay guarda esse contexto no repositorio:
 | `relay-continue` | Quando voce quer saber qual e o proximo passo. |
 | `relay-status` | Para ver o estado sem alterar nada. |
 
+## Acompanhar pelo terminal: relay-tui
+
+O `relay-tui` e um painel so de leitura para deixar num split do terminal: o
+harness de um lado, o painel do outro. Handoff, TODO e backlog mudam na tela
+conforme os arquivos mudam, sem recarregar nada. Ele nunca escreve nos
+registros: quem escreve sao as skills.
+
+**Instalar (macOS).** Um download, sem Node e sem clonar o repositorio. Em Mac
+Apple Silicon use `aarch64-apple-darwin`; em Mac Intel, `x86_64-apple-darwin`
+(`uname -m` diz qual e o seu). Baixando com `curl`, o macOS nao bloqueia o
+arquivo:
+
+```sh
+curl -fLO https://github.com/fabianogoes/ai-relay/releases/download/relay-tui-v<versao>/relay-tui-<versao>-aarch64-apple-darwin.tar.gz
+tar -xzf relay-tui-<versao>-aarch64-apple-darwin.tar.gz
+mkdir -p ~/.local/bin
+mv relay-tui-<versao>-aarch64-apple-darwin/relay-tui ~/.local/bin/
+```
+
+Garanta que `~/.local/bin` esta no seu `PATH`. Se baixou pelo navegador, o macOS
+diz que o `relay-tui` nao pode ser aberto (o binario nao e assinado); libere com
+`xattr -d com.apple.quarantine ~/.local/bin/relay-tui`. As versoes estao em
+https://github.com/fabianogoes/ai-relay/releases. Linux e melhor esforco, e o
+Windows ficou de fora por enquanto.
+
+**Usar.** Abra um split do terminal (no iTerm, `Cmd+D`; no tmux,
+`tmux split-window -h`), entre no repositorio Relay e rode:
+
+```sh
+relay-tui                          # observa o diretorio atual
+relay-tui --workspace /caminho/do/repo
+```
+
+Deixe o harness no outro painel e trabalhe como sempre; o painel acompanha.
+`q`, `Esc` ou `Ctrl-C` saem. O que a tela mostra:
+
+- **Handoff**: o status (`Em andamento`, `Bloqueado`), quem deixou e quando, o
+  objetivo e o proximo passo. Se estiver bloqueado, mostra o bloqueio e a
+  condicao de retomada.
+- **TODO**: uma barra com um segmento por subtarefa e a lista, com `✓` feita,
+  `●` em andamento, `○` disponivel, `◌` esperando outra subtarefa e `!`
+  bloqueada.
+- **Backlog**: quantos itens estao feitos, em curso, disponiveis ou aguardando.
+- **`● atualizando` / `● atualizado`**, no canto: o painel espera os arquivos
+  pararem de mudar (150 ms) e le tudo de novo.
+- **`Inconsistente`**, em vermelho: os registros se contradizem, e o painel
+  lista cada violacao. E o mesmo estado que `relay-status` reporta.
+
+Se faltar altura ou largura, o painel mostra menos (o TODO corta em `+N itens`);
+numa janela estreita, so o status. Um diretorio sem `.orchestration/` mostra
+"Nao e um workspace Relay" e passa a mostrar o estado assim que o Relay for
+instalado ali (`relay-setup`).
+
 ## Documentos
 
 - Para saber mais sobre **Instalacao** veja [docs/INSTALL.pt-BR.md](docs/INSTALL.pt-BR.md)
