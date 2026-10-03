@@ -52,18 +52,17 @@ desenvolvimento deste repositório não pode morar lá.
 
 Cada regra é colocada no gatilho que corresponde ao momento em que ela passa a
 ser necessária, e a raiz guarda no máximo um ponteiro de uma linha. Para o
-design system, os três gatilhos são usados juntos porque cobrem falhas
-diferentes:
+design system, dois gatilhos são usados juntos porque cobrem falhas diferentes:
 
 ```text
-skill relay-design-system     → intenção ("mudar um token")
 docs/design-system/AGENTS.md  → acesso à pasta (chegou por busca)
 guarda PreToolUse             → tentativa de leitura (conselho ignorado)
 ```
 
-Não é redundância: a skill não dispara para quem chega por `grep`, o
-`AGENTS.md` aninhado não dispara antes do primeiro `Read`, e nenhum dos dois
-obriga.
+Não é redundância: o `AGENTS.md` aninhado não obriga, e o guarda só fala quando
+a leitura já foi tentada. A skill `relay-design-system`, que cobria a intenção
+antes do primeiro arquivo aberto, existiu e foi removida em 2026-10-03 (ver
+Notas).
 
 ### 2. Uma regra, várias cascas
 
@@ -83,9 +82,9 @@ Mesmo padrão já usado na raiz, onde `AGENTS.md` é o arquivo e `CLAUDE.md` é 
 symlink:
 
 ```text
-.agents/skills/relay-design-system/     arquivo real
-.claude/skills/relay-design-system      → symlink
-.opencode/skills/relay-design-system    → symlink
+.agents/skills/<skill>/     arquivo real
+.claude/skills/<skill>      → symlink
+.opencode/skills/<skill>    → symlink
 ```
 
 O symlink é **por skill**, nunca do diretório inteiro. Linkar o diretório falha
@@ -137,8 +136,6 @@ mínimo comum protege menos e não protege ninguém melhor.
   não foi perdido — foi movido para onde dispara sozinho.
 - Os 689 KB de protótipo deixam de ser alcançáveis por acidente nos dois
   harnesses com hook.
-- A skill dispara antes do primeiro `Read`, então mesmo o `README.md` de 12 KB
-  não entra em contexto quando a pergunta era outra.
 - O padrão é repetível: a próxima regra desse tipo tem forma pronta — script no
   neutro, casca por harness, symlink por item.
 - A regra é testável sem agente, porque o script roda sozinho.
@@ -149,7 +146,7 @@ mínimo comum protege menos e não protege ninguém melhor.
   3940: a seção de roteamento perdeu quatro linhas e a fronteira de pacote
   gastou duas. A economia é de contexto *carregado*, não de tamanho de arquivo,
   e é honesto dizer isso.
-- Quatro arquivos em três diretórios para uma regra. Com uma regra só, a
+- Três arquivos em três diretórios para uma regra. Com uma regra só, a
   estrutura é maior que o problema; ela se paga a partir da segunda. Aceita
   porque a alternativa já tinha falhado: o aviso puramente textual existia e não
   impedia nada.
@@ -204,6 +201,13 @@ registros do protocolo.
 O que o design system decide sobre tokens e componentes está em
 `docs/design-system/README.md`, e a autoridade dele sobre protótipos e código
 não muda por causa desta decisão.
+
+**Remoção da skill (2026-10-03).** A skill `relay-design-system` foi removida
+por não se pagar: duplicava a ordem de leitura que o `docs/design-system/AGENTS.md`
+já carrega e ocupava espaço na lista de skills de toda sessão. A decisão 1 fica
+com dois gatilhos; o padrão da decisão 3 continua valendo para qualquer skill de
+desenvolvimento futura. Com o projeto em estado inicial, o ajuste foi feito aqui
+em vez de numa ADR de supersessão.
 
 **Pendente.** A execução do plugin no OpenCode real, listada acima como custo
 assumido, é a única verificação que falta para a decisão estar plenamente
