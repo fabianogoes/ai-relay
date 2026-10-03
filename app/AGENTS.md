@@ -14,7 +14,7 @@ A estrutura e a fronteira desta pasta estão em
 2. `../docs/adr/0004-fronteira-e-estrutura-do-app.md` — por que esta pasta
    existe e o que ela não pode fazer.
 3. `../docs/design-system/` — autoridade sobre token e componente. A pasta traz
-   as próprias instruções; existe a skill `relay-design-system`.
+   as próprias instruções.
 4. `../docs/adr/0001-arquitetura-inicial-da-ui.md` — a fronteira
    `relay-core` / `relay-host` / `relay-ui` e a regra de que a aplicação nunca
    escreve um registro do protocolo.

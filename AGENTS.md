@@ -23,7 +23,7 @@ summary that drifts from its source is worse than a pointer to it.
 | `docs/TUI.md` | When changing how the `relay-tui` is installed or used. |
 | `README.md` | When changing what Relay claims to do or how it is explained. |
 | `app/` | Before touching the interface. The folder carries its own `AGENTS.md`; its boundary is ADR-0004 and the data crossing it is ADR-0003. |
-| `docs/design-system/` | Before any UI change. The folder carries its own `AGENTS.md` with the reading order and the rule that its `.html` files are never read by an agent; the `relay-design-system` skill carries the same rules and fires on intent. Start at its `README.md`. |
+| `docs/design-system/` | Before any UI change. The folder carries its own `AGENTS.md` with the reading order and the rule that its `.html` files are never read by an agent. Start at its `README.md`. |
 
 ## Architecture decisions
 

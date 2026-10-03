@@ -3,12 +3,6 @@
 Esta pasta é o design system do Relay. Ela traz as próprias instruções para não
 ocupar contexto no `AGENTS.md` da raiz: você só lê isto quando chega aqui.
 
-Existe uma skill equivalente, `relay-design-system`, que dispara pela intenção
-("mudar um token", "ajustar um componente") antes de qualquer arquivo ser
-aberto. O conteúdo real dela está em
-`.agents/skills/relay-design-system/SKILL.md`, com symlink em
-`.claude/skills/` e `.opencode/skills/`.
-
 ## Ordem de leitura
 
 1. `README.md` — a autoridade. Tokens, componentes e as regras que os governam.
