@@ -1,5 +1,7 @@
 # Relay
 
+[![relay-tui CI](https://github.com/fabianogoes/ai-relay/actions/workflows/relay-tui-ci.yml/badge.svg?branch=main)](https://github.com/fabianogoes/ai-relay/actions/workflows/relay-tui-ci.yml)
+
 **English** · [Português](README.pt-BR.md)
 
 Relay gives coding agents operational memory. The state of the work lives in
@@ -18,6 +20,13 @@ Relay keeps that context in the repository:
 - what is left (backlog and subtasks);
 - what is in progress right now, who left it and when (the handoff);
 - what was completed, with evidence (the changelog).
+
+## Why the name
+
+A relay race is won by the baton, not by any single runner: each one runs a leg
+and hands it over without it touching the ground. Relay is that baton for coding
+agents. The handoff is the moment that matters, and the repository carries the
+baton, so the next agent, whichever it is, picks it up at full speed.
 
 ## How to use it
 
