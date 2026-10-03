@@ -1,4 +1,5 @@
-//! The core reads no disk and no environment, so the same input always derives the same state.
+//! The core reads no disk and no environment, so the same input always
+//! derives the same state.
 
 use std::fs;
 use std::path::{Path, PathBuf};
