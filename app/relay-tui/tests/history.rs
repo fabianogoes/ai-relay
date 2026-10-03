@@ -1,6 +1,6 @@
 //! `extract_history` against the real records of this repository (spec
-//! 20261002-002, A-002): dozens of specs, backlog entries and changelog
-//! records, including old ones without `Criteria` and repeated `T-NNN`.
+//! 20261002-002, A-002): its specs, backlog entries and dozens of changelog
+//! records, with repeated `T-NNN`.
 
 use std::collections::HashSet;
 use std::path::Path;
@@ -16,7 +16,7 @@ fn real_history() -> History {
 #[test]
 fn every_spec_file_is_listed_newest_first_with_a_title() {
     let h = real_history();
-    assert!(h.specs.len() >= 10, "expected the repository's specs, got {}", h.specs.len());
+    assert!(h.specs.len() >= 6, "expected the repository's specs, got {}", h.specs.len());
     let paths: Vec<&str> = h.specs.iter().map(|s| s.path.as_str()).collect();
     let mut sorted = paths.clone();
     sorted.sort_by(|a, b| b.cmp(a));
@@ -25,8 +25,8 @@ fn every_spec_file_is_listed_newest_first_with_a_title() {
         assert!(!spec.title.is_empty() && !spec.id.is_empty(), "{}", spec.path);
         assert!(!spec.title.starts_with('#'), "{}", spec.path);
     }
-    let first = h.specs.iter().find(|s| s.id == "20260907-001").expect("spec 20260907-001");
-    assert!(!first.title.contains("20260907-001 -"), "the id is split from the title");
+    let first = h.specs.iter().find(|s| s.id == "20260907-002").expect("spec 20260907-002");
+    assert!(!first.title.contains("20260907-002 -"), "the id is split from the title");
 }
 
 #[test]
@@ -43,7 +43,7 @@ fn backlog_items_are_grouped_under_the_spec_they_point_at() {
     assert!(b040.text.contains("ADR-0010"), "annotations are stripped: {}", b040.text);
     assert!(!b040.text.contains("spec:") && !b040.text.contains("needs:"));
     // The oldest spec's items are all done and counted, never a percentage.
-    let old = h.specs.iter().find(|s| s.id == "20260907-001").unwrap();
+    let old = h.specs.iter().find(|s| s.id == "20260907-002").unwrap();
     assert!(!old.items.is_empty());
     assert_eq!(old.done(), old.items.len());
 
@@ -52,7 +52,7 @@ fn backlog_items_are_grouped_under_the_spec_they_point_at() {
     for item in h.specs.iter().flat_map(|s| &s.items).chain(&h.no_spec) {
         assert!(seen.insert(item.id.clone()), "{} listed twice", item.id);
     }
-    assert!(seen.contains("B-001"));
+    assert!(seen.contains("B-005"));
 }
 
 #[test]
@@ -71,13 +71,11 @@ fn tasks_of_a_finished_item_carry_every_field() {
 }
 
 #[test]
-fn old_records_without_criteria_and_repeated_ids_are_kept() {
+fn repeated_ids_are_kept() {
     let h = real_history();
-    assert!(h.records.len() >= 100, "got {}", h.records.len());
-    assert!(
-        h.records.iter().any(|r| r.criteria.is_none()),
-        "the changelog has records older than the Criteria field"
-    );
+    assert!(h.records.len() >= 70, "got {}", h.records.len());
+    // A record without `Criteria` is covered by the unit tests: the real
+    // changelog has none.
     // `T-NNN` restarts at every backlog item, so the same id recurs across
     // items and each occurrence is a record of its own. (A repeat inside one
     // item, an append-only correction, is covered by the unit tests: the real
