@@ -108,10 +108,6 @@ See [.opencode/INSTALL.md](../.opencode/INSTALL.md) for the adapter notes. The
 OpenCode installation remains a native Agent Skills discovery link; no custom
 runtime is installed.
 
-This repository's own `.opencode/plugin/` directory is not part of that
-installation. It holds a development guard for contributors working on Relay
-itself, and it is not distributed: the Codex manifest ships `./skills/` only.
-
 ## Updating
 
 Relay uses one shared `skills/` directory. Refresh the checkout or installed

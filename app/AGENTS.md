@@ -32,5 +32,5 @@ isto quando chega aqui.
 
 `skills/` é superfície de pacote e vai pelos manifestos. `app/` é produto: vai
 por clone e o `relay-tui` também por download de binário, em Release.
-`.agents/`, `.claude/` e `.opencode/plugin/` são ferramenta deste repositório e
-não vão a lugar nenhum.
+`.agents/` e `.claude/` são ferramenta deste repositório e não vão a lugar
+nenhum.

@@ -23,7 +23,7 @@ summary that drifts from its source is worse than a pointer to it.
 | `docs/TUI.md` | When changing how the `relay-tui` is installed or used. |
 | `README.md` | When changing what Relay claims to do or how it is explained. |
 | `app/` | Before touching the interface, the `relay-tui` terminal panel. The folder carries its own `AGENTS.md`. |
-| `docs/design-system/` | Before any UI change. The folder carries its own `AGENTS.md` with the reading order and the rule that its `.html` files are never read by an agent. Start at its `README.md`. |
+| `docs/design-system/terminal.md` | Before any change to how the `relay-tui` looks: palette, status, layout, keys. |
 
 ## Architecture decisions
 
@@ -127,8 +127,8 @@ not only the choice.
   harness, but only Relay skills mutate the five protocol records. If a client
   cannot derive a state it needs, change the protocol rather than adding a
   private write.
-- `.agents/`, `.claude/`, and `.opencode/plugin/` are tooling for developing
-  *this* repository, never package surface: the manifests ship `./skills/` only.
+- `.agents/` and `.claude/` are tooling for developing *this* repository,
+  never package surface: the manifests ship `./skills/` only.
 
 ## Development rules
 
@@ -140,7 +140,7 @@ not only the choice.
   repositories.
 - Keep installation guidance aligned across Claude Code, Codex, and OpenCode.
 - Keep each document in its layer: the contract in `docs/PROTOCOL.md`,
-  decisions and their reasoning in `docs/adr/`, exploratory analysis in
+  decisions and their reasoning in `docs/adr/`, the terminal design in
   `docs/design-system/`. Do not copy content between layers.
 - The package surface is English: `README.md`, `docs/PROTOCOL.md`,
   `docs/INSTALL.md`, `docs/TUI.md`, and the skills. Each of those documents has
