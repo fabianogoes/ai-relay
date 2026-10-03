@@ -1,6 +1,6 @@
 # Install Relay
 
-> Português (Brasil): [INSTALL.pt-BR.md](INSTALL.pt-BR.md).
+**English** · [Português](INSTALL.pt-BR.md)
 
 Relay version one is a plugin/skill package. It has no `relay` command-line
 program: the skills read and write the protocol files directly. Other clients

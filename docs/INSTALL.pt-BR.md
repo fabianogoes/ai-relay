@@ -1,5 +1,7 @@
 # Instalar o Relay
 
+**[English](INSTALL.md)** · Português
+
 > Tradução de [INSTALL.md](INSTALL.md). Em caso de divergência, vale o original
 > em inglês.
 

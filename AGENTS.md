@@ -20,6 +20,7 @@ summary that drifts from its source is worse than a pointer to it.
 | `skills/relay-*/SKILL.md` | Before changing one skill. Each is under 40 lines; read the one you are changing, not all five. |
 | `docs/adr/NNNN-*.md` | Before making or revisiting an architectural decision. Index below. |
 | `docs/INSTALL.md` | When changing installation for Claude Code, Codex, or OpenCode. |
+| `docs/TUI.md` | When changing how the `relay-tui` is installed or used. |
 | `README.md` | When changing what Relay claims to do or how it is explained. |
 | `app/` | Before touching the interface. The folder carries its own `AGENTS.md`; its boundary is ADR-0004 and the data crossing it is ADR-0003. |
 | `docs/design-system/` | Before any UI change. The folder carries its own `AGENTS.md` with the reading order and the rule that its `.html` files are never read by an agent; the `relay-design-system` skill carries the same rules and fires on intent. Start at its `README.md`. |
@@ -129,7 +130,10 @@ not only the choice.
   decisions and their reasoning in `docs/adr/`, exploratory analysis in
   `docs/design-system/`. Do not copy content between layers.
 - The package surface is English: `README.md`, `docs/PROTOCOL.md`,
-  `docs/INSTALL.md`, and the skills. ADRs and design analysis are currently
+  `docs/INSTALL.md`, `docs/TUI.md`, and the skills. Each of those documents has
+  a Portuguese (Brazil) translation beside it, `<name>.pt-BR.md`. Change both in
+  the same commit; the code blocks (the on-disk contract and the commands) stay
+  identical, and the English file wins when they diverge. ADRs and design analysis are currently
   written in Portuguese; keep each document in the language it already uses.
 
 ## Relay Protocol

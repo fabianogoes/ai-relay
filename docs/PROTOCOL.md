@@ -1,5 +1,7 @@
 # Relay Protocol
 
+**English** · [Português](PROTOCOL.pt-BR.md)
+
 This document is the version-one on-disk contract. Relay keeps durable intent
 and execution state in Markdown so different harnesses can read the same work
 without shared chat history.
