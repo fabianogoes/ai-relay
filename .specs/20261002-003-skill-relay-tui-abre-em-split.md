@@ -51,8 +51,8 @@ Codex e o OpenCode realmente repassam isso e uma hipotese a verificar, nao um
 fato: e o que o A-004 comprova.
 
 **O Warp e o caso mais fragil.** Ele nao tem comando de split nem AppleScript
-proprio; so resta simular `Cmd+D` pelo System Events, que exige permissao de
-Acessibilidade e quebra se o atalho mudar. Fica na tabela porque e o terminal do
+proprio; so resta simular `Cmd+D` (atalho confirmado pelo dono do projeto) pelo
+System Events, que exige permissao de Acessibilidade e quebra se o atalho mudar. Fica na tabela porque e o terminal do
 dono do projeto, com a instrucao manual como saida quando a simulacao falha.
 
 **O script e testavel sem terminal.** Recebe o ambiente por variaveis e tem

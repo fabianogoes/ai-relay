@@ -47,3 +47,5 @@
 - [ ] B-045 - Script open-split.sh com deteccao do terminal e --dry-run, testado por terminal (spec: `.specs/20261002-003-skill-relay-tui-abre-em-split.md`)
 - [ ] B-046 - Skill relay-tui, manifestos e documentacao de instalacao (spec: `.specs/20261002-003-skill-relay-tui-abre-em-split.md`) (needs: B-045)
 - [ ] B-047 - Verificacao nos terminais reais (tmux, iTerm2, Warp) com evidencia (spec: `.specs/20261002-003-skill-relay-tui-abre-em-split.md`) (needs: B-046)
+- [ ] B-048 - Funcao pura suggest no core, com a tabela de sugestoes testada (spec: `.specs/20261002-004-relay-tui-sugestao-de-proximo-passo.md`)
+- [ ] B-049 - Linha de proximo passo na visao Agora, snapshots, design system e guias (spec: `.specs/20261002-004-relay-tui-sugestao-de-proximo-passo.md`) (needs: B-048)
