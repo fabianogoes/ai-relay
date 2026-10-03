@@ -43,9 +43,10 @@ que ainda tem trabalho pendente.
   - **Largura.** Titulos e itens terminam em `…` em 58 e 40 colunas; abaixo de 40
     colunas vale a linha de status da spec 20261002-001, sem cartoes.
 
-- Uma segunda visao, **Trabalho**, ao lado de **Agora**, que continua sendo a
-  padrao ao abrir; os nomes sao os da UI web (ADR-0007). `Tab` (ou `t`) alterna
-  entre as duas, de qualquer nivel; voltar a Trabalho reabre o nivel e a selecao
+- Uma segunda visao, **Histórico**, ao lado de **Agora**, que continua sendo a
+  padrao ao abrir. **Agora** e o nome da UI web (ADR-0007); a visao que la se
+  chama Trabalho aqui se chama **Histórico**. `Tab` (ou `t`) alterna
+  entre as duas, de qualquer nivel; voltar ao Histórico reabre o nivel e a selecao
   em que a pessoa estava.
 - Quatro niveis, cada um aprofundando o anterior: **specs**, os **itens de
   backlog** da spec, as **tarefas** do item e o **detalhe** da tarefa. `Enter` ou
@@ -54,7 +55,7 @@ que ainda tem trabalho pendente.
   specs, voltam para Agora. `Enter` no detalhe nao faz nada; clique fora de uma
   linha (cabecalho, rodape, area vazia) e ignorado.
 - Teclas de saida: `q` e `Ctrl-C` saem de qualquer visao. `Esc` so sai em Agora,
-  como hoje; em Trabalho ele volta (acima).
+  como hoje; em Histórico ele volta (acima).
 - Ordem e conteudo de cada nivel:
   - **Specs**: os arquivos de `.specs/`, do mais recente ao mais antigo (ordem
     decrescente do nome de arquivo). Linha: id `AAAAMMDD-NNN`, titulo e a
@@ -79,23 +80,38 @@ que ainda tem trabalho pendente.
     do TODO e `Sem registro no changelog ainda.`
 - Cada linha de lista ocupa uma linha: o que nao cabe termina em `…`. O detalhe
   quebra o texto pela largura e nunca corta.
-- **Rolagem so em Trabalho.** A lista rola para manter a selecao visivel e diz,
+- **Rolagem so em Histórico.** A lista rola para manter a selecao visivel e diz,
   em `meta`, quantas linhas ha acima e abaixo; o detalhe rola com setas, `j`/`k`,
   `PgUp`/`PgDn` e a roda. Agora continua sem rolagem (spec 20261002-001).
-- **Largura.** Abaixo de 40 colunas, Trabalho mostra so o cabecalho, a linha
-  `Trabalho precisa de 40 colunas` e o rodape; as teclas continuam valendo.
+- **Largura.** Abaixo de 40 colunas, Histórico mostra so o cabecalho, a linha
+  `Histórico precisa de 40 colunas` e o rodape; as teclas continuam valendo.
 - **Atualizacao.** Quando os registros mudam, as listas sao refeitas e a selecao
   e mantida pelo id (spec, `B-NNN`, posicao do registro); se o item sumiu, a
   selecao vai para a linha mais proxima e, se o nivel inteiro sumiu, sobe ate o
-  primeiro nivel que existe. Trabalho funciona tambem em estado `inconsistent`
+  primeiro nivel que existe. Histórico funciona tambem em estado `inconsistent`
   (a extracao nao depende da derivacao) e, sem `.orchestration/`, mostra a lista
   vazia com `Nenhuma spec em .specs/`.
-- **Mouse.** A captura do mouse fica ligada so enquanto Trabalho esta aberta, para
+- **Mouse.** A captura do mouse fica ligada so enquanto o Histórico esta aberto, para
   Agora continuar permitindo selecionar e copiar texto; e desligada ao voltar a
   Agora, ao sair e no panic, junto com a restauracao do terminal.
-- **Rodape.** Em Trabalho, as teclas do nivel (`Enter abre · Esc volta · Tab
-  Agora · q sai`, encurtado na largura). Em Agora, `q sair · Tab trabalho`, para
-  a visao nova ser descoberta.
+- **Recarregar.** `r` (em Agora e em Histórico) forca uma releitura do workspace,
+  como saida quando o watcher nao entrega eventos (volume de rede, por exemplo);
+  a TUI continua se atualizando sozinha e `r` nao e necessario no uso normal. A
+  selecao e o nivel sobrevivem pelo id, como em qualquer recarga, e nada e
+  escrito. Nao ha teclas F: no macOS elas costumam ser teclas de midia e o
+  terminal e a IDE as usam para outras coisas; letras e `Tab` funcionam em
+  qualquer terminal e dentro do tmux.
+- **Rodape.** Mostra so as teclas validas na tela atual:
+  - Agora: `Tab histórico · r recarregar · q sair`.
+  - Histórico, nos niveis de lista: `↑↓ mover · Enter abrir · Esc voltar · Tab
+    agora · r recarregar · q sair`.
+  - Histórico, no detalhe: `↑↓ rolar · Esc voltar · Tab agora · r recarregar · q
+    sair` (`Enter` la nao faz nada).
+  - **Corte na largura.** Quando o rodape nao cabe, saem indicacoes inteiras (nunca
+    meia), da menos para a mais importante: `r recarregar`, `↑↓`, `Enter abrir`,
+    `Esc voltar`, `Tab`. `q sair` fica sempre. Em 58 colunas cabem as indicacoes
+    de Tab e de `q sair` mais as que sobrarem; em 40, Agora mostra `Tab histórico
+    · q sair`.
 - Core em Rust: extracao dos campos do changelog (data, titulo e todos os campos,
   inclusive as linhas de continuacao) e do titulo de cada spec. So extracao de
   texto: nenhuma regra nova do protocolo, `RelayState` e a suite de conformidade
@@ -128,15 +144,19 @@ real, como a propria spec previa ("Passivo agora"). O texto de spec continua for
 A ADR-0010 registra a emenda; a ADR-0009 segue `Accepted` no resto.
 
 **Mouse e teclado, os dois.** O pedido e clicar, e a captura do mouse tira a
-selecao de texto do terminal; por isso ela so existe na visao Trabalho, e todo
+selecao de texto do terminal; por isso ela so existe na visao Histórico, e todo
 gesto do mouse tem equivalente de teclado (acessibilidade e terminais sem mouse).
 
-**`Esc` volta em Trabalho e sai em Agora.** Em Trabalho, `Esc` e o gesto natural
+**Histórico, nao Trabalho.** "Trabalho" sugere o que esta em curso, que e o que
+Agora ja mostra; a visao nova e o passado e o que falta. O nome diverge da UI web
+de proposito e a ADR-0010 registra a divergencia.
+
+**`Esc` volta em Histórico e sai em Agora.** Em Histórico, `Esc` e o gesto natural
 de voltar; manter nele a saida faria perder a navegacao num toque. Em Agora, o
 comportamento da spec 20261002-001 (A-006) fica intacto. No nivel de specs, `Esc`
 volta a Agora em vez de sair: sair exige um segundo `Esc` ou `q`.
 
-**Rolagem em Trabalho, nao em Agora.** Agora e um painel de olhar, e la a falta
+**Rolagem em Histórico, nao em Agora.** Agora e um painel de olhar, e la a falta
 de altura trunca. Uma lista de historico (dezenas de specs e itens neste
 repositorio) so e navegavel se rolar; a selecao visivel e a regra.
 
@@ -167,7 +187,7 @@ regenera os snapshots de Agora e confere os elementos juntos.
 - A-001 - A ADR-0010 registra a navegacao como estado local da tela, ainda somente
   de leitura, como emenda da decisao 1 da ADR-0009 e dos nao-objetivos de
   navegacao da spec 20261002-001; o indice de ADRs do `AGENTS.md` a lista; e o
-  design system descreve a visao Trabalho: niveis, ordem, linhas, detalhe,
+  design system descreve a visao Histórico: niveis, ordem, linhas, detalhe,
   rolagem, largura minima, teclas e cliques.
 - A-002 - O core em Rust extrai dos registros reais deste repositorio a lista de
   specs com titulo, o backlog por spec (incluindo o grupo Sem spec) e as tarefas
@@ -176,23 +196,26 @@ regenera os snapshots de Agora e confere os elementos juntos.
   repetido e spec sem `# ` no formato esperado; `RelayState` e a suite de
   conformidade nao mudam.
 - A-003 - O estado da navegacao, verificado por testes sem terminal: `Tab` e `t`
-  alternam Agora e Trabalho preservando nivel e selecao; `Enter` ou clique numa
+  alternam Agora e Histórico preservando nivel e selecao; `Enter` ou clique numa
   linha entram no nivel seguinte; `Esc` e `Backspace` voltam um nivel e, no nivel
   de specs, voltam a Agora; `Esc` em Agora, `q` e `Ctrl-C` saem; setas, `j`/`k` e
-  roda movem a selecao sem passar dos limites; a selecao sobrevive a uma recarga
-  pelo id e se reposiciona quando o item ou o nivel some.
+  roda movem a selecao sem passar dos limites; `r` forca a releitura do workspace
+  sem escrever nada e sem perder nivel nem selecao; a selecao sobrevive a uma
+  recarga pelo id e se reposiciona quando o item ou o nivel some.
 - A-004 - Cada nivel e o detalhe se desenham em 58 e 40 colunas, com linhas
   cortadas com `…`, o detalhe quebrado sem corte, a indicacao de linhas acima e
-  abaixo numa lista e num detalhe maiores que a tela, a linha `Trabalho precisa
-  de 40 colunas` em 30 colunas e o rodape de Agora com `Tab trabalho`, verificado
-  por snapshots.
+  abaixo numa lista e num detalhe maiores que a tela, a linha `Histórico precisa
+  de 40 colunas` em 30 colunas e o rodape de Agora e de cada nivel de Histórico com
+  o texto da decisao, inteiro em 80 colunas e cortado por indicacao inteira em 58
+  e 40 colunas, sempre com `q sair` e, em Agora a 40 colunas, `Tab histórico · q
+  sair`, verificado por snapshots.
 - A-005 - No binario real, num pty: `Tab` liga a captura do mouse e um clique
   (sequencia SGR) numa linha a seleciona e abre o nivel seguinte; voltar a Agora
   e sair desligam a captura; o terminal e restaurado ao sair e o workspace
   continua inalterado.
 - A-006 - `app/relay-tui/README.md`, `docs/TUI.md` e `docs/TUI.pt-BR.md`
-  descrevem a visao Trabalho e suas teclas, inclusive que `Esc` volta em vez de
-  sair nela.
+  descrevem a visao Histórico e suas teclas, inclusive que `Esc` volta em vez de
+  sair nela, e a tecla `r` de recarregar.
 - A-007 - A visao Agora mostra o cartao Spec atual (id e titulo na borda,
   `feitos/total`, itens nao feitos com marcador e palavra) e, abaixo, o cartao
   Specs pendentes (id, titulo e `feitos/total` por spec, e a linha Sem spec),
@@ -207,9 +230,9 @@ regenera os snapshots de Agora e confere os elementos juntos.
 
 ## Backlog candidates
 
-- B-001: ADR-0010 e a visao Trabalho registradas no design system.
+- B-001: ADR-0010 e a visao Histórico registradas no design system.
 - B-002: Core em Rust extrai specs, backlog por spec e tarefas por item dos registros.
 - B-003: Estado da navegacao (niveis, selecao, teclas e cliques) sem terminal.
 - B-004: Listas e detalhe desenhados em 58 e 40 colunas, com snapshots.
-- B-005: Binario com captura de mouse na visao Trabalho, teste em pty e documentacao.
+- B-005: Binario com captura de mouse na visao Histórico, teste em pty e documentacao.
 - B-006: Visao Agora agrupada por spec: spec atual com seus itens e specs pendentes (requer B-002).
