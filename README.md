@@ -37,6 +37,7 @@ baton, so the next agent, whichever it is, picks it up at full speed.
 | `relay-session` | When you open a session: resumes or starts the work. |
 | `relay-continue` | When you want to know what the next step is. |
 | `relay-status` | To see the state without changing anything. |
+| `relay-tui-split` | To open the `relay-tui` panel in a split next to the harness. It is outside the protocol: it touches no record. |
 
 ## Terminal panel
 

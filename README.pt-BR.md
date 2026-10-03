@@ -38,6 +38,7 @@ pegue já em velocidade.
 | `relay-session` | Ao abrir uma sessão: retoma ou começa o trabalho. |
 | `relay-continue` | Quando você quer saber qual é o próximo passo. |
 | `relay-status` | Para ver o estado sem alterar nada. |
+| `relay-tui-split` | Para abrir o painel `relay-tui` num split ao lado do harness. Fica fora do protocolo: não toca registro nenhum. |
 
 ## Painel de terminal
 

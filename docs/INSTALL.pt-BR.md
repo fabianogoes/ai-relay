@@ -45,7 +45,7 @@ destino:
 
 ```sh
 mkdir -p .claude/skills
-for skill in relay-setup relay-spec relay-status relay-continue relay-session; do
+for skill in relay-setup relay-spec relay-status relay-continue relay-session relay-tui-split; do
   ln -s /absolute/path/to/relay/skills/"$skill" .claude/skills/"$skill"
 done
 ```
@@ -63,7 +63,7 @@ no escopo do repositório:
 
 ```sh
 mkdir -p .agents/skills
-for skill in relay-setup relay-spec relay-status relay-continue relay-session; do
+for skill in relay-setup relay-spec relay-status relay-continue relay-session relay-tui-split; do
   ln -s /absolute/path/to/relay/skills/"$skill" .agents/skills/"$skill"
 done
 ```
@@ -80,7 +80,7 @@ instalar o Relay do GitHub globalmente para o seu usuário:
 ```sh
 git clone https://github.com/fabianogoes/ai-relay.git ~/.config/opencode/relay
 mkdir -p ~/.config/opencode/skills
-for skill in relay-setup relay-spec relay-status relay-continue relay-session; do
+for skill in relay-setup relay-spec relay-status relay-continue relay-session relay-tui-split; do
   ln -s ~/.config/opencode/relay/skills/"$skill" ~/.config/opencode/skills/"$skill"
 done
 ```
@@ -105,7 +105,7 @@ Para uma instalação local ao projeto:
 
 ```sh
 mkdir -p .opencode/skills
-for skill in relay-setup relay-spec relay-status relay-continue relay-session; do
+for skill in relay-setup relay-spec relay-status relay-continue relay-session relay-tui-split; do
   ln -s /absolute/path/to/relay/skills/"$skill" .opencode/skills/"$skill"
 done
 ```
