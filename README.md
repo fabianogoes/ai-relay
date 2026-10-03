@@ -1,86 +1,86 @@
 # Relay
 
-Relay da memoria operacional a agentes de codigo. O estado do trabalho fica em
-arquivos Markdown no repositorio, e nao no historico do chat, para que qualquer
-agente (Claude Code, Codex, OpenCode) retome de onde outro parou.
+**English** · [Português](README.pt-BR.md)
 
-## Por que existe
+Relay gives coding agents operational memory. The state of the work lives in
+Markdown files in the repository, not in the chat history, so any agent (Claude
+Code, Codex, OpenCode) can resume where another one stopped.
 
-Voce comeca uma tarefa no Codex, para no meio (porque quis ou porque bateu no
-limite de uso) e quer continuar no Claude Code. O agente novo nao sabe o que
-foi decidido nem onde voce parou, e quem reconstroi esse contexto e voce.
+## Why it exists
 
-Relay guarda esse contexto no repositorio:
+You start a task in Codex, stop halfway (by choice or because you hit a usage
+limit) and want to continue in Claude Code. The new agent does not know what was
+decided or where you stopped, and the one who rebuilds that context is you.
 
-- o que fazer e por que (a spec);
-- o que falta (backlog e subtarefas);
-- o que esta em andamento agora, quem deixou e quando (o handoff);
-- o que foi concluido, com evidencia (o changelog).
+Relay keeps that context in the repository:
 
-## Como usar
+- what to do and why (the spec);
+- what is left (backlog and subtasks);
+- what is in progress right now, who left it and when (the handoff);
+- what was completed, with evidence (the changelog).
 
-| Skill | Quando usar |
+## How to use it
+
+| Skill | When to use |
 | --- | --- |
-| `relay-setup` | Uma vez, para instalar o protocolo no repositorio. |
-| `relay-spec` | Quando voce tem uma ideia: uma entrevista a transforma em spec e tarefas. |
-| `relay-session` | Ao abrir uma sessao: retoma ou comeca o trabalho. |
-| `relay-continue` | Quando voce quer saber qual e o proximo passo. |
-| `relay-status` | Para ver o estado sem alterar nada. |
+| `relay-setup` | Once, to install the protocol in the repository. |
+| `relay-spec` | When you have an idea: an interview turns it into a spec and tasks. |
+| `relay-session` | When you open a session: resumes or starts the work. |
+| `relay-continue` | When you want to know what the next step is. |
+| `relay-status` | To see the state without changing anything. |
 
-## Painel de terminal
+## Terminal panel
 
-Relay tem um painel so de leitura para o terminal, o `relay-tui`: deixe-o num
-split ao lado do harness e veja handoff, TODO e backlog mudarem enquanto o
-agente trabalha. E um unico binario, sem Node.
+Relay has a read-only terminal panel, `relay-tui`: leave it in a split next to
+the harness and watch handoff, TODO and backlog change while the agent works. It
+is a single binary, no Node.
 
-## Documentos
+## Documents
 
-- Para saber mais sobre **Instalacao** veja [docs/INSTALL.pt-BR.md](docs/INSTALL.pt-BR.md)
-  (em ingles: [docs/INSTALL.md](docs/INSTALL.md)).
-- Para saber mais sobre **Arquivos, estados e regras** veja [docs/PROTOCOL.md](docs/PROTOCOL.md).
-- Para saber mais sobre o **Painel de terminal** veja [docs/TUI.md](docs/TUI.md).
+| Subject | English | Português |
+| --- | --- | --- |
+| **Installation** | [docs/INSTALL.md](docs/INSTALL.md) | [docs/INSTALL.pt-BR.md](docs/INSTALL.pt-BR.md) |
+| **Files, states and rules** | [docs/PROTOCOL.md](docs/PROTOCOL.md) | [docs/PROTOCOL.pt-BR.md](docs/PROTOCOL.pt-BR.md) |
+| **Terminal panel** | [docs/TUI.md](docs/TUI.md) | [docs/TUI.pt-BR.md](docs/TUI.pt-BR.md) |
 
-## Perguntas frequentes
+## Frequently asked questions
 
-**Spec, backlog, TODO, handoff e changelog nao e burocracia demais?**
-Seria, se voce escrevesse esses arquivos. Quem escreve sao as skills. Voce
-responde a uma entrevista quando tem uma ideia nova e escolhe entre opcoes
-quando abre uma sessao. O resto e registro que o agente faz enquanto trabalha.
+**Aren't spec, backlog, TODO, handoff and changelog too much bureaucracy?**
+They would be, if you wrote those files. The skills write them. You answer an
+interview when you have a new idea and pick among options when you open a
+session. The rest is record the agent keeps while it works.
 
-**Isso nao aumenta minha carga cognitiva?**
-A carga ja existe: sem Relay, e voce quem guarda o contexto entre sessoes e
-agentes. Relay tira esse estado da sua cabeca e o coloca em arquivos que
-qualquer agente le.
+**Doesn't this increase my cognitive load?**
+The load is already there: without Relay, you are the one holding the context
+between sessions and agents. Relay takes that state out of your head and puts it
+in files any agent can read.
 
-**Preciso usar Relay para toda tarefa?**
-Nao. Para corrigir um typo ou um bug de cinco minutos, peca direto ao agente,
-sem invocar nenhuma skill. Relay compensa em trabalho que atravessa sessoes,
-agentes ou interrupcoes.
+**Do I need Relay for every task?**
+No. To fix a typo or a five-minute bug, ask the agent directly, without invoking
+any skill. Relay pays off on work that spans sessions, agents or interruptions.
 
-**Qual o custo de usar?**
-A entrevista da spec toma tempo antes do primeiro codigo, e toda sessao comeca
-lendo os registros, o que consome tokens. Em troca, a retomada nao depende da
-memoria de ninguem.
+**What does it cost?**
+The spec interview takes time before the first code, and every session starts by
+reading the records, which spends tokens. In return, resuming does not depend on
+anyone's memory.
 
-**E se eu parar no meio de uma tarefa?**
-Na proxima sessao, em qualquer harness, `relay-session` le o handoff, encontra
-a subtarefa em andamento e pergunta se retoma dali.
+**What if I stop halfway through a task?**
+In the next session, in any harness, `relay-session` reads the handoff, finds the
+subtask in progress and asks whether to resume from there.
 
-**E se os registros estiverem errados?**
-O agente para, explica o problema e pergunta antes de agir. Ele nunca segue
-trabalhando em cima de um estado incoerente.
+**What if the records are wrong?**
+The agent stops, explains the problem and asks before acting. It never keeps
+working on top of an inconsistent state.
 
-**Preciso de um harness especifico, uma UI ou um CLI?**
-Nao. Relay e Markdown no repositorio mais skills para Claude Code, Codex e
-OpenCode. Interfaces podem exibir o estado, mas nunca escrevem nos registros.
-Para acompanhar o estado num split de terminal existe o `relay-tui`, um binario
-so de leitura baixado em https://github.com/fabianogoes/ai-relay/releases (macOS;
-Linux em melhor esforco; Windows fora por enquanto).
+**Do I need a specific harness, a UI or a CLI?**
+No. Relay is Markdown in the repository plus skills for Claude Code, Codex and
+OpenCode. Interfaces may display the state but never write the records;
+`relay-tui` is one of them (see [docs/TUI.md](docs/TUI.md)).
 
-**Relay substitui meu gerenciador de projetos?**
-Nao. Ele guarda o minimo para agentes trabalharem com continuidade, e nao
-roadmap, prioridade ou estimativa.
+**Does Relay replace my project manager?**
+No. It keeps the minimum agents need to work with continuity, and not roadmap,
+priority or estimates.
 
-## Licenca
+## License
 
 [MIT](LICENSE).
