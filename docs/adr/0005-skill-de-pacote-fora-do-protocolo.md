@@ -2,7 +2,7 @@
 
 ## Status
 
-**Accepted** — 2026-10-02. Renumerada em 2026-10-03 (era a ADR-0011).
+**Accepted** — 2026-10-03.
 
 Estende a ADR-0001 (como uma instrução chega à sessão) e respeita a decisão 1 da
 ADR-0003 (o `relay-tui` é só um observador).

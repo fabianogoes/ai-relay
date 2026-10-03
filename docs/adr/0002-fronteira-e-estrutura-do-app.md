@@ -2,8 +2,7 @@
 
 ## Status
 
-**Accepted** — 2026-09-07. Reescrita em 2026-10-03 para o estado atual, depois
-da remoção da interface web.
+**Accepted** — 2026-10-03.
 
 ## Contexto
 
@@ -115,6 +114,6 @@ repositório ou de qualquer outro. Toda mutação passa por uma skill num harnes
 
 ## Notas
 
-A primeira versão desta decisão continha três pacotes TypeScript da interface
-web (`relay-core`, `relay-host`, `relay-ui`) num workspace npm em
-`app/package.json`. Eles saíram em 2026-10-03; a fronteira continua a mesma.
+A ADR-0001 decide como as instruções chegam à sessão; esta decide onde a
+interface mora e o que ela não pode tocar. A ADR-0003 decide o que a interface
+é.

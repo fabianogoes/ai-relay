@@ -2,22 +2,20 @@
 
 ## Status
 
-**Accepted** — 2026-10-02. Reescrita em 2026-10-03 para o estado atual: a
-interface web foi removida e o `relay-tui` passou a ser a única interface, com o
-único leitor do protocolo.
+**Accepted** — 2026-10-03.
 
 ## Contexto
 
-A primeira interface do Relay foi web: um host local em TypeScript servindo uma
-UI no navegador. Dela, só o observador read-only funcionou no uso real (o
-harness numa tela, o estado durável mudando na outra sem recarregar); a execução
-integrada (lançador, preflight, PTY, terminal no navegador) falhou.
+O Relay guarda o estado do trabalho em cinco registros Markdown, e quem os
+escreve são as skills, dentro de um harness. Falta ver esse estado sem abrir os
+arquivos: o handoff corrente, o TODO e o backlog mudando enquanto o harness
+trabalha.
 
 O uso que importa é o split de terminal: harness de um lado, painel do outro,
-sem navegador, porta nem token. O requisito que define a tecnologia é a
-distribuição: **um único download**, sem clonar o repositório, sem runtime e sem
-gerenciador de pacotes, com leveza como piso. A interface web foi removida em
-2026-10-03, e o `relay-tui` ficou sozinho.
+sem navegador, porta nem token. O painel observa; executar continua sendo papel
+do harness. O requisito que define a tecnologia é a distribuição: **um único
+download**, sem clonar o repositório, sem runtime e sem gerenciador de pacotes,
+com leveza como piso.
 
 ## Decisão
 
@@ -37,9 +35,8 @@ quem só quer as skills continua sem build.
 | Go + Bubble Tea | ~5–10 MB | reescrito | cross-compile trivial |
 | TS com `bun build --compile` | ~60–100 MB | reaproveitado | alvos de cross-compile |
 
-**Por quê:** os três cumprem "um download". O TS compilado era o único que
-reaproveitava o core da interface web, mas leva o runtime no binário e combina
-Ink com Bun, com menos estrada. Entre Rust e Go a diferença técnica é pequena;
+**Por quê:** os três cumprem "um download". O TS compilado leva o runtime no
+binário, de 20 a 50 vezes maior, e combina Ink com Bun, com menos estrada. Entre Rust e Go a diferença técnica é pequena;
 Rust foi escolhido pela preferência do dono do projeto e porque o core é a peça
 que se reescreve com menos risco, por ser pura e testada.
 
@@ -95,10 +92,10 @@ Em `app/relay-tui/tests/fixtures/<caso>/` cada caso é um workspace em disco e u
 `docs/PROTOCOL.md`: se discordarem, o defeito é do caso. Os workspaces `status-*`
 também servem de entrada para os testes da view.
 
-**Por quê o formato neutro, sem serializar Rust:** os casos foram gravados quando
-havia dois leitores (TypeScript e Rust) e continuam legíveis por qualquer
-linguagem. Se um segundo leitor voltar a existir, eles voltam a ser suíte de
-conformidade compartilhada sem conversão.
+**Por quê o formato neutro, sem serializar Rust:** o caso é um workspace como
+qualquer repositório Relay e um JSON escrito à mão, legíveis sem o crate. Um
+segundo leitor do protocolo, se um dia existir, roda os mesmos casos sem
+conversão.
 
 ### 5. Reatividade: o workspace é relido inteiro depois de 150 ms de silêncio
 
@@ -177,8 +174,8 @@ Não faz parte desta entrega. Exigiria:
   alternativa. O spike valida o **Claude Code primeiro**; Codex e OpenCode só
   entram depois dessa validação.
 
-Considerados e **descartados**: embutir o harness num PTY dentro da TUI (a
-superfície que já falhou na interface web) e uma interface de chat sobre os
+Considerados e **descartados**: embutir o harness num PTY dentro da TUI (uma
+superfície de execução, que a decisão 1 recusa) e uma interface de chat sobre os
 modos headless dos harnesses (um protocolo por harness, e quebra a
 neutralidade).
 
@@ -189,7 +186,7 @@ neutralidade).
 - Um download resolve a instalação; nada de runtime, repositório ou gerenciador.
 - Leveza e partida instantânea.
 - Um leitor só: cada mudança de gramática do protocolo é uma edição no `core` e
-  nos fixtures, não duas implementações.
+  nos fixtures.
 - Nenhuma superfície de execução volta pela porta dos fundos.
 
 ### Negativas e custos assumidos
@@ -199,9 +196,8 @@ neutralidade).
 - Binários sem assinatura exigem um passo manual de quem baixa, no macOS.
 - O `core` em Rust é o único leitor: um erro nele não tem uma segunda leitura
   que o denuncie. Os fixtures e o `docs/PROTOCOL.md` são a referência.
-- Algumas peculiaridades do primeiro leitor (TypeScript) foram mantidas de
-  propósito para os fixtures continuarem valendo, como ignorar linhas terminadas
-  em CRLF (limite conhecido no README do crate).
+- Linhas de registro terminadas em CRLF são ignoradas (limite conhecido no
+  README do crate); corrigir exige mudar o `core` e os fixtures juntos.
 
 ## Compliance
 

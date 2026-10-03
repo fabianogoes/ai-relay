@@ -131,9 +131,8 @@ O fundo não é pintado: vem do terminal. As cores presumem um terminal escuro.
 ## Limites conhecidos
 
 - Linhas de registro terminadas em CRLF (arquivos com `\r\n`, comuns no Windows
-  com `autocrlf`) são ignoradas. É o comportamento herdado do primeiro leitor,
-  em TypeScript, mantido para os fixtures continuarem valendo; corrigir exige
-  mudar o `core` e os fixtures juntos.
+  com `autocrlf`) são ignoradas; corrigir exige mudar o `core` e os fixtures
+  juntos.
 - Um `SIGTERM` ou `SIGINT` vindo de fora do teclado não restaura o terminal;
   `Ctrl-C` pelo teclado, `q`, `Esc` e um erro interno restauram.
 - Só tema escuro.

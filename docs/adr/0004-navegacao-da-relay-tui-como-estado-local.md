@@ -2,24 +2,20 @@
 
 ## Status
 
-**Accepted** — 2026-10-03. Renumerada (era a ADR-0010) e ajustada em
-2026-10-03, depois da remoção da interface web.
+**Accepted** — 2026-10-03.
 
 Detalha a decisão 1 da ADR-0003: as teclas só mudam o que a tela mostra, e o
 `relay-tui` nunca escreve um registro.
 
 ## Contexto
 
-A primeira versão do `relay-tui` era um painel passivo: desenhava o estado de
-agora e só reagia às teclas de saída. Isso foi proposital ("Passivo agora"), para que a primeira
-versão não carregasse superfície de interação. O uso real mostrou o limite: para
-saber o que já foi feito (quais specs, quais itens de backlog, quais tarefas e o
-que cada uma entregou) a pessoa abria os arquivos, embora o dado estivesse todo
+A visão Agora mostra o estado de agora: handoff, TODO e backlog. Para saber o
+que já foi feito (quais specs, quais itens de backlog, quais tarefas e o que
+cada uma entregou) seria preciso abrir os arquivos, embora o dado esteja todo
 nos registros que o painel já lê.
 
-O pedido é navegar por esse histórico no próprio painel, com teclado e com
-mouse. Isso traz um risco que o painel passivo não tinha: a captura do mouse
-pelo terminal tira a seleção e a cópia de texto.
+Navegar por esse histórico no próprio painel, com teclado e com mouse, traz um
+risco: a captura do mouse pelo terminal tira a seleção e a cópia de texto.
 
 ## Decisão
 
@@ -43,9 +39,8 @@ tem autoridade sobre a aparência; esta ADR não as repete.
 
 ### 3. O nome é Histórico, e não Trabalho
 
-A interface web chamava de Trabalho a visão equivalente. "Trabalho" sugere o
-que está em curso, que é o que Agora já mostra; a visão nova é o passado e o que
-falta.
+"Trabalho" sugere o que está em curso, que é o que Agora já mostra; esta visão
+é o passado e o que falta.
 
 ### 4. `Esc` volta em Histórico e sai em Agora
 

@@ -39,10 +39,10 @@ fn violation(check: &str, detail: String, records: &[&str]) -> Violation {
     }
 }
 
-/// Whether the first (TypeScript) reader's `Date.parse` accepted a string that already
-/// has the RFC 3339 shape. V8 is lenient about the day (1–31 for every month,
-/// so `02-31` parses) and accepts `24:00:00` but no other hour 24; it rejects
-/// an out-of-range month, minute, second or offset.
+/// Whether a string that already has the RFC 3339 shape is a valid instant.
+/// The day is lenient (1–31 for every month, so `02-31` passes) and `24:00:00`
+/// is accepted but no other hour 24; an out-of-range month, minute, second or
+/// offset is rejected.
 fn rfc3339_is_parseable(value: &str) -> bool {
     let Some(c) = RFC3339.captures(value) else {
         return false;
@@ -398,10 +398,10 @@ pub(crate) fn run_integrity_checks(input: &IntegrityInput) -> Vec<Violation> {
 mod tests {
     use super::*;
 
-    // Each row is the answer of the first (TypeScript) reader's `Date.parse` (NaN or not)
-    // for a string that matches the RFC 3339 shape.
+    // Each row says whether a string that matches the RFC 3339 shape is
+    // accepted.
     #[test]
-    fn timestamps_are_accepted_exactly_as_the_reference_accepts_them() {
+    fn timestamps_are_accepted_exactly_as_the_table_says() {
         let accepted = [
             "2026-09-07T06:49:14Z",
             "2026-09-07T06:49:14-03:00",

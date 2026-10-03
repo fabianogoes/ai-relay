@@ -31,9 +31,7 @@ ADRs live in `docs/adr/NNNN-<slug>.md`, numbered sequentially, in the format
 Title, Status, Context, Decision, Consequences, Compliance, Notes. Status is
 `Proposed`, `Accepted`, or `Superseded`. Never delete a superseded ADR;
 supersede it and keep the chain, because the chain is the answer to "why not
-the other option?". The one exception so far: on 2026-10-03, with the project
-still in its initial stage, the ADRs of the removed web interface were deleted
-and the rest rewritten and renumbered; git history keeps the originals.
+the other option?".
 
 Write one when a decision affects structure, an architecture characteristic, a
 dependency, an interface, or a construction technique. Record the reasoning,

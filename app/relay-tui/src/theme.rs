@@ -42,7 +42,7 @@ pub fn status_tone(status: WorkStatus) -> Color {
     }
 }
 
-/// The label of a derived status, the same words as the web interface.
+/// The label of a derived status.
 pub fn status_label(status: WorkStatus) -> &'static str {
     match status {
         WorkStatus::Backlog => "A escolher",

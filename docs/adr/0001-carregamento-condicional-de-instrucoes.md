@@ -2,8 +2,7 @@
 
 ## Status
 
-**Accepted** — 2026-09-07. Reescrita em 2026-10-03 para o estado atual, depois
-da remoção da interface web.
+**Accepted** — 2026-10-03.
 
 ## Contexto
 
@@ -59,8 +58,7 @@ regra.
 Quando uma regra precisar vincular por hook, ela é **um** script em `.agents/`,
 e cada harness recebe apenas uma casca que o invoca e traduz o resultado. Três
 cópias de uma regra divergem, e a divergência aparece como comportamento
-diferente entre harnesses, caro de diagnosticar. Hoje nenhuma regra usa hook: o
-único que existia protegia os protótipos HTML da interface web e saiu com ela.
+diferente entre harnesses, caro de diagnosticar. Hoje nenhuma regra usa hook.
 
 ### 4. Ferramenta de repositório não é superfície de pacote
 
@@ -111,9 +109,3 @@ comum protege menos e não protege ninguém melhor.
 **Mecanismo inexistente.** `.claude/rules/` com ativação por *glob* é convenção
 do Cursor e do Windsurf, não do Claude Code. Está registrado aqui porque é uma
 suposição plausível o bastante para reaparecer, e porque falharia em silêncio.
-
-**Histórico.** A primeira versão desta decisão nasceu do design system da
-interface web: uma skill (`relay-design-system`), um `AGENTS.md` aninhado e um
-guarda `PreToolUse` que negava a leitura de protótipos HTML de ~350 KB. A skill
-saiu em 2026-10-03, e o guarda e os protótipos saíram com a interface web. O
-padrão continua; o caso que o originou, não.
