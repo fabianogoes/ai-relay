@@ -57,7 +57,7 @@ mostra-la, sem executar nada.
   bloqueio).
 - Priorizar, estimar ou ordenar alem da recomendacao padrao do protocolo.
 - Texto da sugestao configuravel; traducao para o ingles (a tela e em portugues).
-- Linha de sugestao na visao Trabalho (spec 20261002-002).
+- Linha de sugestao na visao Histórico (spec 20261002-002).
 
 ## Decisions
 
