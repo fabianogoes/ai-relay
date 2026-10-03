@@ -3,7 +3,7 @@
 //!
 //! A pure function of the `Nav`, the extracted `History` and the derived state;
 //! the layout rules (levels, rows, scroll, widths) are in
-//! `docs/design-system/terminal.md`, "Visão Histórico".
+//! `DESIGN.md`, "Visão Histórico".
 
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;

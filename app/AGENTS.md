@@ -9,8 +9,9 @@ isto quando chega aqui.
 1. `relay-tui/README.md` — estrutura do crate, compilar, testar e publicar.
 2. `../docs/adr/0009-relay-tui-observador-de-terminal-em-rust.md` — por que o
    painel existe, em Rust, e só lê.
-3. `../docs/design-system/terminal.md` — autoridade sobre a aparência da tela.
-   Leia antes de mudar cor, rótulo ou layout.
+3. `relay-tui/DESIGN.md` — autoridade sobre a aparência da tela. Cor, rótulo,
+   layout ou tecla mudam **primeiro** nele, depois no código; uma divergência
+   entre os dois se resolve no documento primeiro.
 4. `relay-tui/tests/fixtures/README.md` — os casos que o core precisa derivar.
    Leia antes de mudar uma regra do protocolo no `core`.
 

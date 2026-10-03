@@ -143,6 +143,7 @@ O fundo não é pintado: vem do terminal. As cores presumem um terminal escuro.
 app/relay-tui/
 ├── Cargo.toml / Cargo.lock
 ├── README.md
+├── DESIGN.md              ← como a tela deve parecer (autoridade sobre a view)
 ├── scripts/package.sh     ← empacota o binário para o release
 ├── dist/                  ← tarballs gerados (.tar.gz + .sha256), fora do git
 ├── src/
@@ -171,7 +172,7 @@ app/relay-tui/
 Para mudar o que aparece na tela, os arquivos são os de `src/view/` e o
 `src/theme.rs`. A regra de qual estado mostrar fica em `src/core/`, conferida pela suíte
 de `tests/fixtures/`. O desenho da tela está em
-[`docs/design-system/terminal.md`](../../docs/design-system/terminal.md).
+[`DESIGN.md`](DESIGN.md).
 
 ## Compilar do código
 

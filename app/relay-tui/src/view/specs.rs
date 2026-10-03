@@ -144,7 +144,7 @@ pub(super) fn full_height(g: &Groups) -> u16 {
     current_full(g) + pending_full(g)
 }
 
-/// The shape for `avail` rows, in the order the design system gives: first Specs
+/// The shape for `avail` rows, in the order `DESIGN.md` gives: first Specs
 /// pendentes becomes a line, then Spec atual is cut (`+N itens`), and last both
 /// become the count line of the backlog. `avail` is at least 1.
 pub(super) fn shape(g: &Groups, avail: u16) -> Shape {

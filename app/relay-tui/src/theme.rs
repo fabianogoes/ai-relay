@@ -1,5 +1,5 @@
-//! The palette of `docs/design-system/terminal.md`: One Dark with the Charm pink for identifiers. The background is
-//! never painted; it comes from the terminal.
+//! The palette of `DESIGN.md`: One Dark with the Charm pink for identifiers.
+//! The background is never painted; it comes from the terminal.
 
 use ratatui::style::{Color, Modifier, Style};
 
@@ -32,7 +32,7 @@ pub fn color(color: Color) -> Style {
     Style::new().fg(color)
 }
 
-/// The tone of a derived status (`docs/design-system/terminal.md`, "Status").
+/// The tone of a derived status (`DESIGN.md`, "Status").
 pub fn status_tone(status: WorkStatus) -> Color {
     match status {
         WorkStatus::InProgress | WorkStatus::Done => GREEN,

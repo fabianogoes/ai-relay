@@ -1,5 +1,5 @@
 //! What the snapshots show, said as rules: state is never only color, and the
-//! tones are the ones of the design system.
+//! tones are the ones of `DESIGN.md`.
 
 use std::path::{Path, PathBuf};
 

@@ -6,7 +6,7 @@ antes de mudar qualquer coisa aqui.
 
 - Instalar e usar: [`../docs/TUI.md`](../docs/TUI.md).
 - Compilar, testar e publicar: [`relay-tui/README.md`](relay-tui/README.md).
-- O desenho da tela: [`../docs/design-system/terminal.md`](../docs/design-system/terminal.md).
+- O desenho da tela: [`relay-tui/DESIGN.md`](relay-tui/DESIGN.md).
 
 ## Estrutura
 

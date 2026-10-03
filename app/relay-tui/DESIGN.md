@@ -5,8 +5,7 @@
 
 Este documento é a autoridade sobre a aparência do `relay-tui`: paleta, status,
 estrutura e comportamento da tela. Uma mudança de cor, rótulo ou layout se faz
-primeiro aqui e depois no código (`app/relay-tui/src/theme.rs` e
-`app/relay-tui/src/view/`); uma divergência entre este documento e a tela é
+primeiro aqui e depois no código (`src/theme.rs` e `src/view/`); uma divergência entre este documento e a tela é
 defeito de um dos dois e se resolve aqui primeiro.
 
 O `relay-tui` é um painel passivo e estreito, pensado para dividir o terminal
