@@ -8,8 +8,8 @@
 │ ✓ T-002 Escrever tokens.css          │
 │ ○ T-003 Scaffold da relay-ui         │
 ╰──────────────────────────────────────╯
-╭ Backlog ──────────────────────── 0/1 ╮
-│ ○ 1 disponível                       │
+╭ Specs pendentes ────────────────── 1 ╮
+│ Sem spec                         0/1 │
 ╰──────────────────────────────────────╯
 
 
@@ -17,11 +17,11 @@
 
 
 
+  Comece T-003 com relay-session.
 
-
-
-
- q sair
+╭──────────────────────────────────────╮
+│ Tab histórico · q sair               │
+╰──────────────────────────────────────╯
 
 --- colors ---
 #######.mmmmmmmmmmmmmmmmm...g.mmmmmmmmmm
@@ -34,8 +34,8 @@ d.G.iiiii.mmmmmmmmmmmm.mm.mmmm.mmmmmmm.d
 d.G.iiiii.mmmmmmmm.mmmmmmmmmm..........d
 d.u.iiiii.ffffffff.ff.ffffffff.........d
 dddddddddddddddddddddddddddddddddddddddd
-d.FFFFFFF.dddddddddddddddddddddddd.mmm.d
-d.U.f.ffffffffff.......................d
+d.FFFFF.FFFFFFFFF.dddddddddddddddddd.m.d
+d.fff.ffff.........................mmm.d
 dddddddddddddddddddddddddddddddddddddddd
 
 
@@ -43,8 +43,8 @@ dddddddddddddddddddddddddddddddddddddddd
 
 
 
+..mmmmmm.iiiii.mmm.FFFFFFFFFFFFFm
 
-
-
-
-.F.mmmm
+dddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmmmm.m.F.mmmm...............d
+dddddddddddddddddddddddddddddddddddddddd

@@ -1,0 +1,30 @@
+ relay  ~/Developer/relay                     ● atualizado
+
+╭ Itens · 20260901-001 ────────────────────── ↑ 25 acima ╮
+│   B-225 Item de rotina numero 25 da lista lon… ✓ feito │
+│   B-226 Item de rotina numero 26 da lista lon… ✓ feito │
+│   B-227 Item de rotina numero 27 da lista lon… ✓ feito │
+│   B-228 Item de rotina numero 28 da lista lon… ✓ feito │
+│   B-229 Item de rotina numero 29 da lista lon… ✓ feito │
+│ ▸ B-230 Item de rotina numero 30 da lista lon… ✓ feito │
+╰────────────────────────────────────────────────────────╯
+
+╭────────────────────────────────────────────────────────╮
+│ Enter abrir · Esc voltar · Tab agora · q sair          │
+╰────────────────────────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
+
+d.FFFFF.F.IIIIIIIIIIII.dddddddddddddddddddddd.m.mm.mmmmm.d
+d...iiiii.mmmm.mm.mmmmmm.mmmmmm.mm.mm.mmmmm.mmmm.G.fffff.d
+d...iiiii.mmmm.mm.mmmmmm.mmmmmm.mm.mm.mmmmm.mmmm.G.fffff.d
+d...iiiii.mmmm.mm.mmmmmm.mmmmmm.mm.mm.mmmmm.mmmm.G.fffff.d
+d...iiiii.mmmm.mm.mmmmmm.mmmmmm.mm.mm.mmmmm.mmmm.G.fffff.d
+d...iiiii.mmmm.mm.mmmmmm.mmmmmm.mm.mm.mmmmm.mmmm.G.fffff.d
+d.U.iiiii.FFFF.FF.FFFFFF.FFFFFF.FF.FF.FFFFF.FFFF.G.fffff.d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFFFF.mmmmm.m.FFF.mmmmmm.m.FFF.mmmmm.m.F.mmmm..........d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

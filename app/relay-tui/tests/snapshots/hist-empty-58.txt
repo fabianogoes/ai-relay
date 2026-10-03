@@ -1,0 +1,22 @@
+ relay  ~/Developer/relay                     ● atualizado
+
+╭ Specs ─────────────────────────────────────────────────╮
+│ Nenhuma spec em .specs/                                │
+│                                                        │
+╰────────────────────────────────────────────────────────╯
+
+╭────────────────────────────────────────────────────────╮
+│ Enter abrir · Esc voltar · Tab agora · q sair          │
+╰────────────────────────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
+
+d.FFFFF.dddddddddddddddddddddddddddddddddddddddddddddddddd
+d.mmmmmmm.mmmm.mm.mmmmmmm................................d
+d........................................................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFFFF.mmmmm.m.FFF.mmmmmm.m.FFF.mmmmm.m.F.mmmm..........d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

@@ -1,0 +1,34 @@
+ relay  ~/Developer/relay   ● atualizado
+
+╭ Tarefas · B-001 ─────────────────────╮
+│ ▸ T-001 Tipos do estado … 2026-09-01 │
+│   T-002 Um fixture por s… 2026-09-02 │
+│   T-002 Correcao do fixt… 2026-09-03 │
+│                                      │
+│                                      │
+│                                      │
+│                                      │
+│                                      │
+╰──────────────────────────────────────╯
+
+╭──────────────────────────────────────╮
+│ Esc voltar · Tab agora · q sair      │
+╰──────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm...g.mmmmmmmmmm
+
+d.FFFFFFF.F.IIIII.dddddddddddddddddddddd
+d.U.iiiii.FFFFF.FF.FFFFFF.F.mmmmmmmmmm.d
+d...iiiii.ff.fffffff.fff.ff.mmmmmmmmmm.d
+d...iiiii.ffffffff.ff.fffff.mmmmmmmmmm.d
+d......................................d
+d......................................d
+d......................................d
+d......................................d
+d......................................d
+dddddddddddddddddddddddddddddddddddddddd
+
+dddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmm.m.FFF.mmmmm.m.F.mmmm......d
+dddddddddddddddddddddddddddddddddddddddd

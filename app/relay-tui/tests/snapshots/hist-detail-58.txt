@@ -1,0 +1,50 @@
+ relay  ~/Developer/relay                     ● atualizado
+
+╭ Tarefa · T-002 ──────────────────────────── ↓ 6 abaixo ╮
+│ T-002 · Um fixture por status                          │
+│ 2026-09-02                                             │
+│                                                        │
+│ Backlog                                                │
+│ B-001                                                  │
+│                                                        │
+│ Spec                                                   │
+│ .specs/20260901-001-contrato-do-core.md                │
+│                                                        │
+│ Result                                                 │
+│ sete fixtures em disco, um por status, com o           │
+│ expected.json de cada um. O runner compara os dois     │
+│ lados e lista todas as divergencias de uma vez.        │
+│                                                        │
+│ Evidence                                               │
+│ o runner TypeScript e o Rust passam os sete casos.     │
+╰────────────────────────────────────────────────────────╯
+
+╭────────────────────────────────────────────────────────╮
+│ ↑↓ rolar · Esc voltar · Tab agora · q sair             │
+╰────────────────────────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
+
+d.FFFFFF.F.IIIII.dddddddddddddddddddddddddddd.m.m.mmmmmm.d
+d.FFFFF.F.FF.FFFFFFF.FFF.FFFFFF..........................d
+d.mmmmmmmmmm.............................................d
+d........................................................d
+d.MMMMMMM................................................d
+d.iiiii..................................................d
+d........................................................d
+d.MMMM...................................................d
+d.fffffffffffffffffffffffffffffffffffffff................d
+d........................................................d
+d.MMMMMM.................................................d
+d.ffff.ffffffff.ff.ffffff.ff.fff.fffffff.fff.f...........d
+d.fffffffffffff.ff.ffff.fff.f.ffffff.fffffff.ff.ffff.....d
+d.fffff.f.fffff.fffff.ff.ffffffffffff.ff.fff.ffff........d
+d........................................................d
+d.MMMMMMMM...............................................d
+d.f.ffffff.ffffffffff.f.f.ffff.ffffff.ff.ffff.ffffff.....d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FF.mmmmm.m.FFF.mmmmmm.m.FFF.mmmmm.m.F.mmmm.............d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

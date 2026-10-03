@@ -40,7 +40,7 @@ Alternatively, expose the shared skills directly in a target project:
 
 ```sh
 mkdir -p .claude/skills
-for skill in relay-setup relay-spec relay-status relay-continue relay-session; do
+for skill in relay-setup relay-spec relay-status relay-continue relay-session relay-tui-split; do
   ln -s /absolute/path/to/relay/skills/"$skill" .claude/skills/"$skill"
 done
 ```
@@ -57,7 +57,7 @@ plugin development flow, or link the skills for repository-scoped development:
 
 ```sh
 mkdir -p .agents/skills
-for skill in relay-setup relay-spec relay-status relay-continue relay-session; do
+for skill in relay-setup relay-spec relay-status relay-continue relay-session relay-tui-split; do
   ln -s /absolute/path/to/relay/skills/"$skill" .agents/skills/"$skill"
 done
 ```
@@ -74,7 +74,7 @@ Relay from GitHub globally for your user:
 ```sh
 git clone https://github.com/fabianogoes/ai-relay.git ~/.config/opencode/relay
 mkdir -p ~/.config/opencode/skills
-for skill in relay-setup relay-spec relay-status relay-continue relay-session; do
+for skill in relay-setup relay-spec relay-status relay-continue relay-session relay-tui-split; do
   ln -s ~/.config/opencode/relay/skills/"$skill" ~/.config/opencode/skills/"$skill"
 done
 ```
@@ -99,7 +99,7 @@ For project-local installation instead:
 
 ```sh
 mkdir -p .opencode/skills
-for skill in relay-setup relay-spec relay-status relay-continue relay-session; do
+for skill in relay-setup relay-spec relay-status relay-continue relay-session relay-tui-split; do
   ln -s /absolute/path/to/relay/skills/"$skill" .opencode/skills/"$skill"
 done
 ```

@@ -2103,3 +2103,283 @@
 - Evidence: Release https://github.com/fabianogoes/ai-relay/releases/tag/relay-tui-v0.1.0 (run 37078896179, todos os jobs `success`) com oito arquivos: `relay-tui-0.1.0-aarch64-apple-darwin.tar.gz`, `…-x86_64-apple-darwin.tar.gz`, `…-aarch64-unknown-linux-musl.tar.gz`, `…-x86_64-unknown-linux-musl.tar.gz` e o `.sha256` de cada um. CI: run 37078436396 (PR #5) com `macOS (required)` e `ubuntu-latest` verdes. Baixado de verdade com `curl` da URL publica: `shasum -a 256 -c` deu `OK`, o arquivo veio sem `com.apple.quarantine` (confirma que `curl` nao aplica a quarentena, como o README diz), `file` deu `Mach-O 64-bit executable arm64`, o conteudo e `relay-tui`, `LICENSE` e `README.md`, e `relay-tui --version` imprime `relay-tui 0.1.0`.
 - Criteria: A-008
 - Decisions: a tag foi apagada e recriada porque a 0.1.0 nunca tinha sido publicada (o release falhou antes do `publish`) e nao havia nenhum Release a invalidar. Os binarios de Linux saíram no Release, mas so o x86_64 passa por `cargo test` no CI; o arm64 foi apenas compilado e empacotado, e nenhum dos dois foi executado numa maquina Linux.
+
+## 2026-10-03 - T-001 - Tipo Suggestion e funcao pura suggest em src/suggest.rs
+- Backlog: B-048
+- Spec: .specs/20261002-004-relay-tui-sugestao-de-proximo-passo.md
+- Result: `app/relay-tui/src/suggest.rs` criado e exportado em `lib.rs`: `suggest(Option<&RelayState>) -> Suggestion` com `Case` para os onze casos da tabela, na ordem da spec, fora de `core` e de `view`; usa o `available` do core e nao le relogio nem disco.
+- Evidence: `cargo build` em `app/relay-tui` compila sem erro; os testes da tabela ficam para T-002. clippy e rustfmt nao estao instalados neste toolchain, entao nao rodaram.
+- Criteria: none
+- Decisions: none
+
+## 2026-10-03 - T-002 - Testes de suggest sobre os fixtures e casos sinteticos
+- Backlog: B-048
+- Spec: .specs/20261002-004-relay-tui-sugestao-de-proximo-passo.md
+- Result: `app/relay-tui/tests/suggest.rs` com 12 testes: os sete fixtures de status de `app/conformance/` (idle, backlog, ready, in_progress, blocked, done, inconsistent), casos sinteticos para nao-workspace, `blocked` sem handoff, `done` com TODO e `backlog` sem entrada disponivel, a escolha do primeiro item disponivel em ordem textual com o titulo sem anotacoes, e o determinismo (a mesma entrada, e o mesmo estado rederivado, dao a mesma sugestao, sem relogio).
+- Evidence: `cargo test --test suggest` em `app/relay-tui`: 12 passed, 0 failed.
+- Criteria: A-001
+- Decisions: um `[x]` sintetico precisa de registro no changelog, senao o core deriva `inconsistent` (`todo-cleared-before-changelog`); o caso `done` com TODO e montado com o registro.
+
+## 2026-10-03 - T-003 - Verificacao final local do B-048
+- Backlog: B-048
+- Spec: .specs/20261002-004-relay-tui-sugestao-de-proximo-passo.md
+- Result: a suite completa de `app/relay-tui` passa com o modulo `suggest` no crate, sem regressao nos testes de conformidade, pureza, somente-leitura, view e workspace.
+- Evidence: `cargo test` em `app/relay-tui`: todos os alvos `ok`, 0 failed (43 unitarios, 12 em `suggest`, 10 em `e2e_pty`, 2 em `conformance`, 8 em `view_snapshots`). clippy e rustfmt nao estao instalados neste toolchain e nao rodaram.
+- Criteria: none
+- Decisions: none
+
+## 2026-10-03 - T-001 - Linha de proximo passo desenhada na visao Agora
+- Backlog: B-049
+- Spec: .specs/20261002-004-relay-tui-sugestao-de-proximo-passo.md
+- Result: `src/view/hint.rs` monta a frase em portugues de cada caso a partir de `Suggestion` (skill em negrito `fg`, ids em `id`, resto em `meta`). `src/view/cards.rs` reserva a ultima linha do corpo, acima do rodape: o calculo de alturas de `work_body` virou o `plan` puro, e a linha so aparece se o plano com uma linha a menos mantem o Handoff e o TODO como estao (o Backlog pode virar linha). Nos corpos sem `work_body` ela aparece se sobrar uma linha alem do cartao. `fit` passou a terminar com `…` tambem quando o corte cai entre dois trechos.
+- Evidence: `cargo test` em `app/relay-tui` sem falha apos regravar os snapshots; o diff de `tests/snapshots` so acrescenta a linha (36 linhas trocadas em 18 arquivos), por exemplo `Retome T-002 de B-001 com relay-sessio…` em 40 colunas. A revisao dos snapshots por criterio fica para T-002.
+- Criteria: none
+- Decisions: o `…` agora marca todo corte de `fit`, e nao so o que cai dentro de um trecho; antes, um corte exato entre trechos descartava o resto sem marca.
+
+## 2026-10-03 - T-002 - Snapshots, semantica da view e read_only para a linha de proximo passo
+- Backlog: B-049
+- Spec: .specs/20261002-004-relay-tui-sugestao-de-proximo-passo.md
+- Result: regra de altura corrigida em `hint_fits` (`cards.rs`): a linha so fica enquanto, sem a sua linha, o Handoff nao se compacta e o TODO nao e cortado (descer de `Full` para `Standard` nao conta como compactar); com isso a presenca da linha e monotona na altura. Snapshots regravados (a linha aparece em 58 e 40 colunas, cortada com `…` em 40) e novos `in_progress-58-h12/h17/h18/h20`: ausente ate 17 linhas, presente a partir de 18. Em `tests/view_semantics.rs`: a skill em negrito `fg` e ids/resto em `id`/`meta` nos sete status, o corte com `…` em 40 colunas e a ausencia em 39 e 30, e a cessao ordenada por altura (nunca sobre Handoff compacto nem TODO cortado). `suggest.rs` entrou na lista de modulos sem leitura de disco em `tests/read_only.rs`.
+- Evidence: `cargo test` em `app/relay-tui`: 105 passed, 1 ignored, 0 failed. Revisao do diff dos snapshots: so acrescenta a linha (e os novos arquivos de altura). Em 17 linhas o Backlog e o TODO aparecem sem a linha; em 18 ela entra com o Backlog reduzido a uma linha.
+- Criteria: A-002, A-003
+- Decisions: a ordem de cessao por altura e Backlog vira linha, depois a linha de proximo passo some, depois o Handoff compacta e por ultimo o TODO corta; o teste cobre in_progress e blocked, que sao os estados com Handoff.
+
+## 2026-10-03 - T-003 - Design system e guias descrevem a linha de proximo passo
+- Backlog: B-049
+- Spec: .specs/20261002-004-relay-tui-sugestao-de-proximo-passo.md
+- Result: a secao 10 de `docs/design-system/README.md` ganhou o item "Próximo passo" na estrutura da View e o paragrafo "Próximo passo" com a tabela dos onze casos, as cores (skill em negrito `fg`, ids `id`, resto `meta`), a ausencia na visao Historico, e a regra de altura (o Backlog vira linha, depois a linha some, depois o Handoff compacta, por ultimo o TODO corta) e de largura (`…` ao cortar, ausente abaixo de 40 colunas). `docs/TUI.md` e `docs/TUI.pt-BR.md` mencionam a linha e a ordem de cessao por altura, no mesmo conjunto de mudancas.
+- Evidence: `git diff --stat docs`: 3 arquivos (TUI.md, TUI.pt-BR.md, design-system/README.md); a tabela do design system repete a da spec e as frases batem com `src/view/hint.rs`.
+- Criteria: A-004
+- Decisions: none
+
+## 2026-10-03 - T-004 - Verificacao final local do B-049
+- Backlog: B-049
+- Spec: .specs/20261002-004-relay-tui-sugestao-de-proximo-passo.md
+- Result: a linha de proximo passo esta completa e documentada; todos os criterios da spec estao nomeados por algum registro (A-001 no T-002 do B-048; A-002 e A-003 no T-002 e A-004 no T-003 do B-049).
+- Evidence: `cargo test` em `app/relay-tui`: 105 passed, 1 ignored, 0 failed. clippy e rustfmt nao estao instalados neste toolchain e nao rodaram.
+- Criteria: none
+- Decisions: none
+
+## 2026-10-03 - T-001 - ADR-0010 escrita
+- Backlog: B-040
+- Spec: .specs/20261002-002-relay-tui-navegacao-pelo-historico.md
+- Result: `docs/adr/0010-navegacao-da-relay-tui-como-estado-local.md` registra a navegacao como estado local da tela, ainda somente leitura, como emenda da decisao 1 da ADR-0009 e dos nao-objetivos de navegacao da spec 20261002-001; fixa Histórico (e nao Trabalho), `Esc` que volta em Histórico, mouse so em Histórico com equivalente de teclado e o parse novo so no Rust.
+- Evidence: o arquivo existe com Status, Contexto, Decisao, Consequencias, Compliance e Notes; a ADR-0009 nao foi alterada.
+- Criteria: none
+- Decisions: a ADR e datada 2026-10-03 (data da escrita); o indice do `AGENTS.md` e o design system ficam para T-002 e T-003.
+
+## 2026-10-03 - T-002 - ADR-0010 listada no indice de ADRs do AGENTS.md
+- Backlog: B-040
+- Spec: .specs/20261002-002-relay-tui-navegacao-pelo-historico.md
+- Result: o `AGENTS.md` ganhou a entrada de `docs/adr/0010-navegacao-da-relay-tui-como-estado-local.md` (Accepted), acima da ADR-0009, resumindo a navegacao como estado local, a visao Histórico, o `Esc` que volta e a emenda so da decisao 1 da ADR-0009.
+- Evidence: `grep -c 0010-navegacao AGENTS.md` retorna 1.
+- Criteria: none
+- Decisions: none
+
+## 2026-10-03 - T-003 - Visao Histórico e indice de ADRs registrados
+- Backlog: B-040
+- Spec: .specs/20261002-002-relay-tui-navegacao-pelo-historico.md
+- Result: o `AGENTS.md` lista a ADR-0010 no indice de ADRs (T-002) e a secao 10 de `docs/design-system/README.md` ganhou "Visão Histórico": os quatro niveis, a ordem e a linha de cada um, o detalhe, a rolagem so em Histórico, a largura minima (40 colunas) com a linha `Histórico precisa de 40 colunas`, a tabela de teclas e cliques com equivalentes de teclado, a captura do mouse so em Histórico, a atualizacao pelo id e o rodape com o corte por indicacao inteira. A linha "Teclas" da Estrutura passou a citar `Tab` e `r`.
+- Evidence: `grep` encontra a entrada `0010-navegacao` no `AGENTS.md` e o titulo `### Visão Histórico` no design system; a ADR-0010 existe em `docs/adr/` (T-001). Os textos de rodape e de linha repetem os da spec.
+- Criteria: A-001
+- Decisions: `design-system.html` nao foi alterado, porque nenhum token mudou; so o README descreve a visao.
+
+## 2026-10-03 - T-001 - Extracao do changelog e do titulo da spec no core em Rust
+- Backlog: B-041
+- Spec: .specs/20261002-002-relay-tui-navegacao-pelo-historico.md
+- Result: `app/relay-tui/src/core/history.rs` extrai cada registro do changelog (`TaskRecord`: data, id da tarefa, titulo e os campos Backlog, Spec, Result, Evidence, Criteria e Decisions como `Option`, com as linhas de continuacao juntadas ao campo), mantem um `T-NNN` repetido como registro proprio, e extrai id e titulo de uma spec (`spec_id`, `spec_title`) nas tres formas da spec: apos `AAAAMMDD-NNN - `, o `# ` inteiro, ou o nome do arquivo. `derive.rs`, `RelayState` e a suite de conformidade nao foram tocados.
+- Evidence: `cargo test --lib history` em `app/relay-tui`: 7 passed, 0 failed, cobrindo campo com continuacao, registro sem `Criteria`, `T-NNN` repetido, linhas soltas e campo desconhecido, e os tres formatos de titulo de spec.
+- Criteria: none
+- Decisions: um campo termina em linha em branco, em campo desconhecido ou no proximo cabecalho; a continuacao e junta com um espaco. Campo ausente e `None`.
+
+## 2026-10-03 - T-002 - Backlog por spec e tarefas por item no core em Rust
+- Backlog: B-041
+- Spec: .specs/20261002-002-relay-tui-navegacao-pelo-historico.md
+- Result: `extract_history(&RelayFiles)` em `core/history.rs` devolve `History`: as specs do mais recente ao mais antigo (id, titulo, itens de backlog na ordem textual e `done()` para a contagem `feitos/total`), o grupo `no_spec` (item sem `spec:` ou cuja `spec:` nao e arquivo de `.specs/`) e todos os registros do changelog, com `tasks_of(backlog_id)` na ordem textual, repetidos incluidos. Nao depende de `derive_state`.
+- Evidence: `cargo test --lib history` em `app/relay-tui`: 10 passed, 0 failed, incluindo o agrupamento com spec sem itens (0/0), spec sem titulo, itens orfaos e `T-NNN` repetido em `tasks_of`.
+- Criteria: none
+- Decisions: `HistoryItem` carrega o marcador cru e `needs`; a disponibilidade fica com o `OkState` do core, para a view nao recalcular dependencias.
+
+## 2026-10-03 - T-003 - Extracao verificada contra os registros reais, core intacto
+- Backlog: B-041
+- Spec: .specs/20261002-002-relay-tui-navegacao-pelo-historico.md
+- Result: `app/relay-tui/tests/history.rs` roda `extract_history` sobre os registros reais deste repositorio: specs do mais recente ao mais antigo com id e titulo separados, backlog agrupado sob a spec (B-040 e B-041 sob 20261002-002, anotacoes `spec:`/`needs:` fora do texto, cada item em um unico grupo), tarefas de B-040 com todos os campos e `Criteria: A-001` no T-003, e registros antigos sem `Criteria`. Os casos de campo com continuacao, `T-NNN` repetido no mesmo item e spec sem `# ` no formato esperado ficam nos testes de unidade de `history.rs`, porque o changelog real ainda nao tem repeticao dentro de um item.
+- Evidence: `cargo test` em `app/relay-tui`: 119 passed, 1 ignored, 0 failed (4 testes novos em `tests/history.rs`, 10 em `core::history`); `tests/conformance.rs` e `tests/purity.rs` passam; `git status` nao lista `derive.rs`, `types.rs`, `integrity.rs` nem `app/conformance/` como alterados.
+- Criteria: A-002
+- Decisions: o teste real nao afirma repeticao de `T-NNN` dentro de um item, para nao depender de um dado que o repositorio nao tem.
+
+## 2026-10-03 - T-001 - Modulo de navegacao sem terminal nem disco
+- Backlog: B-042
+- Spec: .specs/20261002-002-relay-tui-navegacao-pelo-historico.md
+- Result: `app/relay-tui/src/nav.rs` define `Nav` (visao Agora/Histórico, nivel specs/itens/tarefas/detalhe, selecao por nivel guardada pela chave da linha) e `handle(Input, &Ctx) -> Effect`. `Tab`/`t` alternam preservando nivel e selecao; `Enter` desce um nivel (nada no detalhe nem em lista vazia); `Esc` e `Backspace` sobem um nivel e, no de specs, voltam a Agora; `Esc` sai so em Agora e `q`/`Ctrl-C` saem de qualquer visao; setas movem a selecao sem passar dos limites; `Reload` e um efeito que nao altera o lugar. As linhas vem de `History` e `OkState`: specs mais novas primeiro e o grupo Sem spec, itens da spec, tarefas do item com os itens do TODO atual sem registro no fim.
+- Evidence: `cargo test --test nav` em `app/relay-tui`: 9 passed, 0 failed, com um teste por regra acima (toggle, ordem das specs, descida por nivel, tarefas com `Pending`, voltar por `Esc` e por `Backspace`, saidas, limites das setas, `Reload`, lista vazia).
+- Criteria: none
+- Decisions: o clique entra como `Input::Click(indice da linha)`, porque quem traduz coordenada em linha e a view (B-043); a rolagem do detalhe e limitada por um maximo que a view informa com `set_detail_max`.
+
+## 2026-10-03 - T-002 - Recarga pelo id, roda, paginas, rolagem do detalhe e clique
+- Backlog: B-042
+- Spec: .specs/20261002-002-relay-tui-navegacao-pelo-historico.md
+- Result: `Nav::reconcile` mantem cada selecao pela chave da linha quando as listas sao refeitas, leva a selecao a linha mais proxima da mesma lista quando a linha some e, quando some o pai do nivel aberto, sobe ate o primeiro nivel que existe. A roda move a selecao como as setas; `PgUp`/`PgDn` movem pela pagina (`set_page`) e param nas pontas; no detalhe, setas, roda e paginas rolam ate o maximo informado pela view (`set_detail_max`) e sair do detalhe zera a rolagem; `Click(i)` seleciona a linha e abre o nivel seguinte, e e ignorado fora das linhas, no detalhe e em Agora.
+- Evidence: `cargo test --test nav` em `app/relay-tui`: 19 passed, 0 failed (10 novos): selecao mantida com linhas novas acima, item sumido, spec sumida com subida ao nivel de specs, tarefa que ganha registro, item que some com o detalhe aberto, historico em estado `inconsistent` sem `ok`, roda, paginas, rolagem do detalhe e cliques.
+- Criteria: none
+- Decisions: um item do TODO sem registro (`Pending`) que ganha registro deixa de ser achado pela chave e a selecao cai na linha mais proxima, em vez de seguir a tarefa por id entre tipos de linha diferentes.
+
+## 2026-10-03 - T-003 - App liga a navegacao: teclas, roda e `r` que recarrega
+- Backlog: B-042
+- Spec: .specs/20261002-002-relay-tui-navegacao-pelo-historico.md
+- Result: `App` guarda o `Nav` e o `History` e os refaz a cada leitura do workspace (uma leitura so alimenta o estado derivado e as listas). `key_input` traduz `Tab`/`t`, `Enter`, `Esc`, `Backspace`, setas e `j`/`k`, `PgUp`/`PgDn`, `r` e `q`/`Ctrl-C` (uma letra com Ctrl nao e tecla de navegacao) e a roda do mouse em `Input`; o `Effect` decide: `Quit` sai, `Reload` relê o workspace como depois de um `Settled`, e a selecao e reconciliada pelo id. `Esc` sai so em Agora, `q` e `Ctrl-C` de qualquer visao. `nav.rs` entrou na lista de modulos sem leitura de disco de `tests/read_only.rs`. A tela ainda desenha so Agora e o clique nao e traduzido (B-043 e B-044).
+- Evidence: `cargo test` em `app/relay-tui`: 143 passed, 1 ignored, 0 failed, incluindo os testes ponta a ponta em pty e os de conformidade e pureza; 5 testes novos em `src/app.rs`: `Tab`/`t` e `Esc` que volta, `j`/`k` e roda, `r` relê sem evento do watcher mantendo nivel e selecao, navegar e recarregar nao alteram nenhum registro (conteudo identico antes e depois), Ctrl+letra ignorada. `git status` nao lista `derive.rs`, `types.rs`, `integrity.rs` nem `app/conformance/`.
+- Criteria: A-003
+- Decisions: a letra maiuscula equivale a minuscula nas teclas de navegacao (como ja era em `q`); `Backspace` em Agora nao faz nada.
+
+## 2026-10-03 - T-001 - Visao Histórico desenhada: listas, rolagem e detalhe
+- Backlog: B-043
+- Spec: .specs/20261002-002-relay-tui-navegacao-pelo-historico.md
+- Result: `app/relay-tui/src/view/history.rs` desenha o cabecalho e um cartao com o nivel aberto do `Nav`. Specs: id, titulo e `feitos/total`, mais a linha Sem spec; itens: id, texto e estado com o marcador e a palavra de Agora (disponivel e aguardando vem do `available` do core; sem estado derivado, `pendente`); tarefas: id, titulo e data, e os itens do TODO sem registro com `sem registro`. Cada linha ocupa uma linha e termina em `…`; a janela de rolagem mantem a selecao visivel e o cartao diz `↑ N acima · ↓ M abaixo` (so os numeros quando as palavras nao cabem). O detalhe quebra o titulo, a data e os campos pela largura sem cortar, omite o campo ausente e rola ate o fim; sem registro mostra `Sem registro no changelog ainda.`. Abaixo de 40 colunas aparece so o aviso `Histórico precisa de 40 colunas`, abaixo de 6 linhas so cabecalho e rodape, e sem specs `Nenhuma spec em .specs/`. `App::render` escolhe a visao aberta e `App::fit` informa ao `Nav` a pagina e o limite de rolagem do detalhe.
+- Evidence: `cargo test` em `app/relay-tui`: todos os alvos `ok`, 0 failed; `tests/history_view.rs` com 9 testes sobre o texto desenhado: linhas de spec, corte com `…` com a contagem alinhada a direita em 58 e 40 colunas, marcadores dos itens, tarefas com data, rolagem de 30 itens com indicacao de acima e abaixo, detalhe quebrado sem `…` e sem campo inventado, rolagem do detalhe ate `Decisions`, aviso em 30 colunas e lista vazia. O rodape continua o de antes; muda em T-002 e os snapshots vem em T-003.
+- Criteria: none
+- Decisions: em 30 colunas a frase `Histórico precisa de 40 colunas` (31 colunas) quebra por palavras em duas linhas em vez de terminar em `…`; a janela da lista e sem estado (a selecao fica no meio quando ha folga), o que dispensa guardar o inicio da janela no `Nav`.
+
+## 2026-10-03 - T-002 - Rodape de Agora e de cada nivel de Histórico
+- Backlog: B-043
+- Spec: .specs/20261002-002-relay-tui-navegacao-pelo-historico.md
+- Result: `view/mod.rs` troca o rodape fixo `q sair` por indicacoes (`Hint` com tecla, rotulo e ordem de corte) e tres rodapes: Agora `Tab histórico · r recarregar · q sair`, listas de Histórico `↑↓ mover · Enter abrir · Esc voltar · Tab agora · r recarregar · q sair` e detalhe `↑↓ rolar · Esc voltar · Tab agora · r recarregar · q sair` (sem `Enter`). Quando nao cabem, saem indicacoes inteiras da menos para a mais importante (`r recarregar`, `↑↓`, `Enter abrir`, `Esc voltar`, `Tab`) dentro da largura util (largura - 4, a dos cartoes); `q sair` fica sempre. `HistoryScreen` escolhe o rodape do nivel aberto e o `App` desenha a visao aberta.
+- Evidence: `cargo test --test history_view`: 13 passed, 0 failed (4 novos): textos inteiros em 80 colunas, cortes em 58 (`Enter abrir · Esc voltar · Tab agora · q sair`), 40 (`Esc voltar · Tab agora · q sair`) e 30 colunas, Agora a 40 colunas com `Tab histórico · q sair`, o detalhe sem `Enter`, e `q sair` presente ate em 7 colunas; `cargo test --lib app`: 18 passed, incluindo o teste de que a visao aberta e a desenhada. Os snapshots de Agora ainda mostram o rodape antigo e sao regravados em T-003.
+- Criteria: none
+- Decisions: a frase inteira do rodape de Agora tem 37 colunas e a spec manda mostrar `Tab histórico · q sair` em 40; por isso o limite do rodape e a largura util dos cartoes (largura - 4) e nao a largura da tela.
+
+## 2026-10-03 - T-003 - Snapshots de cada nivel de Histórico e do rodape de Agora
+- Backlog: B-043
+- Spec: .specs/20261002-002-relay-tui-navegacao-pelo-historico.md
+- Result: `tests/history_snapshots.rs` grava 23 snapshots (texto e mapa de cor) de um workspace montado a mao: specs em 58 e 40 colunas (e com a segunda selecionada), itens com um item em cada estado (feito, em curso, aguardando, disponivel, bloqueado) e o grupo Sem spec, tarefas de um item com correcao (`T-002` repetido) e do item atual com `sem registro`, detalhe com todos os campos quebrado em 58 e 40 colunas e o de um item do TODO sem registro, lista de 31 itens no inicio, no meio e no fim (`↑ N acima · ↓ M abaixo`, so os numeros em 40 colunas), detalhe em 40 colunas e 12 linhas no inicio e no fim, o aviso em 30 colunas, alturas 5 e 6, workspace vazio e spec sem itens (`0/0`). Os snapshots de Agora foram regravados: so a linha do rodape mudou (`Tab histórico · r recarregar · q sair`, e `Tab histórico · q sair` em 40 colunas). A secao 10 do design system descreve o novo rodape de Agora.
+- Evidence: `cargo test` em `app/relay-tui`: todos os alvos `ok`, 0 failed (`history_snapshots` 7, `history_view` 13, `view_snapshots` 9, `app` 59 na lib); revisei o texto de cada snapshot novo e o mapa de cor de `hist-items-58` (selecao `▸` em `U`, ids em `i`, estado em tom e negrito); os cortes com `…` aparecem em 58 e 40 colunas, o detalhe nao tem `…` e a indicacao de acima e abaixo aparece na lista e no detalhe maiores que a tela. `git status` nao lista `derive.rs`, `types.rs`, `integrity.rs` nem `app/conformance/`.
+- Criteria: A-004
+- Decisions: o aviso de 30 colunas e gravado quebrado em duas linhas (`Histórico precisa de 40` / `colunas`), porque a frase tem 31 colunas; o teste `view_semantics` ja tinha um aviso de funcao `card_rows` sem uso, que nao e desta mudanca.
+
+## 2026-10-03 - T-001 - Clique na tela vira linha da lista
+- Backlog: B-044
+- Spec: .specs/20261002-002-relay-tui-navegacao-pelo-historico.md
+- Result: `view::row_at` traduz a coordenada de um clique no indice da linha de lista que esta desenhada ali, pela mesma janela de rolagem do desenho; cabecalho, rodape, moldura do cartao, area vazia abaixo da ultima linha e qualquer ponto do detalhe nao sao linhas. O `App` guarda o tamanho do ultimo `fit` e, com Histórico aberto, entrega `Input::Click(indice)` ao `Nav` para o botao esquerdo; em Agora e com outro botao o clique e ignorado.
+- Evidence: `cargo test --lib app` em `app/relay-tui`: 21 passed, 0 failed (3 novos): clique na linha seleciona e abre o nivel seguinte; clique em cabecalho, borda de cima, bordas laterais, area vazia, rodape, fora da tela, em Agora e com o botao direito e ignorado; numa lista de 30 itens rolada o clique mapeia pela janela (B-017 e B-021) e no detalhe nada acontece.
+- Criteria: none
+- Decisions: um clique so conta no botao esquerdo, ao apertar (`Down`); soltar o botao nao faz nada.
+
+## 2026-10-03 - T-002 - Captura do mouse so com Histórico aberto
+- Backlog: B-044
+- Spec: .specs/20261002-002-relay-tui-navegacao-pelo-historico.md
+- Result: `App::wants_mouse()` e verdadeiro so com Histórico aberto, e `app::run_with_mouse` chama `set_mouse(bool)` quando esse desejo muda (`run` segue igual, com um `set_mouse` vazio). O `main.rs` liga e desliga a captura (`EnableMouseCapture`/`DisableMouseCapture`) por esse gancho, desliga de novo antes de `ratatui::restore()` ao sair e instala um hook de panic que desliga a captura e entao chama o hook de restauracao do ratatui. Em builds de debug, `RELAY_TUI_TEST_PANIC=history` abre Histórico, liga a captura e entra em panico, para o teste em pty provar a restauracao.
+- Evidence: `cargo test` em `app/relay-tui`: todos os alvos `ok`, 0 failed (63 na lib); o teste `the_mouse_is_wanted_only_while_historico_is_open` dirige o laco com eventos um a um e ve `[ligar, desligar, ligar, desligar]` para `Tab`, `Esc` (do nivel de specs a Agora), `Tab`, `Tab`. A restauracao no binario real (sair e panic) e o teste em pty de T-003.
+- Criteria: none
+- Decisions: quem fornece `set_mouse` e quem desliga a captura no fim do laco; assim a restauracao no `main.rs` cobre a saida por `q` e `Ctrl-C` em Histórico mesmo quando o laco acaba num lote de eventos.
+
+## 2026-10-03 - T-003 - Teste em pty da captura do mouse e documentacao de Histórico
+- Backlog: B-044
+- Spec: .specs/20261002-002-relay-tui-navegacao-pelo-historico.md
+- Result: o binario real, lido por um emulador de terminal, liga a captura do mouse com `Tab`, abre o nivel seguinte com um clique SGR numa linha da lista, e a desliga ao voltar a Agora (`Esc` do nivel de specs e `Tab`/`t`), ao sair de Histórico por `q` ou `Ctrl-C` e num panic em Histórico; o terminal sai restaurado (tela normal, cursor visivel, mouse nao reportado) e o workspace nao muda. O README do app, `docs/TUI.md` e `docs/TUI.pt-BR.md` descrevem a visao Histórico, os quatro niveis, a tabela de teclas e cliques (`Esc` volta em vez de sair nela, `r` recarrega, `q` e `Ctrl-C` saem de qualquer visao), a captura do mouse so em Histórico e o aviso abaixo de 40 colunas.
+- Evidence: `cargo test --test e2e_pty` em `app/relay-tui`: 15 passed, 1 ignored, 0 failed, com 5 testes novos (Tab liga o mouse e o clique em B-002 abre `Tarefas · B-002`; clique no cabecalho e no rodape nao faz nada; voltar a Agora desliga; `q` e `Ctrl-C` em Histórico desligam e restauram; `RELAY_TUI_TEST_PANIC=history` restaura e desliga antes da mensagem; navegar por teclas e mouse deixa o conteudo do workspace identico). Tirando o `DisableMouseCapture` do hook de panic o teste de panic falha com `the mouse was left reported`, e com ele volta a passar. `cargo test` completo: todos os alvos `ok`, 0 failed.
+- Criteria: A-005, A-006
+- Decisions: o aviso `muitos terminais pedem Shift (Option no iTerm2) para selecionar com a captura ligada` esta na documentacao como fato geral de terminal, sem prometer um comportamento por terminal; a lista de teclas do README do app esta em portugues, como o resto dele.
+
+## 2026-10-03 - T-001 - Script open-split.sh
+- Backlog: B-045
+- Spec: .specs/20261002-003-skill-relay-tui-abre-em-split.md
+- Result: `skills/relay-tui-split/scripts/open-split.sh [--dry-run] [DIR]` e um script POSIX `sh` (sem arrays, `local`, `[[` nem `echo -e`) que confere `relay-tui` no `PATH` (sem ele imprime o link do guia no GitHub e sai com 1), resolve o diretorio para um caminho absoluto, detecta o terminal pela primeira variavel que casa (`TMUX`, `ZELLIJ`, `WEZTERM_PANE`, `KITTY_WINDOW_ID`, `TERM_PROGRAM=iTerm.app`, `TERM_PROGRAM=WarpTerminal`) e abre um painel a direita com `relay-tui --workspace '<dir>'`: `tmux split-window -h`, `zellij action new-pane --direction right --`, `wezterm cli split-pane --right --pane-id`, `kitten @ launch --location=vsplit`, AppleScript do iTerm2 (na sessao de `ITERM_SESSION_ID`, `split vertically with default profile` e `write text`) e AppleScript do Warp via System Events (confere o app em primeiro plano, `Cmd+D`, digita o comando e Enter). `--dry-run` imprime o comando e sai com 0 sem executar; terminal nao reconhecido ou split que falha imprime a instrucao manual do terminal e sai com 2; nunca tenta outro terminal. Nao le nem escreve registro e nao instala nada.
+- Evidence: rodado a mao em `sh` e em `dash` com `env -i` para cada terminal em `--dry-run`: a saida de cada um e a da tabela, o caminho `/tmp/dir with space/it's` sai citado e correto no tmux (`"relay-tui --workspace '/tmp/dir with space/it'\\''s'"`) e no kitty, sem `relay-tui` no `PATH` sai 1 com o link e sem terminal reconhecido sai 2 com a instrucao; os dois scripts AppleScript impressos compilam com `osacompile`. Os testes automatizados sao T-002.
+- Criteria: none
+- Decisions: o dry-run de iTerm2 e Warp imprime `osascript <<'APPLESCRIPT' ... APPLESCRIPT` (o script real, que e o que vai para o `osascript`) em vez de `-e` repetido; sem `ITERM_SESSION_ID` o iTerm2 divide a sessao corrente da janela corrente; o Warp e reconhecido pelo bundle id `dev.warp.` e nao pelo nome do processo; uma opcao desconhecida ou um diretorio que nao existe sai com 2.
+
+## 2026-10-03 - T-002 - Testes do script por terminal, em sh e em dash
+- Backlog: B-045
+- Spec: .specs/20261002-003-skill-relay-tui-abre-em-split.md
+- Result: `.agents/tests/open-split.test.sh` (ferramenta do repositorio, fora de `skills/`) roda o script sob `sh` e `dash` com `env -i` e um `PATH` que so tem terminais falsos que registram a chamada. Para cada terminal da tabela (tmux, zellij, WezTerm, kitty, iTerm2, Warp) compara a saida de `--dry-run`, com `--workspace` absoluto e citado para um caminho com espaco, e confere que o dry-run nao executa nada; confere a precedencia (tmux dentro do iTerm2 e tmux, e cada multiplexador ou emulador vence os que vem depois); mostra que o caminho com apostrofo sobrevive aos dois shells; executa de verdade cada acao pelos falsos e compara o `argv` (e o script AppleScript recebido pelo `osascript`); falha do split imprime a instrucao daquele terminal, sai com 2 e nao tenta outro; terminal nao reconhecido sai com 2; sem `relay-tui` no `PATH` sai com 1 com o link do guia, tambem em `--dry-run`, sem instalar nada; opcao desconhecida, diretorio inexistente e dois diretorios saem com 2; nenhum registro e citado no script e nenhum arquivo de teste fica dentro de `skills/`.
+- Evidence: `sh .agents/tests/open-split.test.sh`: `145 passed, 0 failed` (a suite inteira em `sh` e em `dash`). Tres mutacoes do script derrubam o teste e o script restaurado e identico ao original: sem o `-h` do tmux (14 falhas), iTerm2 antes do tmux na ordem (6) e caminho sem aspas (24).
+- Criteria: A-001, A-002
+- Decisions: o teste de A-005 (nenhum registro nomeado) ja cobre `skills/relay-tui-split/SKILL.md`, que ainda nao existe; o criterio so e nomeado quando a skill existir (B-046). A verificacao nos terminais reais (A-004) e do B-047.
+
+## 2026-10-03 - T-001 - Skill relay-tui-split, links por item e linha do AGENTS.md
+- Backlog: B-046
+- Spec: .specs/20261002-003-skill-relay-tui-abre-em-split.md
+- Result: `skills/relay-tui-split/SKILL.md` (30 linhas, em ingles, neutra de harness) diz que a skill esta fora do protocolo e nao le nem escreve registro, manda rodar `scripts/open-split.sh` a partir do diretorio da skill com o repositorio do usuario como unico argumento (e `--dry-run` so quando a pessoa pergunta o que ele faria) e relatar o que o script imprimiu por codigo de saida (0 painel aberto, 1 sem `relay-tui` no `PATH` com o link, 2 terminal nao suportado ou split falhou com a instrucao manual), sem instalar o binario, sem tentar outro terminal e sem gerenciar o painel depois. Os links relativos `.agents/skills/relay-tui-split` e `.claude/skills/relay-tui-split` apontam para `../../skills/relay-tui-split`, como os das demais skills (ADR-0002), e a skill aparece na lista de skills da sessao. A linha das skills do `AGENTS.md` deixa de dizer "all five".
+- Evidence: `wc -l skills/relay-tui-split/SKILL.md`: 30; `ls .claude/skills/relay-tui-split/` mostra `SKILL.md` e `scripts` pelo link; `sh .agents/tests/open-split.test.sh`: `145 passed, 0 failed`, e o teste de que nenhum registro e citado agora inspeciona a `SKILL.md` existente alem do script.
+- Criteria: none
+- Decisions: o nome do diretorio de scripts na `SKILL.md` e relativo a skill, porque o caminho absoluto muda por harness e por instalacao; a documentacao e os lacos de instalacao ficam em T-002 e T-003.
+
+## 2026-10-03 - T-002 - Lacos de instalacao e tabela de skills com relay-tui-split
+- Backlog: B-046
+- Spec: .specs/20261002-003-skill-relay-tui-abre-em-split.md
+- Result: os quatro lacos de `docs/INSTALL.md` e os quatro de `docs/INSTALL.pt-BR.md` (Claude Code, Codex, OpenCode global e OpenCode local) passaram a incluir `relay-tui-split`, com os blocos de codigo identicos nas duas linguas; a tabela de skills de `README.md` e `README.pt-BR.md` ganhou a linha `relay-tui-split` com a nota de que ela fica fora do protocolo e nao toca registro. O `.opencode/INSTALL.md`, que listava so quatro skills, passou a listar tambem `relay-continue` (que faltava) e `relay-tui-split`.
+- Evidence: `rtk proxy grep -c relay-tui-split`: 4 em `docs/INSTALL.md`, 4 em `docs/INSTALL.pt-BR.md`, 1 em cada README e 2 em `.opencode/INSTALL.md`; `git diff --stat` dos cinco arquivos: 14 insercoes e 9 remocoes (so as linhas dos lacos, as linhas da tabela e as do adaptador do OpenCode).
+- Criteria: none
+- Decisions: alinhar o `.opencode/INSTALL.md` e incluir o `relay-continue` que faltava e uma correcao de uma divergencia ja existente, feita aqui para manter a orientacao de instalacao igual nos tres harnesses (AGENTS.md, "Keep installation guidance aligned").
+
+## 2026-10-03 - T-003 - Secao de split dos guias do relay-tui com a skill e as permissoes
+- Backlog: B-046
+- Spec: .specs/20261002-003-skill-relay-tui-abre-em-split.md
+- Result: a secao "Open it in a split" de `docs/TUI.md` e "Abrir num split" de `docs/TUI.pt-BR.md` agora comecam pela skill (`/relay-tui-split` no Claude Code; "Use relay-tui-split" no Codex e no OpenCode), explicam que ela e do pacote, fora do protocolo, nao toca registro nem instala nada, listam a deteccao e a acao de cada terminal (tmux, zellij, WezTerm, kitty, iTerm2, Warp) com a ordem de precedencia, dizem as permissoes do macOS (Automacao para o iTerm2, Acessibilidade para o Warp, que so recebe as teclas se for o app em primeiro plano), descrevem o script, `--dry-run` e os codigos de saida 0, 1 e 2, e mantem a abertura manual como alternativa. Nao afirmam que Codex e OpenCode repassam o ambiente do terminal: isso e a verificacao do B-047.
+- Evidence: `rtk proxy grep -c relay-tui-split` retorna 3 em cada guia; as duas secoes tem as mesmas tabelas e os mesmos comandos. Para A-003: a `SKILL.md` tem 30 linhas, os links `.agents/skills/relay-tui-split` e `.claude/skills/relay-tui-split` existem, e a skill consta nos quatro lacos de `docs/INSTALL.md` e de `docs/INSTALL.pt-BR.md`, na tabela de `README.md` e `README.pt-BR.md` e nas secoes de split dos dois guias (T-001, T-002 e este registro). Para A-005: `grep` por `.orchestration`, `.specs`, `BACKLOG.md`, `TODO.md`, `HANDOFF.md` e `CHANGELOG.md` em `SKILL.md` e `open-split.sh` nao acha nada, e `sh .agents/tests/open-split.test.sh` repete essa inspecao e da `145 passed, 0 failed`.
+- Criteria: A-003, A-005
+- Decisions: A-004 (verificacao com o harness real em cada terminal) continua do B-047; a documentacao so promete o que o script faz e o que os testes cobrem.
+
+## 2026-10-03 - T-001 - Ambiente do Claude Code no Warp e tmux real
+- Backlog: B-047
+- Spec: .specs/20261002-003-skill-relay-tui-abre-em-split.md
+- Result: Claude Code + Warp, so deteccao: o shell que o Claude Code usa nesta sessao herda o ambiente do Warp (`TERM_PROGRAM=WarpTerminal`, `TERM_PROGRAM_VERSION=v0.2026.09.16.08.27.stable_02`, `__CFBundleIdentifier=dev.warp.Warp-Stable`), entao a hipotese da spec (o ambiente do terminal chega ao shell do harness) se confirma para o Claude Code. O script rodado dai com `--dry-run` e `relay-tui` no `PATH` escolhe o Warp e imprime o AppleScript do Warp (`Cmd+D`, depois digita `relay-tui --workspace '/Users/fabiano/Developer/relay'`), saida 0. Script + tmux 3.6b, de verdade: num servidor tmux isolado (`tmux -L relay-b047 -f /dev/null`, que nao toca as sessoes da pessoa) o script dentro de um painel abriu o painel a direita: `Opened relay-tui in a tmux split, watching /Users/fabiano/Developer/relay`, `EXIT=0`, e o painel novo mostra o `relay-tui` desenhando o handoff deste trabalho.
+- Evidence: comando 1: `PATH=<repo>/app/relay-tui/target/release:$PATH sh skills/relay-tui-split/scripts/open-split.sh --dry-run` no shell do Claude Code: `TERM_PROGRAM=WarpTerminal TMUX=unset`, exit 0, AppleScript do Warp. Comando 2: `tmux -L relay-b047 -f /dev/null new-session -d -s b047 -x 200 -y 40 sh`, `send-keys` do script e `list-panes -F`: painel 0 `start=[sh]` 100x40 e painel 1 `start=["relay-tui --workspace '/Users/fabiano/Developer/relay'"] cmd=relay-tui` 99x40; `capture-pane` do painel 1 mostra `relay`, `● atualizado` e o cartao `Handoff` com `B-047 · T-001`. O servidor isolado foi encerrado (`no server running`).
+- Criteria: none
+- Decisions: o tmux foi verificado num servidor proprio (`-L relay-b047`) para nao dividir nenhuma sessao da pessoa; o painel do tmux que roda o script faz o papel do shell do harness, e o harness de verdade no tmux e o T-002.
+
+## 2026-10-03 - T-002 - Claude Code, Codex e OpenCode no tmux
+- Backlog: B-047
+- Spec: .specs/20261002-003-skill-relay-tui-abre-em-split.md
+- Result: cada harness rodou de verdade dentro de um painel de um servidor tmux isolado (`tmux -L relay-b047 -f /dev/null`), num repositorio descartavel com `.claude/skills`, `.agents/skills` e `.opencode/skills` apontando para `skills/relay-tui-split`, com o `relay-tui` do `target/release` no `PATH`, e recebeu um pedido curto para usar a skill. Claude Code 2.1.288 (`claude -p --model haiku --allowedTools Bash Skill Read`): abriu o painel e relatou o resultado. OpenCode 1.18.32 (`opencode run`): carregou a skill pela ferramenta nativa (`→ Skill "relay-tui-split"`), rodou o script (`./scripts/open-split.sh`) e o painel abriu. Codex 0.156.1 (`codex exec --skip-git-repo-check`): a sandbox padrao NAO deixa o script falar com o tmux (`error connecting to /private/tmp/tmux-501/relay-b047 (Operation not permitted)`); o script tratou como split que falhou, imprimiu a instrucao manual, saiu com 2 e o Codex a repassou; com `-s danger-full-access` o mesmo pedido abriu o painel. O tmux foi detectado nos tres (o `TMUX` do painel chegou ao shell de cada harness, inclusive na sandbox do Codex).
+- Evidence: `tmux list-panes -F` apos cada execucao: Claude Code, Codex com `danger-full-access` e OpenCode mostram dois paineis, o novo com `start=["relay-tui --workspace '<repositorio descartavel>'"] cmd=relay-tui` 99x40; o `capture-pane` do painel do Claude Code mostra `relay`, `● atualizado` e `Sem trabalho`. Codex com a sandbox padrao: so um painel (`sleep`), saida `Could not open the tmux split.` e a instrucao manual com `relay-tui --workspace '...'`. Os servidores isolados foram encerrados e nao sobrou nenhum processo `relay-tui` dos testes (so existe um `target/debug/relay-tui --workspace /Users/fabiano/Developer/relay`, de outra origem, que nao foi tocado).
+- Criteria: none
+- Decisions: a limitacao do Codex vai para `docs/TUI.md` e `docs/TUI.pt-BR.md` no T-003, como o A-004 manda; uma primeira tentativa do Claude Code com `env -i` falhou com `Not logged in`, defeito do ambiente do teste (a autenticacao precisa do ambiente do usuario) e nao da skill, e foi refeita desfazendo so as variaveis `CLAUDE*`, `WARP*`, `TERM_PROGRAM*`.
+
+## 2026-10-03 - T-003 - Bug do AppleScript do Warp corrigido pela execucao real, guarda verificada e limitacao do Codex documentada
+- Backlog: B-047
+- Spec: .specs/20261002-003-skill-relay-tui-abre-em-split.md
+- Result: ao rodar o script de verdade no shell do Claude Code no Warp, o AppleScript do Warp falhou na hora com `Não é possível ajustar insertion point 1 a application process 1 whose frontmost = true. (-10006)`: `front` e palavra reservada do AppleScript, e o script so tinha sido compilado, nao executado. A variavel virou `frontApp` em `open-split.sh`. Com isso a guarda do Warp foi verificada de verdade: com o Arc (`company.thebrowser.Browser`) em primeiro plano o script parou com `Warp is not the frontmost application (-2700)`, imprimiu a instrucao manual do Warp, saiu com 2 e nao digitou nada em outro aplicativo; o trecho da guarda sozinho responde `guard: not Warp (company.thebrowser.Browser)`. `docs/TUI.md` e `docs/TUI.pt-BR.md` ganharam a nota das sandboxes dos harnesses: Claude Code e OpenCode abrem o painel no tmux, a sandbox padrao do Codex bloqueia o socket do tmux (o script cai na instrucao manual com saida 2) e o painel abre fora da sandbox, e as variaveis do terminal chegam ao shell do harness em todos os casos verificados.
+- Evidence: saida real antes da correcao (`execution error ... (-10006)`, `Could not open the warp split.`, exit 2) e depois (`execution error: Warp is not the frontmost application (-2700)`, exit 2); `sh .agents/tests/open-split.test.sh`: `145 passed, 0 failed` com o script corrigido; `rtk proxy grep -c sandbox` retorna 3 em cada guia. O link temporario `~/.local/bin/relay-tui` que criei para o teste foi removido, e os arquivos de apoio em `/tmp` tambem.
+- Criteria: none
+- Decisions: nao trouxe o Warp para o primeiro plano nem simulei teclas na janela da pessoa (ela recusou essa acao); por isso o `Cmd+D` do Warp e o iTerm2 continuam sem execucao real e viram o T-004, bloqueado.
+
+## 2026-10-03 - T-004 - iTerm2 verificado de verdade e Warp executado ate a permissao de Acessibilidade
+- Backlog: B-047
+- Spec: .specs/20261002-003-skill-relay-tui-abre-em-split.md
+- Result: com a autorizacao explicita da pessoa ("prefiro que rode"), o script rodou de verdade nos dois terminais. iTerm2: o painel abriu. Rodado dentro de uma janela de teste propria do iTerm2 (aberta por AppleScript, cuja sessao tem `ITERM_SESSION_ID`), o script imprimiu `Opened relay-tui in a iterm2 split, watching /Users/fabiano/Developer/relay` e saiu com 0; a aba passou a ter 2 sessoes e a segunda mostra o `relay-tui` desenhando o handoff deste trabalho (`B-047 · T-004`, `● atualizado`); nenhuma permissao extra foi pedida. A janela de teste foi fechada e o processo de teste terminou. Warp: com o Warp em primeiro plano (`dev.warp.Warp-Stable`, trazido por `open -a Warp`) a guarda passou e o Cmd+D foi tentado, mas o macOS negou o envio de teclas ao `osascript` (`osascript não tem permissão para acionar teclas. (1002)`): o script imprimiu a instrucao manual do Warp (Cmd+D e a permissao de Acessibilidade) e saiu com 2, nada foi digitado e nenhum painel abriu. Falta conceder a Acessibilidade e repetir.
+- Evidence: iTerm2: saida do script `Opened relay-tui in a iterm2 split ...` com `EXIT=0`; `count of sessions of current tab` = 2; `text of session 2` com o cartao `Handoff` e `B-047 · T-004`; `pgrep` mostrou um `relay-tui --workspace /Users/fabiano/Developer/relay` novo (e nenhum depois de fechar a janela). Warp: `frontmost: dev.warp.Warp-Stable`, erro `1002`, `Could not open the warp split.`, exit 2, e o `pgrep` sem processo novo. O link temporario `~/.local/bin/relay-tui` e a saida de apoio foram removidos.
+- Criteria: none
+- Decisions: nao concedi nem contornei a permissao de Acessibilidade, que e uma escolha da pessoa em Ajustes do Sistema; por isso o Warp vira o T-005, bloqueado ate ela conceder a permissao ao Warp (o processo que esta na frente) e pedir que eu repita. A permissao negada tambem e um resultado verificado: o script cai na instrucao manual e nao digita nada.
+
+## 2026-10-03 - T-005 - Warp com a Acessibilidade concedida: split que executa a linha sozinho
+- Backlog: B-047
+- Spec: .specs/20261002-003-skill-relay-tui-abre-em-split.md
+- Result: com a Acessibilidade concedida (`AXIsProcessTrusted()` passou a `true`) e o Warp em primeiro plano, o script abriu o split do Warp (`Cmd+D` funcionou), mas a primeira versao so deixou o texto `relay-tui --workspace '/Users/fabiano/Developer/relay'` digitado no painel novo, sem executar; a pessoa viu e rodou a linha a mao, e o `relay-tui` abriu certo. O `key code 36` (Enter) logo apos a digitacao nao foi aceito pelo Warp; o script do Warp passou a esperar 0,4 s e enviar `keystroke return`. Com a correcao, o mesmo comando abriu o split e executou a linha sozinho: o `relay-tui` ficou rodando no painel novo.
+- Evidence: antes: `Opened relay-tui in a warp split` com exit 0 e nenhum processo `relay-tui --workspace` depois de 4 s (o shell novo existia, sem filho), e o relato da pessoa de que a linha estava digitada e nao executada. Depois da correcao: `Opened relay-tui in a warp split, watching /Users/fabiano/Developer/relay`, exit 0 e `ps` mostra `35510 ttys003 00:04 relay-tui --workspace /Users/fabiano/Developer/relay`, num tty novo. `sh .agents/tests/open-split.test.sh`: `145 passed, 0 failed` (o teste do Warp agora exige `keystroke return`). O link temporario `~/.local/bin/relay-tui` foi removido. A-004 reunido: tmux com Claude Code, Codex (so fora da sandbox) e OpenCode (T-001 e T-002), iTerm2 (T-004) e Warp (este registro).
+- Criteria: A-004
+- Decisions: no iTerm2 o script rodou dentro de uma sessao propria (com `ITERM_SESSION_ID`) e nao com o Claude Code aberto la; no Warp foi o proprio Claude Code, pela skill, que rodou o script; o que A-004 pede de fundamental (o ambiente do terminal chega ao shell do harness e o painel abre) fica verificado em tmux e Warp com o harness, e no iTerm2 pelo script. Os splits de teste ficaram abertos na janela do Warp da pessoa (varios com o texto digitado e um rodando o `relay-tui`) para ela fechar.
+
+## 2026-10-03 - T-001 - Agrupamento do backlog por spec, puro, e o historico no View
+- Backlog: B-050
+- Spec: .specs/20261002-002-relay-tui-navegacao-pelo-historico.md
+- Result: `app/relay-tui/src/view/specs.rs` agrupa o backlog por spec, so com os dados que o core ja entrega (marcador e `available` de `OkState`, e os arquivos e titulos de spec do `History`): a spec atual e a do item ativo do TODO (`em curso`) ou, sem item ativo, a do primeiro item disponivel em ordem textual (`a seguir`, sem afirmar prioridade); ela traz os itens nao feitos na ordem do backlog e `feitos/total`; as specs pendentes seguem a ordem em que aparecem no `BACKLOG.md`, so com as que tem item nao feito, e os itens sem spec valida formam a linha Sem spec; sem item que ancore a spec atual (backlog sem disponivel, ou item ativo sem spec valida) ela nao existe e todas as pendentes vao para a lista. `View` ganhou o campo `history` (e `view::no_history()` para telas sem specs); o `App` o preenche e os sete pontos de teste que construiam `View` foram atualizados.
+- Evidence: `cargo test --lib specs` em `app/relay-tui`: 6 passed, 0 failed (spec do item ativo com feitos so na contagem, spec do primeiro disponivel com as outras na ordem do backlog, nenhum disponivel sem spec atual, Sem spec, item ativo sem spec valida, spec toda feita fora das pendentes). Os cartoes sao T-002.
+- Criteria: none
+- Decisions: a escolha da spec atual usa o `available` do core e nunca recalcula dependencias, como manda a spec; um item ativo cuja spec nao e um arquivo de `.specs/` nao ancora cartao nenhum.
+
+## 2026-10-03 - T-002 - Cartoes Spec atual e Specs pendentes e a ordem de ceder por altura
+- Backlog: B-050
+- Spec: .specs/20261002-002-relay-tui-navegacao-pelo-historico.md
+- Result: o cartao Backlog de Agora foi substituido por dois cartoes em `in_progress`, `blocked`, `ready` e `backlog`. Spec atual: na borda `AAAAMMDD-NNN` e o titulo da spec (cortado com `…` antes do lado direito), a direita `em curso` (verde) ou `a seguir` (azul, sem item ativo) e `feitos/total`; dentro, os itens nao feitos na ordem do backlog com marcador e palavra a direita (`em curso`, `disponível`, `aguardando · após B-NNN`, `bloqueado`), e os feitos so na contagem. Specs pendentes: uma linha por spec (id, titulo e `feitos/total`), Sem spec por ultimo. Em `backlog` a linha `● A escolher  Sem handoff ativo` fica no lugar do Handoff e os dois cartoes no lugar do cartao `A escolher`. A altura cede nesta ordem: Specs pendentes vira `N specs pendentes`, Spec atual corta em `+N itens` (sempre com ao menos um item), e os dois viram a linha de contagem do Backlog de antes; so entao o Handoff compacta e o TODO corta. A linha de proximo passo continua depois do Backlog virar linha. `done`, `idle`, `inconsistent` e nao-workspace nao mudaram. O codigo morto do cartao Backlog antigo foi removido.
+- Evidence: `cargo test --test agora_specs` em `app/relay-tui`: 6 passed, 0 failed, num workspace montado a mao (spec toda feita, spec com um item bloqueado, a atual com todos os estados, uma com um item, e um item sem spec): o titulo e a contagem do cartao, os itens com a palavra e `após B-041`, o feito fora da lista, a ordem das pendentes e Sem spec por ultimo, `a seguir` sem item ativo, o corte com `…` em 58 e 40 colunas, a sequencia 0 (dois cartoes), 1 (linha de pendentes), 2 (atual cortada) e 3 (linha de contagem) sem nunca voltar atras entre as alturas 44 e 14, e o TODO e o Handoff intactos ate chegar a 3. Os testes de unidade de `specs` seguem em 6 passed. Os snapshots e os testes antigos que citam o cartao Backlog sao regravados e ajustados em T-003.
+- Criteria: none
+- Decisions: o corte do cartao Spec atual nao deixa um cartao so com `+N itens`: abaixo de frame, um item e a linha de corte (4 linhas, mais a de pendentes) ele vira a linha de contagem; o `em curso`/`a seguir` fica na borda, antes do `feitos/total`.
+
+## 2026-10-03 - T-003 - Snapshots da visao Agora agrupada por spec e documentacao
+- Backlog: B-050
+- Spec: .specs/20261002-002-relay-tui-navegacao-pelo-historico.md
+- Result: a visao Agora mostra o cartao Spec atual (id e titulo na borda, `feitos/total`, itens nao feitos com marcador e palavra) e, abaixo, o cartao Specs pendentes (id, titulo e `feitos/total` por spec, e a linha Sem spec), em `in_progress`, `blocked`, `ready` e `backlog` (este com `a seguir` e a spec do primeiro item disponivel, e sem o cartao Spec atual quando nao ha entrada disponivel). 16 snapshots novos (`agora-specs-*`, em 58 e 40 colunas e de altura reduzida) mostram cada passo da ordem de ceder (dois cartoes, pendentes em uma linha, atual cortada em `+N itens`, linha de contagem), e os snapshots de `done`, `idle`, `inconsistent` e nao-workspace seguem sem cartoes de spec. As frases longas do proximo passo ganharam uma forma curta para a skill nunca ser o que se corta (`Próximo item: B-NNN (título). Comece com relay-session.`, `Nenhum item disponível: relay-continue.`, `Registros em conflito: relay-status e relay-continue.`). O design system (secao 10: estrutura, "Agrupado por spec", altura, proximo passo), `docs/TUI.md` e `docs/TUI.pt-BR.md` descrevem os dois cartoes no lugar do cartao Backlog; os testes em pty que dependiam do texto do cartao antigo passaram a criar o arquivo de spec.
+- Evidence: `cargo test` em `app/relay-tui`: todos os alvos `ok`, 193 passed, 0 failed (`agora_specs` 9, `view_snapshots` 9, `e2e_pty` 16, lib 71); `sh .agents/tests/open-split.test.sh`: `145 passed, 0 failed`; `grep` por `Specs pendentes`, `a seguir` e `em curso ·` nos snapshots de `done`, `idle`, `inconsistent` e `not-relay` nao acha nada. A escolha da spec atual usa o `available` e os marcadores do core (`specs.rs` nao recalcula dependencias). Revisei o texto dos snapshots novos nas quatro etapas de altura e o do estado `backlog` sem item disponivel.
+- Criteria: A-007
+- Decisions: o cartao Spec atual so aparece se o item ancora tem spec valida (um arquivo de `.specs/`); o Sem spec vem sempre por ultimo, como no nivel de specs de Histórico; a forma curta das frases e usada so quando a longa nao cabe, e nenhuma frase longa (a mensagem da tabela da spec 004) mudou para quem tem largura.

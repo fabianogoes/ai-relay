@@ -15,13 +15,13 @@
 │ ✓ T-001 Formato do caso de conformidade                │
 │ ✓ T-002 Extrair as entradas dos fixtures para workspa… │
 │ ✓ T-003 Runner TS lê a suíte                           │
-│ ● T-004 Runner Rust lê a suíte                         │
-│ ◌ T-005 CI quebra em divergência  após T-004           │
-│ ○ T-006 Documentar o formato                           │
-│ +4 itens                                               │
+│ +7 itens · ● T-004 em andamento                        │
 ╰────────────────────────────────────────────────────────╯
- Backlog 1/6 · 1 em curso · 1 bloqueado · 2 disponíveis
- q sair
+ 1 spec pendente
+
+╭────────────────────────────────────────────────────────╮
+│ Tab histórico · r recarregar · q sair                  │
+╰────────────────────────────────────────────────────────╯
 
 --- colors ---
 #######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
@@ -41,10 +41,10 @@ d........................................................d
 d.G.iiiii.mmmmmmm.mm.mmmm.mm.mmmmmmmmmmmm................d
 d.G.iiiii.mmmmmmm.mm.mmmmmmmm.mmm.mmmmmmmm.mmmm.mmmmmmmm.d
 d.G.iiiii.mmmmmm.mm.mm.m.mmmmm...........................d
-d.G.iiiii.FFFFFF.FFFF.FF.F.FFFFF.........................d
-d.m.iiiii.mm.mmmmmm.mm.mmmmmmmmmmm..yyyy.yyyyy...........d
-d.u.iiiii.ffffffffff.f.fffffff...........................d
-d.mm.mmmmm...............................................d
+d.mm.mmmmm.m.m.mmmmm.mm.mmmmmmmmm........................d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-.FFFFFFF.mmm.m.m.mm.mmmmm.m.m.mmmmmmmmm.m.m.mmmmmmmmmmm
-.F.mmmm
+.m.mmmm.mmmmmmmm
+
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

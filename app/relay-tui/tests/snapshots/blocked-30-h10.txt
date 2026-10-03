@@ -5,9 +5,9 @@
 
 
 
-
-
- q sair
+╭────────────────────────────╮
+│ Tab histórico · q sair     │
+╰────────────────────────────╯
 
 --- colors ---
 #######.mmmmmmmmm.g.mmmmmmmmmm
@@ -17,6 +17,6 @@
 
 
 
-
-
-.F.mmmm
+dddddddddddddddddddddddddddddd
+d.FFF.mmmmmmmmm.m.F.mmmm.....d
+dddddddddddddddddddddddddddddd

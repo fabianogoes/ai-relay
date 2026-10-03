@@ -15,13 +15,13 @@
 │ ████████ ████████ ████████                             │
 │                                                        │
 │ ✓ T-001 Materializar os sete fixtures                  │
-│ ✓ T-002 Escrever tokens.css                            │
-│ ! T-003 Scaffold da relay-ui  bloqueado                │
+│ +2 itens                                               │
 ╰────────────────────────────────────────────────────────╯
-╭ Backlog ────────────────────────────────────────── 0/1 ╮
-│ ○ 1 disponível                                         │
+ 1 spec pendente
+
+╭────────────────────────────────────────────────────────╮
+│ Tab histórico · r recarregar · q sair                  │
 ╰────────────────────────────────────────────────────────╯
- q sair
 
 --- colors ---
 #######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
@@ -41,10 +41,10 @@ d.FFFF.ddddddddddddddddddddddddddddddddddddddddddddd.mmm.d
 d.gggggggg.gggggggg.yyyyyyyy.............................d
 d........................................................d
 d.G.iiiii.mmmmmmmmmmmm.mm.mmmm.mmmmmmmm..................d
-d.G.iiiii.mmmmmmmm.mmmmmmmmmm............................d
-d.Y.iiiii.ffffffff.ff.ffffffff..yyyyyyyyy................d
+d.mm.mmmmm...............................................d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-d.FFFFFFF.dddddddddddddddddddddddddddddddddddddddddd.mmm.d
-d.U.f.ffffffffff.........................................d
+.m.mmmm.mmmmmmmm
+
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-.F.mmmm
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

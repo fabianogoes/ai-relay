@@ -2,11 +2,11 @@
 
 
 
- q sair
+ Tab histórico · r recarregar · q sair
 
 --- colors ---
 #######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
 
 
 
-.F.mmmm
+.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm

@@ -82,8 +82,39 @@ relay-tui --version
 relay-tui --help
 ```
 
-Teclas: `q`, `Esc` ou `Ctrl-C` saem. Não há mais nada para apertar: é um painel
-para olhar.
+O painel abre em **Agora**, o que está em curso. `Tab` (ou `t`) abre a segunda
+visão, **Histórico**, e volta; `r` relê o workspace por inteiro (só é preciso
+quando o watcher não entrega eventos, num volume de rede por exemplo). `q` e
+`Ctrl-C` saem de qualquer visão, na hora. `Esc` em Agora não sai sozinho: pergunta
+`Sair?` no rodapé, e `Esc`, `Enter` ou `y` confirmam enquanto qualquer outra tecla
+cancela. Em Histórico `Esc` volta. Trocar de visão, mover a seleção e recarregar
+não escrevem nada: o painel continua só de leitura.
+
+### Histórico
+
+Quatro níveis, cada um aprofundando o anterior: as **specs** (da mais recente à
+mais antiga, com `feitos/total` dos itens), os **itens de backlog** da spec, as
+**tarefas** do item (os registros do changelog) e o **detalhe** da tarefa, com
+Result, Evidence, Criteria e Decisions. Cada linha de lista ocupa uma linha e
+termina em `…` quando não cabe; o detalhe quebra o texto e nunca corta. A lista
+rola para manter a seleção visível e diz quantas linhas há acima e abaixo.
+
+| Tecla | Efeito |
+| --- | --- |
+| `↑` `↓`, `j` `k`, roda do mouse | movem a seleção (no detalhe, rolam) |
+| `PgUp` `PgDn` | movem uma página |
+| `Enter` ou clique numa linha | abre o nível seguinte |
+| `Esc` ou `Backspace` | voltam um nível; no de specs, voltam a Agora. Em Histórico `Esc` volta em vez de sair |
+| `Tab`, `t` | alternam Agora e Histórico, no mesmo nível e na mesma seleção |
+| `r` | relê o workspace |
+| `q`, `Ctrl-C` | saem |
+
+O mouse só é capturado enquanto Histórico está aberto, para Agora continuar
+permitindo selecionar e copiar texto; a captura é desligada ao voltar a Agora,
+ao sair e num erro interno. Com ela ligada, muitos terminais pedem uma tecla
+(`Shift`, ou `Option` no iTerm2) para selecionar texto. Todo gesto do mouse tem
+uma tecla equivalente. Abaixo de 40 colunas Histórico mostra só um aviso, e as
+teclas continuam valendo.
 
 - A cor segue o status: verde em andamento ou concluído, azul pronto ou
   disponível, amarelo bloqueado, vermelho inconsistente. Todo estado também
@@ -92,7 +123,7 @@ para olhar.
   escrita o workspace é relido por inteiro e volta a `● atualizado`.
 - Um diretório sem `.orchestration/` mostra "Não é um workspace Relay" e
   continua vigiando: o painel muda sozinho quando o diretório aparecer.
-- Sem rolagem: se faltar altura, o TODO corta em `+N itens`; abaixo de 40
+- Agora não rola: se faltar altura, o TODO corta em `+N itens`; abaixo de 40
   colunas só o cabeçalho e o status aparecem.
 
 O fundo não é pintado: vem do terminal. As cores presumem um terminal escuro.

@@ -1,0 +1,26 @@
+ relay  ~/Developer/relay                     ● atualizado
+
+╭ Itens · Sem spec ──────────────────────────────────────╮
+│ ▸ B-099 Tarefa avulsa, sem spec           ○ disponível │
+│                                                        │
+│                                                        │
+│                                                        │
+╰────────────────────────────────────────────────────────╯
+
+╭────────────────────────────────────────────────────────╮
+│ Enter abrir · Esc voltar · Tab agora · q sair          │
+╰────────────────────────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
+
+d.FFFFF.F.FFF.FFFF.ddddddddddddddddddddddddddddddddddddddd
+d.U.iiiii.FFFFFF.FFFFFFF.FFF.FFFF...........U.ffffffffff.d
+d........................................................d
+d........................................................d
+d........................................................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFFFF.mmmmm.m.FFF.mmmmmm.m.FFF.mmmmm.m.F.mmmm..........d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

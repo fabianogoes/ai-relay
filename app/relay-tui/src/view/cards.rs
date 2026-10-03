@@ -10,8 +10,11 @@ use ratatui::widgets::{Block, BorderType, Widget};
 use crate::core::{
     ChecklistEntry, Handoff, OkState, RelayState, Violation, WorkStatus,
 };
+use crate::suggest::suggest;
 use crate::theme;
 
+use super::hint;
+use super::specs;
 use super::text::{relative_time, truncate, width, wrap_capped};
 use super::{Screen, View};
 
@@ -19,17 +22,17 @@ use super::{Screen, View};
 const TODO_MIN: u16 = 4;
 
 /// A run of text and its style.
-type Seg = (String, Style);
+pub(super) type Seg = (String, Style);
 
-fn seg(text: impl Into<String>, style: Style) -> Seg {
+pub(super) fn seg(text: impl Into<String>, style: Style) -> Seg {
     (text.into(), style)
 }
 
-fn seg_width(segs: &[Seg]) -> usize {
+pub(super) fn seg_width(segs: &[Seg]) -> usize {
     segs.iter().map(|(t, _)| width(t)).sum()
 }
 
-fn plural(n: usize, one: &str, many: &str) -> String {
+pub(super) fn plural(n: usize, one: &str, many: &str) -> String {
     format!("{n} {}", if n == 1 { one } else { many })
 }
 
@@ -48,13 +51,19 @@ fn fit(segs: &[Seg], max: usize) -> Line<'static> {
         let rest = max - used;
         if rest > 0 {
             spans.push(Span::styled(truncate(text, rest), *style));
+        } else if let Some(last) = spans.pop() {
+            // The cut falls between two runs: the previous one takes the `…`,
+            // so a cut line never ends as if it were whole.
+            let kept = last.content.chars().count().saturating_sub(1);
+            let cut: String = last.content.chars().take(kept).collect();
+            spans.push(Span::styled(format!("{cut}…"), last.style));
         }
         break;
     }
     Line::from(spans)
 }
 
-fn put(buf: &mut Buffer, area: Rect, row: usize, segs: &[Seg]) {
+pub(super) fn put(buf: &mut Buffer, area: Rect, row: usize, segs: &[Seg]) {
     if row < area.height as usize {
         buf.set_line(area.x, area.y + row as u16, &fit(segs, area.width as usize), area.width);
     }
@@ -62,7 +71,7 @@ fn put(buf: &mut Buffer, area: Rect, row: usize, segs: &[Seg]) {
 
 /// Draws the frame of a card and returns the area for its content: inside the
 /// border, with one column of padding on each side.
-fn card(buf: &mut Buffer, area: Rect, title: &[Seg], right: &[Seg], border: Color) -> Rect {
+pub(super) fn card(buf: &mut Buffer, area: Rect, title: &[Seg], right: &[Seg], border: Color) -> Rect {
     let to_line = |segs: &[Seg]| {
         Line::from(segs.iter().map(|(t, s)| Span::styled(t.clone(), *s)).collect::<Vec<_>>())
     };
@@ -82,7 +91,7 @@ fn card(buf: &mut Buffer, area: Rect, title: &[Seg], right: &[Seg], border: Colo
     }
 }
 
-fn plain_title(text: &str) -> Vec<Seg> {
+pub(super) fn plain_title(text: &str) -> Vec<Seg> {
     vec![seg(format!(" {text} "), theme::bold(theme::FG))]
 }
 
@@ -129,13 +138,59 @@ pub(super) fn body(view: &View, area: Rect, buf: &mut Buffer) {
     if area.height < 3 {
         return;
     }
+    // The next-step line sits on the last row of the area, just above the
+    // footer; the cards above it get one row less.
+    let hinted = hint_fits(view, area);
+    let cards = if hinted { Rect { height: area.height - 1, ..area } } else { area };
     match view.screen {
-        Screen::NotARelayWorkspace => not_relay_card(view, Rect { height: area.height.min(6), ..area }, buf),
+        Screen::NotARelayWorkspace => not_relay_card(view, Rect { height: cards.height.min(6), ..cards }, buf),
+        Screen::State(RelayState::Inconsistent { violations }) => {
+            let rows = violation_rows(violations, cards.width.saturating_sub(4) as usize);
+            violations_card(violations, Rect { height: cards.height.min(rows as u16 + 2), ..cards }, buf);
+        }
+        Screen::State(RelayState::Ok(ok)) => ok_body(view, ok, cards, buf),
+    }
+    if hinted {
+        // Aligned with the content of the cards (inside their border and
+        // padding), and inside the same width.
+        let line = Rect { x: area.x + 2, y: area.bottom() - 1, width: area.width.saturating_sub(4), height: 1, ..area };
+        let segs = hint::segments(
+            &suggest(match view.screen {
+                Screen::NotARelayWorkspace => None,
+                Screen::State(state) => Some(state),
+            }),
+            line.width as usize,
+        );
+        put(buf, line, 0, &segs);
+    }
+}
+
+/// Whether the next-step line is drawn. As the height shrinks the Backlog
+/// gives up its frame first, then this line, then the Handoff is compacted,
+/// and last the TODO is cut (design system, section 10).
+fn hint_fits(view: &View, area: Rect) -> bool {
+    let Some(spare) = area.height.checked_sub(1).filter(|h| *h >= 3) else {
+        return false;
+    };
+    match view.screen {
+        Screen::NotARelayWorkspace => spare >= 6,
         Screen::State(RelayState::Inconsistent { violations }) => {
             let rows = violation_rows(violations, area.width.saturating_sub(4) as usize);
-            violations_card(violations, Rect { height: area.height.min(rows as u16 + 2), ..area }, buf);
+            spare >= rows as u16 + 2
         }
-        Screen::State(RelayState::Ok(ok)) => ok_body(view, ok, area, buf),
+        Screen::State(RelayState::Ok(ok)) => match ok.status {
+            WorkStatus::Idle | WorkStatus::Done => spare >= 3,
+            WorkStatus::Backlog => spare > specs::full_height(&specs::groups(ok, view.history)),
+            WorkStatus::Ready | WorkStatus::InProgress | WorkStatus::Blocked => {
+                // The line is the first to give way: it stays only while, without
+                // its row, the Handoff is not compacted (one line per field)
+                // and the TODO is not cut.
+                let reduced = plan(view, ok, Rect { height: spare, ..area });
+                let compact = reduced.handoff.is_some_and(|(d, _)| d == Density::Compact);
+                let todo_whole = ok.todo.is_empty() || reduced.todo == ok.todo.len() as u16 + 4;
+                !compact && todo_whole
+            }
+        },
     }
 }
 
@@ -194,7 +249,7 @@ fn ok_body(view: &View, ok: &OkState, area: Rect, buf: &mut Buffer) {
             put(buf, inner, 0, &[seg("Nenhum backlog, TODO ou handoff neste workspace.", theme::fg())]);
         }
         WorkStatus::Done => done_card(ok, area, buf),
-        WorkStatus::Backlog => backlog_choose(ok, area, buf),
+        WorkStatus::Backlog => backlog_body(view, ok, area, buf),
         WorkStatus::Ready | WorkStatus::InProgress | WorkStatus::Blocked => {
             work_body(view, ok, area, buf);
         }
@@ -221,32 +276,83 @@ fn done_card(ok: &OkState, area: Rect, buf: &mut Buffer) {
     );
 }
 
-fn work_body(view: &View, ok: &OkState, area: Rect, buf: &mut Buffer) {
-    let mut y = area.y;
+/// How the rows of a work body are shared: the Handoff card (its density and
+/// height), the one-line status that stands in for it, the TODO card and the
+/// Backlog (3 rows as a card, 1 as a line, 0 when absent).
+#[derive(Clone, Copy, PartialEq, Eq)]
+struct Plan {
+    handoff: Option<(Density, u16)>,
+    lead_line: u16,
+    todo: u16,
+    backlog: u16,
+}
+
+fn plan(view: &View, ok: &OkState, area: Rect) -> Plan {
     let mut remaining = area.height;
-    let at = |y: u16, height: u16| Rect { y, height, ..area };
+    let mut plan = Plan { handoff: None, lead_line: 0, todo: 0, backlog: 0 };
+    // The TODO and the Backlog, whole; and the least they need to still say
+    // something.
+    let todo_full = if ok.todo.is_empty() { 0 } else { ok.todo.len() as u16 + 4 };
+    // The backlog area, whole: the current spec and the pending ones.
+    let groups = specs::groups(ok, view.history);
+    let backlog_full = specs::full_height(&groups);
 
     if let Some(handoff) = &ok.handoff {
-        let tone = theme::status_tone(ok.status);
         let inner_width = area.width.saturating_sub(4) as usize;
-        // What the TODO and the Backlog need to still say something.
-        // The TODO and the Backlog, whole; and the least they need to still
-        // say something.
-        let todo_full = if ok.todo.is_empty() { 0 } else { ok.todo.len() as u16 + 4 };
-        let backlog_full = if ok.backlog.is_empty() { 0 } else { 3 };
-        let min_rest = if ok.todo.is_empty() { 0 } else { TODO_MIN } + u16::from(!ok.backlog.is_empty());
+        let min_rest = if ok.todo.is_empty() { 0 } else { TODO_MIN } + u16::from(backlog_full > 0);
         // The handoff takes the most text that still leaves everything else
         // whole; failing that, the standard caps; failing that, one line per
         // field.
         let fits = |lines: &[Vec<Seg>], rest: u16| lines.len() as u16 + 2 + rest <= remaining;
-        let mut lines = handoff_lines(handoff, ok.status, inner_width, view.now_unix, Density::Full);
+        let mut density = Density::Full;
+        let mut lines = handoff_lines(handoff, ok.status, inner_width, view.now_unix, density);
         if !fits(&lines, todo_full + backlog_full) {
-            lines = handoff_lines(handoff, ok.status, inner_width, view.now_unix, Density::Standard);
+            density = Density::Standard;
+            lines = handoff_lines(handoff, ok.status, inner_width, view.now_unix, density);
             if !fits(&lines, min_rest) {
-                lines = handoff_lines(handoff, ok.status, inner_width, view.now_unix, Density::Compact);
+                density = Density::Compact;
+                lines = handoff_lines(handoff, ok.status, inner_width, view.now_unix, density);
             }
         }
         let height = (lines.len() as u16 + 2).min(remaining.saturating_sub(min_rest).max(3)).min(remaining);
+        plan.handoff = Some((density, height));
+        remaining -= height;
+    } else if ok.status == WorkStatus::Ready && remaining > 0 {
+        // No Handoff card to carry the status, so the line carries it.
+        plan.lead_line = 1;
+        remaining -= 1;
+    }
+
+    if remaining == 0 {
+        return plan;
+    }
+
+    // The backlog area gives way (pending specs to a line, the current spec cut,
+    // both to the count line) before the TODO is cut.
+    plan.backlog = if backlog_full == 0 {
+        0
+    } else {
+        match remaining.saturating_sub(todo_full) {
+            0 => 1.min(remaining),
+            avail => specs::shape(&groups, avail).height().min(remaining),
+        }
+    };
+    let todo_height = remaining.saturating_sub(plan.backlog).min(todo_full);
+    if !ok.todo.is_empty() && todo_height >= TODO_MIN {
+        plan.todo = todo_height;
+    }
+    plan
+}
+
+fn work_body(view: &View, ok: &OkState, area: Rect, buf: &mut Buffer) {
+    let plan = plan(view, ok, area);
+    let mut y = area.y;
+    let at = |y: u16, height: u16| Rect { y, height, ..area };
+
+    if let (Some(handoff), Some((density, height))) = (&ok.handoff, plan.handoff) {
+        let tone = theme::status_tone(ok.status);
+        let inner_width = area.width.saturating_sub(4) as usize;
+        let mut lines = handoff_lines(handoff, ok.status, inner_width, view.now_unix, density);
         lines.truncate(height.saturating_sub(2) as usize);
         let inner = card(
             buf,
@@ -259,9 +365,7 @@ fn work_body(view: &View, ok: &OkState, area: Rect, buf: &mut Buffer) {
             put(buf, inner, row, line);
         }
         y += height;
-        remaining -= height;
-    } else if ok.status == WorkStatus::Ready && remaining > 0 {
-        // No Handoff card to carry the status, so the line carries it.
+    } else if plan.lead_line == 1 {
         let tone = theme::status_tone(ok.status);
         put(
             buf,
@@ -274,31 +378,16 @@ fn work_body(view: &View, ok: &OkState, area: Rect, buf: &mut Buffer) {
             ],
         );
         y += 1;
-        remaining -= 1;
     }
 
-    if remaining == 0 {
-        return;
+    if plan.todo > 0 {
+        todo_card(ok, at(y, plan.todo), buf);
+        y += plan.todo;
     }
-
-    // The Backlog gives up its frame before the TODO is cut.
-    let todo_full = if ok.todo.is_empty() { 0 } else { ok.todo.len() as u16 + 4 };
-    let backlog_height: u16 = if ok.backlog.is_empty() {
-        0
-    } else if remaining >= todo_full + 3 {
-        3
-    } else {
-        1
-    };
-    let todo_height = remaining.saturating_sub(backlog_height).min(todo_full);
-    if !ok.todo.is_empty() && todo_height >= TODO_MIN {
-        todo_card(ok, at(y, todo_height), buf);
-        y += todo_height;
-    }
-    match backlog_height {
-        3 => backlog_card(ok, at(y, 3), buf),
-        1 => backlog_line(ok, at(y, 1), buf),
-        _ => {}
+    if plan.backlog > 0 {
+        let groups = specs::groups(ok, view.history);
+        let shape = specs::shape(&groups, plan.backlog);
+        specs::draw(&groups, ok, shape, at(y, plan.backlog), buf, |a, b| backlog_line(ok, a, b));
     }
 }
 
@@ -458,38 +547,6 @@ fn counts(ok: &OkState) -> Counts {
     c
 }
 
-/// `✓ 32 feitos · ● 1 em curso · …`, omitting what is zero. Falls back to the
-/// glyphs and numbers alone when the words do not fit.
-fn count_segments(c: &Counts, width: usize) -> Vec<Seg> {
-    let parts = [
-        (c.done, "✓", ("feito", "feitos"), theme::GREEN),
-        (c.active, "●", ("em curso", "em curso"), theme::GREEN),
-        (c.blocked, "!", ("bloqueado", "bloqueados"), theme::YELLOW),
-        (c.available, "○", ("disponível", "disponíveis"), theme::BLUE),
-        (c.waiting, "◌", ("aguardando", "aguardando"), theme::META),
-    ];
-    let build = |words: bool| {
-        let mut segs: Vec<Seg> = Vec::new();
-        for (n, glyph, word, tone) in parts.iter().filter(|p| p.0 > 0) {
-            if !segs.is_empty() {
-                segs.push(seg(" · ", theme::color(theme::META)));
-            }
-            segs.push(seg(format!("{glyph} "), theme::bold(*tone)));
-            let label = if words { plural(*n, word.0, word.1) } else { n.to_string() };
-            segs.push(seg(label, theme::fg()));
-        }
-        segs
-    };
-    let long = build(true);
-    if seg_width(&long) <= width { long } else { build(false) }
-}
-
-fn backlog_card(ok: &OkState, area: Rect, buf: &mut Buffer) {
-    let c = counts(ok);
-    let inner = card(buf, area, &plain_title("Backlog"), &count_title(c.done, ok.backlog.len()), theme::DIM);
-    put(buf, inner, 0, &count_segments(&c, inner.width as usize));
-}
-
 fn backlog_line(ok: &OkState, area: Rect, buf: &mut Buffer) {
     let c = counts(ok);
     let mut segs = vec![
@@ -511,29 +568,29 @@ fn backlog_line(ok: &OkState, area: Rect, buf: &mut Buffer) {
     put(buf, area, 0, &segs);
 }
 
-/// The `backlog` status ("A escolher"): no TODO and no handoff, so the card
-/// lists what can be picked.
-fn backlog_choose(ok: &OkState, area: Rect, buf: &mut Buffer) {
-    let c = counts(ok);
+/// The `backlog` status ("A escolher"): no TODO and no handoff. A line carries
+/// the status, as for `ready`, and the current spec and the pending ones show what
+/// can be picked.
+fn backlog_body(view: &View, ok: &OkState, area: Rect, buf: &mut Buffer) {
+    if area.height == 0 {
+        return;
+    }
     let tone = theme::status_tone(WorkStatus::Backlog);
-    let title = status_title(theme::status_label(WorkStatus::Backlog), tone);
-    let available: Vec<&ChecklistEntry> = ok.backlog.iter().filter(|e| e.available).collect();
-    // The counts line, then a blank row and the items when there are any.
-    let content = 1 + if available.is_empty() { 0 } else { 1 + available.len() };
-    let area = Rect { height: area.height.min(content as u16 + 2), ..area };
-    let inner = card(buf, area, &title, &count_title(c.done, ok.backlog.len()), tone);
-    put(buf, inner, 0, &count_segments(&c, inner.width as usize));
-
-    let rows = (inner.height as usize).saturating_sub(2);
-    let shown = if available.len() <= rows { available.len() } else { rows.saturating_sub(1) };
-    for (i, e) in available.iter().take(shown).enumerate() {
-        let head = [seg("○ ", theme::color(theme::BLUE)), seg(format!("{} ", e.id), theme::color(theme::ID))];
-        let text = truncate(&e.text, (inner.width as usize).saturating_sub(seg_width(&head)));
-        let mut segs = head.to_vec();
-        segs.push(seg(text, theme::fg()));
-        put(buf, inner, 2 + i, &segs);
+    put(
+        buf,
+        Rect { height: 1, ..area },
+        0,
+        &[
+            seg(" ● ", theme::bold(tone)),
+            seg(theme::status_label(WorkStatus::Backlog), theme::bold(tone)),
+            seg("  Sem handoff ativo", theme::color(theme::META)),
+        ],
+    );
+    let rest = Rect { y: area.y + 1, height: area.height - 1, ..area };
+    if rest.height == 0 {
+        return;
     }
-    if shown < available.len() && rows > 0 {
-        put(buf, inner, 2 + shown, &[seg(format!("+{}", plural(available.len() - shown, "item", "itens")), theme::color(theme::META))]);
-    }
+    let groups = specs::groups(ok, view.history);
+    let shape = specs::shape(&groups, rest.height);
+    specs::draw(&groups, ok, shape, Rect { height: shape.height(), ..rest }, buf, |a, b| backlog_line(ok, a, b));
 }

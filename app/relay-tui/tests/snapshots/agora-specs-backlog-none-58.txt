@@ -1,0 +1,62 @@
+ relay  ~/Developer/relay                     ● atualizado
+
+ ● A escolher  Sem handoff ativo
+╭ Specs pendentes ──────────────────────────────────── 4 ╮
+│ 20261002-001 relay-tui: observador de terminal em… 0/2 │
+│ 20261002-002 relay-tui: navegacao pelo historico … 0/1 │
+│ 20261002-003 Skill que abre o relay-tui em um spl… 0/1 │
+│ Sem spec                                           0/1 │
+╰────────────────────────────────────────────────────────╯
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  Nenhum item disponível: relay-continue.
+
+╭────────────────────────────────────────────────────────╮
+│ Tab histórico · r recarregar · q sair                  │
+╰────────────────────────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
+
+.U.U.UUUUUUUU..mmm.mmmmmmm.mmmmm
+d.FFFFF.FFFFFFFFF.dddddddddddddddddddddddddddddddddddd.m.d
+d.iiiiiiiiiiii.ffffffffff.ffffffffff.ff.ffffffff.fff.mmm.d
+d.iiiiiiiiiiii.ffffffffff.fffffffff.ffff.fffffffff.f.mmm.d
+d.iiiiiiiiiiii.fffff.fff.ffff.f.fffffffff.ff.ff.ffff.mmm.d
+d.fff.ffff...........................................mmm.d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+..mmmmmm.mmmm.mmmmmmmmmmm.FFFFFFFFFFFFFFm
+
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

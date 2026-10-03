@@ -1,0 +1,30 @@
+ relay  ~/Developer/relay   ● atualizado
+
+╭ Itens · 20260901-001 ─────── ↑12 ↓13 ╮
+│   B-212 Item de rotina nume… ✓ feito │
+│   B-213 Item de rotina nume… ✓ feito │
+│   B-214 Item de rotina nume… ✓ feito │
+│ ▸ B-215 Item de rotina nume… ✓ feito │
+│   B-216 Item de rotina nume… ✓ feito │
+│   B-217 Item de rotina nume… ✓ feito │
+╰──────────────────────────────────────╯
+
+╭──────────────────────────────────────╮
+│ Esc voltar · Tab agora · q sair      │
+╰──────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm...g.mmmmmmmmmm
+
+d.FFFFF.F.IIIIIIIIIIII.ddddddd.mmm.mmm.d
+d...iiiii.mmmm.mm.mmmmmm.mmmmm.G.fffff.d
+d...iiiii.mmmm.mm.mmmmmm.mmmmm.G.fffff.d
+d...iiiii.mmmm.mm.mmmmmm.mmmmm.G.fffff.d
+d.U.iiiii.FFFF.FF.FFFFFF.FFFFF.G.fffff.d
+d...iiiii.mmmm.mm.mmmmmm.mmmmm.G.fffff.d
+d...iiiii.mmmm.mm.mmmmmm.mmmmm.G.fffff.d
+dddddddddddddddddddddddddddddddddddddddd
+
+dddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmm.m.FFF.mmmmm.m.F.mmmm......d
+dddddddddddddddddddddddddddddddddddddddd

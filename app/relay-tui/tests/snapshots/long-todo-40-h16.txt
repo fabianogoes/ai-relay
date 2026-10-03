@@ -7,13 +7,13 @@
 ╰──────────────────────────────────────╯
 ╭ TODO ────────────────────────── 3/10 ╮
 │ ██ ██ ██ ██ ██ ██ ██ ██ ██ ██        │
-│                                      │
-│ ✓ T-001 Formato do caso de conformi… │
-│ ✓ T-002 Extrair as entradas dos fix… │
-│ +8 itens · ● T-004 em andamento      │
+│ +10 itens · ● T-004 em andamento     │
 ╰──────────────────────────────────────╯
- Backlog 1/6 · 1 em curso · 1 bloqueado
- q sair
+ 1 spec pendente
+
+╭──────────────────────────────────────╮
+│ Tab histórico · q sair               │
+╰──────────────────────────────────────╯
 
 --- colors ---
 #######.mmmmmmmmmmmmmmmmm...g.mmmmmmmmmm
@@ -25,10 +25,10 @@ g.mmmmmmm...fffff.fffff.ffff.f.f.......g
 gggggggggggggggggggggggggggggggggggggggg
 d.FFFF.dddddddddddddddddddddddddd.mmmm.d
 d.gg.gg.gg.gg.ee.uu.ee.yy.ee.ee........d
-d......................................d
-d.G.iiiii.mmmmmmm.mm.mmmm.mm.mmmmmmmmm.d
-d.G.iiiii.mmmmmmm.mm.mmmmmmmm.mmm.mmmm.d
-d.mm.mmmmm.m.m.mmmmm.mm.mmmmmmmmm......d
+d.mmm.mmmmm.m.m.mmmmm.mm.mmmmmmmmm.....d
 dddddddddddddddddddddddddddddddddddddddd
-.FFFFFFF.mmm.m.m.mm.mmmmm.m.m.mmmmmmmmm
-.F.mmmm
+.m.mmmm.mmmmmmmm
+
+dddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmmmm.m.F.mmmm...............d
+dddddddddddddddddddddddddddddddddddddddd

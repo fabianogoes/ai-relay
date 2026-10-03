@@ -70,7 +70,7 @@ fn the_shipped_code_cannot_write_to_disk_or_launch_a_process() {
 #[test]
 fn the_only_thing_that_reads_the_disk_is_the_workspace_module() {
     let src = Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
-    for file in ["core", "view", "theme.rs"] {
+    for file in ["core", "view", "nav.rs", "suggest.rs", "theme.rs"] {
         let path = src.join(file);
         let mut files = Vec::new();
         if path.is_dir() {

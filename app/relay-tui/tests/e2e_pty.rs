@@ -1,7 +1,7 @@
 //! The real binary in a real pseudo-terminal, read through a terminal
 //! emulator (vt100): what the user would see, and what the terminal is left
 //! as. This is the evidence for "reflects a change without restarting" and
-//! "restores the terminal on q, Esc, Ctrl-C and panic".
+//! "restores the terminal on q, Esc (once confirmed), Ctrl-C and panic".
 
 use std::fs;
 use std::io::{Read, Write};
@@ -26,6 +26,12 @@ fn copy_tree(from: &Path, to: &Path) {
             fs::copy(entry.path(), target).unwrap();
         }
     }
+}
+
+/// A spec file the backlog can point at, so its card shows the spec and its items.
+fn add_spec(dir: &Path, name: &str) {
+    fs::create_dir_all(dir.join(".specs")).unwrap();
+    fs::write(dir.join(".specs").join(name), "# 20261002-001 - Spec de teste\n").unwrap();
 }
 
 /// A workspace on disk, copied from one of the conformance cases.
@@ -133,12 +139,23 @@ impl Session {
         status
     }
 
-    /// What the terminal was left as: the normal screen, the cursor shown.
+    /// Whether the terminal was asked to report the mouse.
+    fn mouse_reported(&self) -> bool {
+        self.parser.lock().unwrap().screen().mouse_protocol_mode() != vt100::MouseProtocolMode::None
+    }
+
+    /// What the terminal was left as: the normal screen, the cursor shown and
+    /// the mouse no longer reported into the shell.
     fn assert_restored(&self) {
         let parser = self.parser.lock().unwrap();
         let screen = parser.screen();
         assert!(!screen.alternate_screen(), "the alternate screen was not left");
         assert!(!screen.hide_cursor(), "the cursor was left hidden");
+        assert_eq!(
+            screen.mouse_protocol_mode(),
+            vt100::MouseProtocolMode::None,
+            "the mouse was left reported"
+        );
     }
 }
 
@@ -162,7 +179,7 @@ fn it_opens_and_shows_the_workspace() {
     assert!(screen.contains("relay"));
     assert!(screen.contains("Handoff") && screen.contains("B-001") && screen.contains("T-002"));
     assert!(screen.contains("Validar os fixtures contra o protocolo."));
-    assert!(screen.contains("TODO") && screen.contains("Backlog") && screen.contains("q sair"));
+    assert!(screen.contains("TODO") && screen.contains("Specs pendentes") && screen.contains("q sair"));
 }
 
 #[test]
@@ -171,6 +188,7 @@ fn a_change_on_disk_shows_up_without_restarting() {
     let session = Session::start(dir.path(), 24, 58, &[]);
     session.wait_for("the empty workspace", |s| s.contains("Sem trabalho") && s.contains("atualizado"));
 
+    add_spec(dir.path(), "20261002-001-x.md");
     fs::write(
         dir.path().join(".orchestration/BACKLOG.md"),
         "# Backlog\n\n- [ ] B-001 - Algo para escolher (spec: .specs/20261002-001-x.md)\n",
@@ -189,6 +207,7 @@ fn a_burst_of_writes_ends_in_a_single_settled_screen() {
     let session = Session::start(dir.path(), 24, 58, &[]);
     session.wait_for("the empty workspace", |s| s.contains("Sem trabalho"));
 
+    add_spec(dir.path(), "20261002-001-x.md");
     for n in 1..=5 {
         fs::write(
             dir.path().join(".orchestration/BACKLOG.md"),
@@ -212,6 +231,7 @@ fn a_directory_without_orchestration_says_so_and_keeps_watching() {
     session.wait_for("the not-a-workspace card", |s| s.contains("Não é um workspace Relay"));
 
     fs::create_dir_all(dir.path().join(".orchestration")).unwrap();
+    add_spec(dir.path(), "x.md");
     fs::write(dir.path().join(".orchestration/BACKLOG.md"), "# Backlog\n\n- [ ] B-001 - Chegou (spec: .specs/x.md)\n").unwrap();
     session.wait_for("the workspace that appeared", |s| s.contains("A escolher") && s.contains("Chegou"));
 }
@@ -232,9 +252,10 @@ fn it_redraws_when_the_terminal_is_resized() {
     session.wait_for("the narrow layout", |s| width_of_card_top(s, "Handoff") == Some(40));
     session.resize(24, 80);
     session.wait_for("the wide layout", |s| width_of_card_top(s, "Handoff") == Some(80));
-    // Below the card width only the status line remains.
+    // Below the card width only the status line remains in the body (the footer
+    // is still a card).
     session.resize(12, 30);
-    session.wait_for("the compact status", |s| !s.contains("╭") && s.contains("Em andamento"));
+    session.wait_for("the compact status", |s| !s.contains("╭ Handoff") && s.contains("Em andamento"));
 }
 
 fn quits_with(keys: &[u8]) {
@@ -251,8 +272,34 @@ fn q_quits_and_restores_the_terminal() {
 }
 
 #[test]
-fn escape_quits_and_restores_the_terminal() {
-    quits_with(b"\x1b");
+fn escape_asks_first_and_a_second_answer_leaves_and_restores_the_terminal() {
+    for answer in [&b"\x1b"[..], &b"\r"[..], &b"y"[..]] {
+        let (_dir, mut session) = open_in_progress();
+        session.send(b"\x1b");
+        session.wait_for("the question", |s| s.contains("Sair?") && s.contains("outra tecla cancela"));
+        // Asking leaves nothing: the panel is still there and the process runs.
+        assert!(session.child.try_wait().unwrap().is_none(), "Esc alone must not leave");
+        assert!(session.screen().contains("Handoff"), "{}", session.screen());
+        session.send(answer);
+        let status = session.exit();
+        assert!(status.success(), "exit status {status:?}");
+        session.assert_restored();
+    }
+}
+
+#[test]
+fn any_other_key_cancels_the_question_and_the_panel_goes_on() {
+    let (_dir, mut session) = open_in_progress();
+    session.send(b"\x1b");
+    session.wait_for("the question", |s| s.contains("Sair?"));
+    session.send(b"x");
+    session.wait_for("the footer again", |s| !s.contains("Sair?") && s.contains("Tab histórico"));
+    assert!(session.child.try_wait().unwrap().is_none(), "the panel left on a cancel");
+    // And it still leaves with `q`.
+    session.send(b"q");
+    let status = session.exit();
+    assert!(status.success(), "exit status {status:?}");
+    session.assert_restored();
 }
 
 #[test]
@@ -312,4 +359,110 @@ fn print_the_real_screens() {
         session.send(b"q");
         session.exit();
     }
+}
+
+// -- Histórico and the mouse (spec 20261002-002, A-005) -----------------------
+
+/// An idle workspace plus one spec with two backlog items, so Histórico has
+/// rows to click.
+fn history_workspace() -> TempDir {
+    let dir = workspace("status-idle");
+    fs::create_dir_all(dir.path().join(".specs")).unwrap();
+    fs::write(dir.path().join(".specs/20260101-001-primeira.md"), "# 20260101-001 - Primeira spec\n").unwrap();
+    fs::write(
+        dir.path().join(".orchestration/BACKLOG.md"),
+        "# Backlog\n\n- [x] B-001 - Primeiro item (spec: `.specs/20260101-001-primeira.md`)\n\
+         - [ ] B-002 - Segundo item (spec: `.specs/20260101-001-primeira.md`)\n",
+    )
+    .unwrap();
+    dir
+}
+
+fn open_history() -> (TempDir, Session) {
+    let dir = history_workspace();
+    let mut session = Session::start(dir.path(), 24, 58, &[]);
+    session.wait_for("Agora", |s| s.contains("atualizado") && s.contains("Tab histórico"));
+    assert!(!session.mouse_reported(), "Agora must leave the mouse alone, so its text can be selected");
+    session.send(b"\t");
+    session.wait_for("Histórico", |s| s.contains("Specs") && s.contains("Primeira spec"));
+    (dir, session)
+}
+
+/// A left click and its release, as the terminal reports them (SGR, 1-based).
+fn click(session: &mut Session, column: u16, row: u16) {
+    session.send(format!("\x1b[<0;{column};{row}M\x1b[<0;{column};{row}m").as_bytes());
+}
+
+#[test]
+fn tab_turns_the_mouse_on_and_a_click_on_a_row_opens_the_next_level() {
+    let (_dir, mut session) = open_history();
+    assert!(session.mouse_reported(), "Histórico must ask for the mouse");
+    // The card starts on screen row 3 and its first row is row 4 (1-based).
+    click(&mut session, 6, 4);
+    session.wait_for("the items level", |s| s.contains("Itens · 20260101-001") && s.contains("B-002"));
+    // Clicking the second item opens its tasks.
+    click(&mut session, 6, 5);
+    session.wait_for("the tasks level", |s| s.contains("Tarefas · B-002"));
+    assert!(session.mouse_reported());
+    // A click on the header or the footer does nothing.
+    click(&mut session, 6, 1);
+    click(&mut session, 6, 24);
+    session.send(b"j");
+    thread::sleep(Duration::from_millis(150));
+    assert!(session.screen().contains("Tarefas · B-002"), "{}", session.screen());
+}
+
+#[test]
+fn going_back_to_agora_turns_the_mouse_off() {
+    let (_dir, mut session) = open_history();
+    // Esc from the specs level goes to Agora instead of quitting.
+    session.send(b"\x1b");
+    session.wait_for("Agora", |s| s.contains("Tab histórico") && !s.contains("Specs"));
+    assert!(!session.mouse_reported(), "the mouse stayed on in Agora");
+    // And the same with Tab.
+    session.send(b"\t");
+    session.wait_for("Histórico again", |s| s.contains("Specs"));
+    assert!(session.mouse_reported());
+    session.send(b"t");
+    session.wait_for("Agora again", |s| s.contains("Tab histórico") && !s.contains("Specs"));
+    assert!(!session.mouse_reported());
+}
+
+#[test]
+fn quitting_from_historico_turns_the_mouse_off_and_restores_the_terminal() {
+    for keys in [&b"q"[..], &[0x03][..]] {
+        let (_dir, mut session) = open_history();
+        assert!(session.mouse_reported());
+        session.send(keys);
+        let status = session.exit();
+        assert!(status.success(), "exit status {status:?}");
+        session.assert_restored();
+    }
+}
+
+#[test]
+fn a_panic_in_historico_turns_the_mouse_off_before_the_message() {
+    let dir = history_workspace();
+    let mut session = Session::start(dir.path(), 24, 58, &[("RELAY_TUI_TEST_PANIC", "history")]);
+    let status = session.exit();
+    assert!(!status.success(), "a panic must not exit 0");
+    session.assert_restored();
+    assert!(session.screen().contains("RELAY_TUI_TEST_PANIC"), "{}", session.screen());
+}
+
+#[test]
+fn navigating_with_keys_and_the_mouse_writes_nothing_to_the_workspace() {
+    let dir = history_workspace();
+    let before = snapshot(dir.path());
+    let mut session = Session::start(dir.path(), 24, 58, &[]);
+    session.wait_for("Agora", |s| s.contains("atualizado"));
+    session.send(b"\t");
+    session.wait_for("Histórico", |s| s.contains("Primeira spec"));
+    click(&mut session, 6, 4);
+    session.wait_for("the items level", |s| s.contains("Itens ·"));
+    session.send(b"r");
+    session.send(b"\x1b\x1b");
+    session.send(b"q");
+    session.exit();
+    assert_eq!(snapshot(dir.path()), before, "navigating changed the workspace");
 }

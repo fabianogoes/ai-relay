@@ -13,15 +13,15 @@
 │ ● T-002 Validar os fixtures                            │
 │ ○ T-003 Registrar no índice                            │
 ╰────────────────────────────────────────────────────────╯
-╭ Backlog ────────────────────────────────────────── 0/1 ╮
-│ ○ 1 disponível                                         │
+╭ Specs pendentes ──────────────────────────────────── 1 ╮
+│ Sem spec                                           0/1 │
 ╰────────────────────────────────────────────────────────╯
 
+  Retome T-002 de B-001 com relay-session.
 
-
-
-
- q sair
+╭────────────────────────────────────────────────────────╮
+│ Tab histórico · r recarregar · q sair                  │
+╰────────────────────────────────────────────────────────╯
 
 --- colors ---
 #######.mmmmmmmmmmmmmmmmm....................y.mmmmmmmmmmm
@@ -39,12 +39,12 @@ d.G.iiiii.mmmmmmmm.m.mmmmmmmm............................d
 d.G.iiiii.FFFFFFF.FF.FFFFFFFF............................d
 d.u.iiiii.fffffffff.ff.ffffff............................d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-d.FFFFFFF.dddddddddddddddddddddddddddddddddddddddddd.mmm.d
-d.U.f.ffffffffff.........................................d
+d.FFFFF.FFFFFFFFF.dddddddddddddddddddddddddddddddddddd.m.d
+d.fff.ffff...........................................mmm.d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 
+..mmmmmm.iiiii.mm.iiiii.mmm.FFFFFFFFFFFFFm
 
-
-
-
-.F.mmmm
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

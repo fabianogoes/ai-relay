@@ -1,0 +1,24 @@
+ relay  ~/Developer/relay                     ● atualizado
+
+ ● A escolher  Sem handoff ativo
+ Backlog 3/10 · 1 bloqueado · 5 disponíveis · 1 aguardando
+
+
+
+
+╭────────────────────────────────────────────────────────╮
+│ Tab histórico · r recarregar · q sair                  │
+╰────────────────────────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
+
+.U.U.UUUUUUUU..mmm.mmmmmmm.mmmmm
+.FFFFFFF.mmmm.m.m.mmmmmmmmm.m.m.mmmmmmmmmmm.m.m.mmmmmmmmmm
+
+
+
+
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

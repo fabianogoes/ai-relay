@@ -15,19 +15,19 @@
 │ ✓ T-002 Escrever tokens.css                                                                                          │
 │ ! T-003 Scaffold da relay-ui  bloqueado                                                                              │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-╭ Backlog ──────────────────────────────────────────────────────────────────────────────────────────────────────── 0/1 ╮
-│ ○ 1 disponível                                                                                                       │
+╭ Specs pendentes ────────────────────────────────────────────────────────────────────────────────────────────────── 1 ╮
+│ Sem spec                                                                                                         0/1 │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 
 
 
 
+  Resolva o bloqueio de T-003 (ver Handoff) e retome com relay-session.
 
-
-
-
- q sair
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Tab histórico · r recarregar · q sair                                                                                │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 --- colors ---
 #######.mmmmmmmmmmmmmmmmm...................................................................................g.mmmmmmmmmm
@@ -47,16 +47,16 @@ d.G.iiiii.mmmmmmmmmmmm.mm.mmmm.mmmmmmmm.........................................
 d.G.iiiii.mmmmmmmm.mmmmmmmmmm..........................................................................................d
 d.Y.iiiii.ffffffff.ff.ffffffff..yyyyyyyyy..............................................................................d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-d.FFFFFFF.dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.mmm.d
-d.U.f.ffffffffff.......................................................................................................d
+d.FFFFF.FFFFFFFFF.dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.m.d
+d.fff.ffff.........................................................................................................mmm.d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 
 
 
 
 
+..mmmmmmm.m.mmmmmmmm.mm.iiiii.mmmm.mmmmmmmm.m.mmmmmm.mmm.FFFFFFFFFFFFFm
 
-
-
-
-.F.mmmm
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm................................................................................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

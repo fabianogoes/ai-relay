@@ -17,7 +17,7 @@ summary that drifts from its source is worse than a pointer to it.
 | Read | When |
 | --- | --- |
 | `docs/PROTOCOL.md` | Before changing how any skill reads or writes a Relay record. It is the on-disk contract and holds every transition rule and integrity check in full. |
-| `skills/relay-*/SKILL.md` | Before changing one skill. Each is under 40 lines; read the one you are changing, not all five. |
+| `skills/relay-*/SKILL.md` | Before changing one skill. Each is under 40 lines; read the one you are changing, not all of them. |
 | `docs/adr/NNNN-*.md` | Before making or revisiting an architectural decision. Index below. |
 | `docs/INSTALL.md` | When changing installation for Claude Code, Codex, or OpenCode. |
 | `docs/TUI.md` | When changing how the `relay-tui` is installed or used. |
@@ -43,6 +43,13 @@ not only the choice.
   protocol, with a name distinct from the binary, a POSIX `sh` script as the
   first executable in the package, and its tests in `.agents/tests/`, not in
   `skills/`.
+- `docs/adr/0010-navegacao-da-relay-tui-como-estado-local.md` — Accepted —
+  navigation in the `relay-tui` is local screen state and stays read-only: a
+  second view, **Histórico** (not Trabalho, a deliberate divergence from the web
+  UI), beside Agora, with `Esc` going back instead of quitting there, mouse
+  capture only while Histórico is open (every gesture with a key equivalent), and
+  the new changelog and spec-title extraction living only in Rust. It amends
+  ADR-0009 decision 1 ("only reacts to exit keys") and nothing else in it.
 - `docs/adr/0009-relay-tui-observador-de-terminal-em-rust.md` — Accepted —
   `relay-tui`, a read-only, passive terminal observer in Rust (`ratatui`),
   shipped as a single downloadable binary from a GitHub Release (macOS

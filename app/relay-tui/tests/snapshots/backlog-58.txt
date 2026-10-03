@@ -1,11 +1,8 @@
  relay  ~/Developer/relay                     ● atualizado
 
-╭ ● A escolher ───────────────────────────────────── 0/4 ╮
-│ ○ 3 disponíveis · ◌ 1 aguardando                       │
-│                                                        │
-│ ○ B-001 Contrato do estado derivado                    │
-│ ○ B-002 Fronteira e estrutura do app/                  │
-│ ○ B-003 Framework da relay-ui                          │
+ ● A escolher  Sem handoff ativo
+╭ Specs pendentes ──────────────────────────────────── 1 ╮
+│ Sem spec                                           0/4 │
 ╰────────────────────────────────────────────────────────╯
 
 
@@ -20,19 +17,19 @@
 
 
 
+  Próximo item: B-001 (Cont…). Comece com relay-session.
 
- q sair
+╭────────────────────────────────────────────────────────╮
+│ Tab histórico · r recarregar · q sair                  │
+╰────────────────────────────────────────────────────────╯
 
 --- colors ---
 #######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
 
-u.U.U.UUUUUUUU.uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.mmm.u
-u.U.f.fffffffffff.m.M.f.ffffffffff.......................u
-u........................................................u
-u.u.iiiii.ffffffff.ff.ffffff.ffffffff....................u
-u.u.iiiii.fffffffff.f.fffffffff.ff.ffff..................u
-u.u.iiiii.fffffffff.ff.ffffffff..........................u
-uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu
+.U.U.UUUUUUUU..mmm.mmmmmmm.mmmmm
+d.FFFFF.FFFFFFFFF.dddddddddddddddddddddddddddddddddddd.m.d
+d.fff.ffff...........................................mmm.d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 
 
 
@@ -46,5 +43,8 @@ uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu
 
 
 
+..mmmmmmm.mmmmm.iiiii.mmmmmmmm.mmmmmm.mmm.FFFFFFFFFFFFFm
 
-.F.mmmm
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

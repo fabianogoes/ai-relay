@@ -19,7 +19,9 @@ mkdir -p ~/.config/opencode/skills
 ln -s ~/.config/opencode/relay/skills/relay-setup ~/.config/opencode/skills/relay-setup
 ln -s ~/.config/opencode/relay/skills/relay-spec ~/.config/opencode/skills/relay-spec
 ln -s ~/.config/opencode/relay/skills/relay-status ~/.config/opencode/skills/relay-status
+ln -s ~/.config/opencode/relay/skills/relay-continue ~/.config/opencode/skills/relay-continue
 ln -s ~/.config/opencode/relay/skills/relay-session ~/.config/opencode/skills/relay-session
+ln -s ~/.config/opencode/relay/skills/relay-tui-split ~/.config/opencode/skills/relay-tui-split
 ```
 
 Start a new OpenCode session and test the installation with:
@@ -29,7 +31,8 @@ Use relay-status to report the current Relay state.
 ```
 
 OpenCode does not expose these skills as `/relay` slash commands. Seeing
-`relay-setup`, `relay-spec`, `relay-status`, and `relay-session` in `/skills`
+`relay-setup`, `relay-spec`, `relay-status`, `relay-continue`, `relay-session`, and
+`relay-tui-split` in `/skills`
 is the expected discovery result; the agent loads one by name through its
 native `skill` tool when the prompt requires it.
 

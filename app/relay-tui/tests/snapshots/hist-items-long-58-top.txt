@@ -1,0 +1,30 @@
+ relay  ~/Developer/relay                     ● atualizado
+
+╭ Itens · 20260901-001 ───────────────────── ↓ 25 abaixo ╮
+│ ▸ B-001 Contrato do estado derivado, com um f… ✓ feito │
+│   B-201 Item de rotina numero 1 da lista longa ✓ feito │
+│   B-202 Item de rotina numero 2 da lista longa ✓ feito │
+│   B-203 Item de rotina numero 3 da lista longa ✓ feito │
+│   B-204 Item de rotina numero 4 da lista longa ✓ feito │
+│   B-205 Item de rotina numero 5 da lista longa ✓ feito │
+╰────────────────────────────────────────────────────────╯
+
+╭────────────────────────────────────────────────────────╮
+│ Enter abrir · Esc voltar · Tab agora · q sair          │
+╰────────────────────────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
+
+d.FFFFF.F.IIIIIIIIIIII.ddddddddddddddddddddd.m.mm.mmmmmm.d
+d.U.iiiii.FFFFFFFF.FF.FFFFFF.FFFFFFFFF.FFF.FF.FF.G.fffff.d
+d...iiiii.mmmm.mm.mmmmmm.mmmmmm.m.mm.mmmmm.mmmmm.G.fffff.d
+d...iiiii.mmmm.mm.mmmmmm.mmmmmm.m.mm.mmmmm.mmmmm.G.fffff.d
+d...iiiii.mmmm.mm.mmmmmm.mmmmmm.m.mm.mmmmm.mmmmm.G.fffff.d
+d...iiiii.mmmm.mm.mmmmmm.mmmmmm.m.mm.mmmmm.mmmmm.G.fffff.d
+d...iiiii.mmmm.mm.mmmmmm.mmmmmm.m.mm.mmmmm.mmmmm.G.fffff.d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFFFF.mmmmm.m.FFF.mmmmmm.m.FFF.mmmmm.m.F.mmmm..........d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

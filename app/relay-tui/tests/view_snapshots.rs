@@ -95,7 +95,7 @@ fn check(name: &str, view: &View, width: u16, height: u16) {
 }
 
 fn view<'a>(state: &'a RelayState, freshness: Freshness) -> View<'a> {
-    View { screen: Screen::State(state), workspace: "~/Developer/relay", freshness, now_unix: now() }
+    View { history: relay_tui::view::no_history(), screen: Screen::State(state), workspace: "~/Developer/relay", freshness, now_unix: now() }
 }
 
 const STATUS_CASES: [&str; 7] = ["idle", "backlog", "ready", "in_progress", "blocked", "done", "inconsistent"];
@@ -124,7 +124,7 @@ fn a_change_in_flight_says_so_in_words() {
 
 #[test]
 fn a_directory_without_orchestration() {
-    let view = View {
+    let view = View { history: relay_tui::view::no_history(),
         screen: Screen::NotARelayWorkspace,
         workspace: "~/Developer/sem-relay",
         freshness: Freshness::Fresh,
@@ -239,4 +239,12 @@ fn a_tall_or_wide_terminal_shows_the_handoff_nearly_whole() {
     check("long-todo-58-h40", &view(&long, Freshness::Fresh), 58, 40);
     let blocked = conformance_case("status-blocked");
     check("blocked-120-h30", &view(&blocked, Freshness::Fresh), 120, 30);
+}
+
+#[test]
+fn the_next_step_line_yields_with_the_height() {
+    let state = conformance_case("status-in_progress");
+    for height in [12, 17, 18, 20] {
+        check(&format!("in_progress-58-h{height}"), &view(&state, Freshness::Fresh), 58, height);
+    }
 }

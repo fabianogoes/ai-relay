@@ -43,7 +43,7 @@ fn every_screen_renders_at_every_size_without_panicking() {
         let state = conformance_case(&name);
         for screen in [Screen::State(&state), Screen::NotARelayWorkspace] {
             for freshness in [Freshness::Fresh, Freshness::Updating] {
-                let view = View { screen, workspace: "~/Developer/relay", freshness, now_unix: 1_790_000_000 };
+                let view = View { history: relay_tui::view::no_history(), screen, workspace: "~/Developer/relay", freshness, now_unix: 1_790_000_000 };
                 for (w, h) in SIZES {
                     let area = Rect::new(0, 0, w, h);
                     let mut buf = Buffer::empty(area);
@@ -57,7 +57,7 @@ fn every_screen_renders_at_every_size_without_panicking() {
 #[test]
 fn an_area_that_does_not_start_at_the_origin_is_respected() {
     let state = conformance_case("status-in_progress");
-    let view = View {
+    let view = View { history: relay_tui::view::no_history(),
         screen: Screen::State(&state),
         workspace: "~/x",
         freshness: Freshness::Fresh,

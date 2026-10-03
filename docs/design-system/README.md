@@ -816,7 +816,7 @@ um tom só dele. Tom e rótulo textual continuam obrigatórios (princípio 7).
 ### Estrutura
 
 - **Cartões** com borda arredondada (`╭ ╮ ╰ ╯`) e o título na própria borda:
-  cabeçalho, Handoff, TODO e Backlog. A borda é `dim`; a do Handoff herda o
+  cabeçalho, Handoff, TODO, Spec atual, Specs pendentes e rodapé. A borda é `dim`; a do Handoff herda o
   tom do status. Em `inconsistent`, um cartão de violações (`check` e `detail`)
   substitui o conteúdo.
 - **Marcadores do TODO** acompanham o protocolo e sempre trazem texto ao lado:
@@ -827,9 +827,13 @@ um tom só dele. Tom e rótulo textual continuam obrigatórios (princípio 7).
   nunca porcentagem (princípio 8; ADR-0003).
 - **Frescor em texto:** `atualizado` ou `atualizando`, no cabeçalho.
 - **Largura de referência: 58 colunas.** Sem rolagem: faltando altura, o TODO
-  trunca em "+N itens" e o Backlog reduz-se a uma linha de contagem; abaixo de
+  trunca em "+N itens" e o backlog (Spec atual e Specs pendentes) reduz-se a uma
+  linha de contagem; abaixo de
   cerca de 40 colunas aparecem só o cabeçalho e o status.
-- **Teclas:** `q`, `Esc` e `Ctrl-C` saem. O rodapé diz `q sair`.
+- **Teclas:** em Agora, `q` e `Ctrl-C` saem na hora e `Esc` pergunta antes (ver
+  "Confirmar a saída"); `Tab` abre a visão Histórico
+  e `r` recarrega (ADR-0010; ver "Visão Histórico"). O rodapé mostra só as teclas
+  válidas na tela atual.
 
 ### View
 
@@ -855,12 +859,50 @@ couber, a versão compacta abaixo. O que passa do teto termina em `…`.
    andamento, `blue` disponível, `bar_empty` indisponível) — é contagem, nunca
    porcentagem. Cada item: marcador, ID em `id` e texto; feito em `meta`, em
    andamento em `fg` negrito, indisponível com `após T-NNN` em `yellow`.
-4. **Cartão Backlog**, quando há backlog. Título `Backlog`; à direita
-   `feitos/total`. Uma linha de contagens com palavra: `N feitos · N em curso ·
-   N disponíveis · N aguardando · N bloqueados`, omitindo as que são zero. Em
-   `backlog` (A escolher), onde não há TODO nem handoff, o cartão lista antes
-   os itens disponíveis (ID em `id` e texto).
-5. **Rodapé**, uma linha em `meta`: `q sair`.
+4. **Spec atual e Specs pendentes**, no lugar do antigo cartão Backlog, quando há
+   backlog (ver "Agrupado por spec" abaixo). Em `backlog` (A escolher), onde não
+   há TODO nem handoff, a linha `● A escolher  Sem handoff ativo` (como a de
+   `ready`) fica no lugar do Handoff e os dois cartões no lugar do cartão `A
+   escolher`.
+5. **Próximo passo**, uma linha logo acima do rodapé (ver "Próximo passo"
+   abaixo).
+6. **Rodapé**, um cartão de três linhas (borda `dim`) com `Tab histórico · r
+   recarregar · q sair`, as teclas em negrito `fg` e o resto em `meta`, separado do
+   corpo por uma linha em branco. Abaixo de 10 linhas de altura (sem a linha em
+   branco do topo também) volta a ser uma linha só, como antes. Quando não cabe na largura útil dos cartões
+   (a largura menos quatro), saem indicações inteiras, `r recarregar` primeiro e
+   depois `Tab`; `q sair` fica sempre. Em 40 colunas, `Tab histórico · q sair`.
+
+**Próximo passo.** Uma linha, e não um cartão: um cartão competiria com o
+Handoff, que é o objeto central da tela (princípio 1). Ela é função só do estado
+já carregado (nada de relógio) e **sugere sem executar**: a TUI não acrescenta
+tecla nem interação. A skill vai em texto e em negrito `fg`; os IDs em `id`; o
+resto da frase em `meta`; nada depende só da cor. Ela começa na mesma coluna do conteúdo dos cartões e não
+passa da largura útil (a largura menos quatro): quando não cabe, o título entre
+parênteses encurta primeiro (e some se não sobrar espaço), de modo que a skill a
+chamar nunca é o que se corta. As frases longas têm uma forma curta, usada quando a
+longa não cabe nem sem o título (por exemplo `Próximo item: B-NNN (título).
+Comece com relay-session.`, `Nenhum item disponível: relay-continue.`, `Registros
+em conflito: relay-status e relay-continue.`). O primeiro caso que casar vale:
+
+| Caso | Condição | Frase |
+| --- | --- | --- |
+| não é workspace | diretório sem `.orchestration/` | Instale o protocolo com `relay-setup`. |
+| `inconsistent` | violações | Os registros se contradizem: `relay-status` mostra o diagnóstico e `relay-continue` pode propor o reparo. |
+| `in_progress` | handoff `in_progress` | Retome `T-NNN` de `B-NNN` com `relay-session`. |
+| `blocked` com handoff | handoff `blocked` | Resolva o bloqueio de `T-NNN` (ver Handoff) e retome com `relay-session`. |
+| `blocked` sem handoff | TODO sem item disponível | Nenhuma subtarefa disponível em `B-NNN`: `relay-continue` mostra o bloqueio e as opções. |
+| `ready` | TODO com item disponível | Comece `T-NNN` (título) com `relay-session`. |
+| `done` com TODO | TODO todo `[x]`, sem handoff, item ainda aberto no backlog | Subtarefas de `B-NNN` concluídas: feche o item com `relay-session`. |
+| `backlog` com disponível | há entrada de backlog disponível | Próximo item disponível: `B-NNN` (título). Comece com `relay-session`. |
+| `backlog` sem disponível | nenhuma entrada disponível | Nenhum item disponível: resolva os bloqueios ou dependências do backlog; `relay-continue` mostra as opções. |
+| `done` | qualquer outro `done` | Tudo concluído. Para uma nova ideia: `relay-spec`. |
+| `idle` | sem backlog, TODO nem handoff | Nada em andamento. Para começar: `relay-spec`. |
+
+"Próximo item disponível" é a recomendação padrão do protocolo (a primeira
+entrada disponível em ordem textual), sem dizer que é a de maior prioridade. Em
+`relay-tui` a lógica fica em `suggest`, fora do `core`; a view só monta a frase.
+A linha não existe na visão Histórico.
 
 **Estados sem handoff.** `ready` mostra, no lugar do Handoff, uma linha que
 leva o status — `● Pronto` em negrito `blue` — e `Sem handoff ativo` em `meta`,
@@ -883,9 +925,31 @@ lacuna aceita acima).
 de um minuto), `há N min`, `há N h` (menos de um dia), `há N d`. Um `Updated` no
 futuro, por relógio desajustado, também é `agora`.
 
+**Agrupado por spec.** O backlog aparece em dois cartões, na ordem do protocolo
+e sem recalcular nada (o `available` e o marcador vêm do core):
+
+- **Spec atual**: na borda, o id `AAAAMMDD-NNN` e o título da spec (o mesmo do
+  nível de specs de Histórico, cortado com `…` antes do lado direito); à direita
+  `em curso` (negrito `green`) ou `a seguir` (negrito `blue`) e `feitos/total`.
+  A spec atual é a do item ativo do TODO; sem item ativo (estado `backlog`), a do
+  primeiro item disponível em ordem textual, a recomendação padrão do protocolo, e
+  o cartão diz `a seguir`, sem afirmar prioridade. Dentro, os itens ainda não
+  feitos da spec, na ordem textual, com o marcador à esquerda e a palavra à direita
+  (`em curso`, `disponível`, `aguardando · após B-NNN` em `yellow`, `bloqueado`);
+  os feitos entram só na contagem. Sem item que ancore a spec (backlog sem item
+  disponível, ou item ativo sem spec válida) o cartão não aparece.
+- **Specs pendentes**: uma linha por spec, além da atual, que tem ao menos um item
+  não feito, na ordem em que aparecem pela primeira vez no `BACKLOG.md`: id,
+  título e `feitos/total`. Os itens sem spec válida formam a linha **Sem spec**,
+  por último. Sem outra spec pendente o cartão não aparece.
+
 **Altura.** Não há rolagem. O cabeçalho tem prioridade. Faltando altura, cede
-primeiro o Backlog, que perde a moldura e vira uma linha (`Backlog 32/37 · 1 em
-curso · 3 disponíveis`, omitindo o que não cabe inteiro); depois o Handoff, que
+primeiro o backlog: Specs pendentes vira uma linha (`N specs pendentes`), depois
+Spec atual corta em `+N itens` (sempre com ao menos um item: abaixo disso não há
+cartão cortado) e, por fim, os dois viram a linha de contagem do Backlog (`Backlog
+32/37 · 1 em curso · 3 disponíveis`, omitindo o que não cabe inteiro); depois a linha de
+próximo passo, que some antes de o Handoff se compactar e, portanto, sempre antes
+de o TODO cortar; depois o Handoff, que
 perde o espaço extra e, se preciso, se compacta — sem a linha em branco e com
 uma linha por campo — para deixar o mínimo do TODO (moldura, barra e uma linha); por fim o TODO corta em `+N itens`,
 e a linha de corte também mostra o ID do item em andamento, se ele ficou fora.
@@ -897,4 +961,85 @@ disponível`, `3 disponíveis`; `+1 item`, `+4 itens`; `+1 violação`).
 **Largura.** A referência é de 58 colunas. Texto longo quebra (campos do handoff)
 ou termina em `…` (itens, caminho); nunca estoura a moldura. Abaixo de 40
 colunas só aparecem o cabeçalho e o status em uma linha (`● Em andamento  B-034`),
-sem cartões.
+sem cartões e sem a linha de próximo passo. A linha de próximo passo, quando não
+cabe, termina em `…`.
+
+### Visão Histórico
+
+Segunda visão do `relay-tui`, ao lado de **Agora**, que continua sendo a padrão
+ao abrir (ADR-0010). O nome diverge de propósito do **Trabalho** da UI web:
+Trabalho sugere o que está em curso, que é o que Agora já mostra; Histórico é o
+passado e o que falta. É estado local da tela e continua somente leitura: nenhuma
+tecla nem clique escreve num registro.
+
+**Níveis.** Quatro, cada um aprofundando o anterior: **specs**, **itens de
+backlog** da spec, **tarefas** do item e **detalhe** da tarefa. `Tab` (ou `t`)
+alterna com Agora de qualquer nível, e voltar ao Histórico reabre o nível e a
+seleção em que a pessoa estava.
+
+**Ordem e linhas.** Cada linha de lista ocupa uma linha e o que não cabe termina
+em `…`. Contagens são `feitos/total`, nunca porcentagem.
+
+| Nível | Ordem | Linha |
+| --- | --- | --- |
+| Specs | arquivos de `.specs/`, do mais recente ao mais antigo (nome decrescente) | id `AAAAMMDD-NNN` em `id`, título e `feitos/total` dos itens (`0/0` sem itens); uma última linha **Sem spec** reúne os itens cuja `spec:` falta ou não é um arquivo de `.specs/` |
+| Itens de backlog | ordem textual do `BACKLOG.md` | id, texto (sem as anotações `spec:`/`needs:`) e o estado, com o mesmo marcador e palavra do cartão Backlog de Agora |
+| Tarefas | registros do changelog cujo `Backlog` é o item, na ordem textual; um `T-NNN` repetido (correção append-only) é uma linha própria | id, título e data do registro; se o item é o do TODO atual, os itens do TODO ainda sem registro vêm depois, com o marcador do TODO e a palavra `sem registro` |
+| Detalhe | — | título inteiro e os campos do registro (Backlog, Spec, Result, Evidence, Criteria, Decisions), com as linhas de continuação juntadas ao campo; campo ausente é omitido, nunca inventado; tarefa sem registro mostra id, texto, marcador e `Sem registro no changelog ainda.` |
+
+O título de uma spec é o texto após `AAAAMMDD-NNN - ` no primeiro `# ` do
+arquivo; sem esse formato, o texto inteiro do `# `; sem `# `, o nome do arquivo.
+
+**Rolagem.** Só aqui (Agora continua sem rolagem). A lista rola para manter a
+seleção visível e diz, em `meta`, quantas linhas há acima e abaixo; o detalhe
+rola com setas, `j`/`k`, `PgUp`/`PgDn` e a roda. O detalhe quebra o texto pela
+largura e nunca corta.
+
+**Largura.** A referência é de 58 colunas e a visão se desenha também em 40.
+Abaixo de 40, mostra só o cabeçalho, a linha `Histórico precisa de 40 colunas`
+e o rodapé; as teclas continuam valendo. Sem `.orchestration/`, a lista fica
+vazia com `Nenhuma spec em .specs/`. A visão funciona também em `inconsistent`.
+
+**Teclas e cliques.** Todo gesto do mouse tem equivalente de teclado.
+
+| Gesto | Efeito |
+| --- | --- |
+| `Enter` ou clique numa linha | abre o nível seguinte; no detalhe `Enter` não faz nada |
+| `↑` `↓`, `j` `k`, roda | movem a seleção, sem passar dos limites |
+| `Esc` ou `Backspace` | voltam um nível; no nível de specs, voltam a Agora |
+| `Tab` ou `t` | alternam Agora e Histórico |
+| `r` | força a releitura do workspace (em Agora e em Histórico), sem escrever nada |
+| `q`, `Ctrl-C` | saem de qualquer visão, na hora (em Agora `Esc` também sai, mas depois de confirmar) |
+
+Clique fora de uma linha (cabeçalho, rodapé, área vazia) é ignorado; voltar um
+nível pelo mouse não existe. A captura do mouse fica ligada só enquanto Histórico
+está aberto, para que Agora continue permitindo selecionar e copiar texto.
+
+**Atualização.** Quando os registros mudam, as listas são refeitas e a seleção
+é mantida pelo id (spec, `B-NNN`, posição do registro); se o item sumiu, vai
+para a linha mais próxima e, se o nível inteiro sumiu, sobe até o primeiro nível
+que existe.
+
+**Rodapé**, em `meta`, só com as teclas válidas na tela:
+
+- Agora: `Tab histórico · r recarregar · q sair`.
+- Histórico, nas listas: `↑↓ mover · Enter abrir · Esc voltar · Tab agora · r
+  recarregar · q sair`.
+- Histórico, no detalhe: `↑↓ rolar · Esc voltar · Tab agora · r recarregar · q
+  sair`.
+
+Quando não cabe, saem indicações inteiras, nunca meia, da menos para a mais
+importante: `r recarregar`, `↑↓`, `Enter abrir`, `Esc voltar`, `Tab`; `q sair`
+fica sempre. Em 40 colunas, Agora mostra `Tab histórico · q sair`.
+
+### Confirmar a saída
+
+`Esc` em Agora não sai sozinho (um toque perdido encerraria o painel): o rodapé
+é trocado pela pergunta `Sair?` (negrito `yellow`) seguida das respostas em `meta`,
+`Esc, Enter ou y confirmam · outra tecla cancela`. `Esc`, `Enter` e `y` confirmam;
+qualquer outra tecla cancela, o rodapé volta e a tecla é consumida (não faz o que
+faria). `q` e `Ctrl-C` são gestos explícitos e saem na hora. Quando a frase não
+cabe na largura útil dos cartões (a largura menos quatro), usa-se a mais longa que
+cabe: sem `· outra tecla cancela`, depois `Esc ou y confirmam`, `y confirma` e
+só `y`; as teclas de resposta nunca são cortadas ao meio. Em Histórico não há
+pergunta: `Esc` volta.

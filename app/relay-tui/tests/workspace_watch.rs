@@ -37,26 +37,67 @@ fn quiet(watcher: &WorkspaceWatcher) {
     while watcher.events().recv_timeout(Duration::from_millis(600)).is_ok() {}
 }
 
+/// Five writes 20 ms apart. Returns when the last one finished and the longest
+/// gap between two of them: on a loaded machine a write can be descheduled for
+/// longer than the quiescence, and then it is no longer one burst.
+fn burst(dir: &Path) -> (Instant, Duration) {
+    let mut last_write = Instant::now();
+    let mut longest = Duration::ZERO;
+    for i in 0..5 {
+        let before = Instant::now();
+        fs::write(dir.join(".orchestration/TODO.md"), format!("# Active task: B-{i}\n")).unwrap();
+        // The reference is the last write, not the end of the sleep after it.
+        let now = Instant::now();
+        if i > 0 {
+            longest = longest.max(before.duration_since(last_write));
+        }
+        last_write = now;
+        thread::sleep(Duration::from_millis(20));
+    }
+    (last_write, longest)
+}
+
 #[test]
 fn a_burst_of_real_writes_yields_one_dirty_and_one_settled() {
     let dir = workspace_with_records();
     let watcher = started(dir.path());
-    quiet(&watcher);
 
-    let mut last_write = Instant::now();
-    for i in 0..5 {
-        fs::write(dir.path().join(".orchestration/TODO.md"), format!("# Active task: B-{i}\n")).unwrap();
-        // The reference is the last write, not the end of the sleep after it.
-        last_write = Instant::now();
-        thread::sleep(Duration::from_millis(20));
+    // A stall of the machine in the middle of the writes (a shared CI runner)
+    // splits the burst in two, which says nothing about the watcher: try again
+    // with a burst that really was one. A gap that long is one that approaches
+    // the quiescence itself.
+    let mut longest_seen = Duration::ZERO;
+    for _ in 0..6 {
+        quiet(&watcher);
+        let (last_write, longest_gap) = burst(dir.path());
+        if longest_gap >= QUIESCENCE - Duration::from_millis(20) {
+            longest_seen = longest_seen.max(longest_gap);
+            continue;
+        }
+        assert_eq!(next(&watcher, LONG), Some(Dirty));
+        assert_eq!(next(&watcher, LONG), Some(Settled));
+        assert!(last_write.elapsed() >= QUIESCENCE - Duration::from_millis(30));
+        // The burst is one snapshot: nothing else follows it.
+        assert_eq!(next(&watcher, Duration::from_millis(700)), None);
+        // And the settled snapshot has the last write.
+        assert_eq!(read_workspace(dir.path()).todo, "# Active task: B-4\n");
+        return;
     }
 
-    assert_eq!(next(&watcher, LONG), Some(Dirty));
-    assert_eq!(next(&watcher, LONG), Some(Settled));
-    assert!(last_write.elapsed() >= QUIESCENCE - Duration::from_millis(30));
-    // The burst is one snapshot: nothing else follows it.
-    assert_eq!(next(&watcher, Duration::from_millis(700)), None);
-    // And the settled snapshot has the last write.
+    // The machine never let five writes through without a long stall (the
+    // longest gap seen is in the message). What still holds then: the signals
+    // alternate, the last one is Settled, and the settled snapshot has the last
+    // write.
+    quiet(&watcher);
+    burst(dir.path());
+    let mut events = Vec::new();
+    while let Some(event) = next(&watcher, Duration::from_millis(700)) {
+        events.push(event);
+    }
+    assert!(!events.is_empty() && events.len() % 2 == 0, "longest gap {longest_seen:?}: {events:?}");
+    for pair in events.chunks(2) {
+        assert_eq!(pair, [Dirty, Settled], "longest gap {longest_seen:?}: {events:?}");
+    }
     assert_eq!(read_workspace(dir.path()).todo, "# Active task: B-4\n");
 }
 

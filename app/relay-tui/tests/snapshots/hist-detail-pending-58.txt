@@ -1,0 +1,30 @@
+ relay  ~/Developer/relay                     ● atualizado
+
+╭ Tarefa · T-002 ────────────────────────────────────────╮
+│ ● T-002                                                │
+│ Todas as larguras                                      │
+│                                                        │
+│ Sem registro no changelog ainda.                       │
+│                                                        │
+│                                                        │
+╰────────────────────────────────────────────────────────╯
+
+╭────────────────────────────────────────────────────────╮
+│ ↑↓ rolar · Esc voltar · Tab agora · q sair             │
+╰────────────────────────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
+
+d.FFFFFF.F.IIIII.ddddddddddddddddddddddddddddddddddddddddd
+d.G.IIIII................................................d
+d.FFFFF.FF.FFFFFFFF......................................d
+d........................................................d
+d.mmm.mmmmmmmm.mm.mmmmmmmmm.mmmmmm.......................d
+d........................................................d
+d........................................................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FF.mmmmm.m.FFF.mmmmmm.m.FFF.mmmmm.m.F.mmmm.............d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

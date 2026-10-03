@@ -1,0 +1,48 @@
+ relay  ~/Developer/relay                     ● atualizado
+
+╭ Handoff ─────────────────────────────── ● Em andamento ╮
+│ B-041 · T-002 · claude-code · há 5 min                 │
+│                                                        │
+│ Objetivo  Agrupar.                                     │
+│ Próximo   Testar.                                      │
+╰────────────────────────────────────────────────────────╯
+╭ TODO ───────────────────────────────────────────── 1/3 ╮
+│ ████████ ████████ ████████                             │
+│                                                        │
+│ ✓ T-001 Extrair titulos                                │
+│ ● T-002 Agrupar por spec                               │
+│ ○ T-003 Testar                                         │
+╰────────────────────────────────────────────────────────╯
+ Backlog 3/10 · 1 em curso · 1 bloqueado · 4 disponíveis
+
+
+  Retome T-002 de B-041 com relay-session.
+
+╭────────────────────────────────────────────────────────╮
+│ Tab histórico · r recarregar · q sair                  │
+╰────────────────────────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
+
+g.FFFFFFF.ggggggggggggggggggggggggggggggg.G.GG.GGGGGGGGG.g
+g.IIIII.m.iiiii.m.mmmmmmmmmmm.m.mm.m.mmm.................g
+g........................................................g
+g.mmmmmmmm..ffffffff.....................................g
+g.mmmmmmm...fffffff......................................g
+gggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+d.FFFF.ddddddddddddddddddddddddddddddddddddddddddddd.mmm.d
+d.gggggggg.gggggggg.uuuuuuuu.............................d
+d........................................................d
+d.G.iiiii.mmmmmmm.mmmmmmm................................d
+d.G.iiiii.FFFFFFF.FFF.FFFF...............................d
+d.u.iiiii.ffffff.........................................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+.FFFFFFF.mmmm.m.m.mm.mmmmm.m.m.mmmmmmmmm.m.m.mmmmmmmmmmm
+
+
+..mmmmmm.iiiii.mm.iiiii.mmm.FFFFFFFFFFFFFm
+
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

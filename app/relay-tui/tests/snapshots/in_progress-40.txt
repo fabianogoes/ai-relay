@@ -15,13 +15,13 @@
 │ ● T-002 Validar os fixtures          │
 │ ○ T-003 Registrar no índice          │
 ╰──────────────────────────────────────╯
-╭ Backlog ──────────────────────── 0/1 ╮
-│ ○ 1 disponível                       │
+ 1 spec pendente
+
+  Retome T-002 de B-001 com relay-ses…
+
+╭──────────────────────────────────────╮
+│ Tab histórico · q sair               │
 ╰──────────────────────────────────────╯
-
-
-
- q sair
 
 --- colors ---
 #######.mmmmmmmmmmmmmmmmm...g.mmmmmmmmmm
@@ -41,10 +41,10 @@ d.G.iiiii.mmmmmmmm.m.mmmmmmmm..........d
 d.G.iiiii.FFFFFFF.FF.FFFFFFFF..........d
 d.u.iiiii.fffffffff.ff.ffffff..........d
 dddddddddddddddddddddddddddddddddddddddd
-d.FFFFFFF.dddddddddddddddddddddddd.mmm.d
-d.U.f.ffffffffff.......................d
+.m.mmmm.mmmmmmmm
+
+..mmmmmm.iiiii.mm.iiiii.mmm.FFFFFFFFFF
+
 dddddddddddddddddddddddddddddddddddddddd
-
-
-
-.F.mmmm
+d.FFF.mmmmmmmmm.m.F.mmmm...............d
+dddddddddddddddddddddddddddddddddddddddd
