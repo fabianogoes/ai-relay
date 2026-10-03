@@ -37,6 +37,12 @@ Write one when a decision affects structure, an architecture characteristic, a
 dependency, an interface, or a construction technique. Record the reasoning,
 not only the choice.
 
+- `docs/adr/0011-skill-de-pacote-fora-do-protocolo.md` — Accepted —
+  `relay-tui-split`, a package skill that opens a terminal split running the
+  `relay-tui` and touches no record: it lives in `skills/` but outside the
+  protocol, with a name distinct from the binary, a POSIX `sh` script as the
+  first executable in the package, and its tests in `.agents/tests/`, not in
+  `skills/`.
 - `docs/adr/0009-relay-tui-observador-de-terminal-em-rust.md` — Accepted —
   `relay-tui`, a read-only, passive terminal observer in Rust (`ratatui`),
   shipped as a single downloadable binary from a GitHub Release (macOS
