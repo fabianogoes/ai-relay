@@ -159,7 +159,15 @@ teclas continuam valendo.
 - **TODO**: uma barra com um segmento por subtarefa e a lista, com `✓` feita,
   `●` em andamento, `○` disponível, `◌` esperando outra subtarefa e `!`
   bloqueada.
-- **Backlog**: quantos itens estão feitos, em curso, disponíveis ou aguardando.
+- **Spec atual e specs pendentes**: o backlog agrupado por spec. O **cartão da
+  spec** tem na borda o id e o título dela, com `em curso` (ou `a seguir`, quando
+  nada está ativo, a spec do primeiro item disponível) e `feitos/total` à direita,
+  e lista os itens da spec ainda não feitos: `●` em curso, `○` disponível, `◌`
+  aguardando (com `após B-NNN`) e `!` bloqueado. **Specs pendentes** tem uma linha
+  por outra spec com trabalho pendente, e **Sem spec** para os itens que não
+  apontam para um arquivo de spec. Quando falta altura, eles cedem nesta ordem:
+  as specs pendentes viram uma linha, o cartão da spec corta em `+N itens` e os
+  dois viram a linha de contagem do backlog.
 - **Próximo passo**, uma linha acima do rodapé: o que fazer em seguida e qual
   skill chamar (por exemplo `Retome T-002 de B-001 com relay-session.`), tirado
   dos mesmos registros. O painel só sugere: nunca executa nada.

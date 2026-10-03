@@ -17,7 +17,7 @@
 │ ✓ T-003 Runner TS lê a suíte                           │
 │ +7 itens · ● T-004 em andamento                        │
 ╰────────────────────────────────────────────────────────╯
- Backlog 1/6 · 1 em curso · 1 bloqueado · 2 disponíveis
+ 1 spec pendente
 
 ╭────────────────────────────────────────────────────────╮
 │ Tab histórico · r recarregar · q sair                  │
@@ -43,7 +43,7 @@ d.G.iiiii.mmmmmmm.mm.mmmmmmmm.mmm.mmmmmmmm.mmmm.mmmmmmmm.d
 d.G.iiiii.mmmmmm.mm.mm.m.mmmmm...........................d
 d.mm.mmmmm.m.m.mmmmm.mm.mmmmmmmmm........................d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-.FFFFFFF.mmm.m.m.mm.mmmmm.m.m.mmmmmmmmm.m.m.mmmmmmmmmmm
+.m.mmmm.mmmmmmmm
 
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d

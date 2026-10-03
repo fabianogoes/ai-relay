@@ -17,7 +17,7 @@
 │ ✓ T-001 Materializar os sete fixtures                  │
 │ +2 itens                                               │
 ╰────────────────────────────────────────────────────────╯
- Backlog 0/1 · 1 disponível
+ 1 spec pendente
 
 ╭────────────────────────────────────────────────────────╮
 │ Tab histórico · r recarregar · q sair                  │
@@ -43,7 +43,7 @@ d........................................................d
 d.G.iiiii.mmmmmmmmmmmm.mm.mmmm.mmmmmmmm..................d
 d.mm.mmmmm...............................................d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-.FFFFFFF.mmm.m.m.mmmmmmmmmm
+.m.mmmm.mmmmmmmm
 
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d

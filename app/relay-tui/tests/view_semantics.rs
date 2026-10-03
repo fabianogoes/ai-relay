@@ -20,7 +20,7 @@ fn case(name: &str) -> RelayState {
 }
 
 fn render(state: &RelayState, freshness: Freshness, width: u16, height: u16) -> Buffer {
-    let view = View {
+    let view = View { history: relay_tui::view::no_history(),
         screen: Screen::State(state),
         workspace: "~/Developer/relay",
         freshness,

@@ -1,23 +1,33 @@
  relay  ~/Developer/relay                     ● atualizado
 
 ╭ Handoff ─────────────────────────────── ● Em andamento ╮
-│ B-001 · T-002 · claude-code · há 7 h                   │
+│ B-041 · T-002 · claude-code · há 5 min                 │
 │                                                        │
-│ Objetivo  Validar os fixtures contra o protocolo.      │
-│ Próximo   Rodar as verificações de integridade.        │
+│ Objetivo  Agrupar.                                     │
+│ Próximo   Testar.                                      │
 ╰────────────────────────────────────────────────────────╯
 ╭ TODO ───────────────────────────────────────────── 1/3 ╮
 │ ████████ ████████ ████████                             │
 │                                                        │
-│ ✓ T-001 Escrever a ADR-0003                            │
-│ ● T-002 Validar os fixtures                            │
-│ ○ T-003 Registrar no índice                            │
+│ ✓ T-001 Extrair titulos                                │
+│ ● T-002 Agrupar por spec                               │
+│ ○ T-003 Testar                                         │
 ╰────────────────────────────────────────────────────────╯
-╭ Specs pendentes ──────────────────────────────────── 1 ╮
+╭ 20261002-002 relay-tui: navegacao pe… ─ em curso · 1/4 ╮
+│ ● B-041 Core em Rust extrai specs, backlog e… em curso │
+│ ◌ B-042 Estado da navegacao s… aguardando · após B-041 │
+│ ○ B-044 Binario com captura de mouse        disponível │
+╰────────────────────────────────────────────────────────╯
+╭ Specs pendentes ──────────────────────────────────── 3 ╮
+│ 20261002-001 relay-tui: observador de terminal em… 1/3 │
+│ 20261002-003 Skill que abre o relay-tui em um spl… 0/1 │
 │ Sem spec                                           0/1 │
 ╰────────────────────────────────────────────────────────╯
 
-  Retome T-002 de B-001 com relay-session.
+
+
+
+  Retome T-002 de B-041 com relay-session.
 
 ╭────────────────────────────────────────────────────────╮
 │ Tab histórico · r recarregar · q sair                  │
@@ -27,21 +37,31 @@
 #######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
 
 g.FFFFFFF.ggggggggggggggggggggggggggggggg.G.GG.GGGGGGGGG.g
-g.IIIII.m.iiiii.m.mmmmmmmmmmm.m.mm.m.m...................g
+g.IIIII.m.iiiii.m.mmmmmmmmmmm.m.mm.m.mmm.................g
 g........................................................g
-g.mmmmmmmm..fffffff.ff.ffffffff.ffffff.f.ffffffffff......g
-g.mmmmmmm...fffff.ff.ffffffffffff.ff.ffffffffffff........g
+g.mmmmmmmm..ffffffff.....................................g
+g.mmmmmmm...fffffff......................................g
 gggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
 d.FFFF.ddddddddddddddddddddddddddddddddddddddddddddd.mmm.d
 d.gggggggg.gggggggg.uuuuuuuu.............................d
 d........................................................d
-d.G.iiiii.mmmmmmmm.m.mmmmmmmm............................d
-d.G.iiiii.FFFFFFF.FF.FFFFFFFF............................d
-d.u.iiiii.fffffffff.ff.ffffff............................d
+d.G.iiiii.mmmmmmm.mmmmmmm................................d
+d.G.iiiii.FFFFFFF.FFF.FFFF...............................d
+d.u.iiiii.ffffff.........................................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.IIIIIIIIIIII.FFFFFFFFFF.FFFFFFFFF.FFF.d.GG.GGGGG.m.mmm.d
+d.G.iiiii.FFFF.FF.FFFF.FFFFFF.FFFFFF.FFFFFFF.FF.ff.fffff.d
+d.M.iiiii.mmmmmm.mm.mmmmmmmmm.mm.mmmmmmmmmm.y.yyyy.yyyyy.d
+d.U.iiiii.fffffff.fff.fffffff.ff.fffff........ffffffffff.d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 d.FFFFF.FFFFFFFFF.dddddddddddddddddddddddddddddddddddd.m.d
+d.iiiiiiiiiiii.ffffffffff.ffffffffff.ff.ffffffff.fff.mmm.d
+d.iiiiiiiiiiii.fffff.fff.ffff.f.fffffffff.ff.ff.ffff.mmm.d
 d.fff.ffff...........................................mmm.d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+
+
+
 
 ..mmmmmm.iiiii.mm.iiiii.mmm.FFFFFFFFFFFFFm
 

@@ -3,7 +3,7 @@
 ╭ Handoff ─────────────────────────────── ● Em andamento ╮
 │ B-002 · T-004 · claude-code · há 5 min                 │
 ╰────────────────────────────────────────────────────────╯
- Backlog 1/6 · 1 em curso · 1 bloqueado · 2 disponíveis
+ 1 spec pendente
 
 
 
@@ -17,7 +17,7 @@
 g.FFFFFFF.ggggggggggggggggggggggggggggggg.G.GG.GGGGGGGGG.g
 g.IIIII.m.iiiii.m.mmmmmmmmmmm.m.mm.m.mmm.................g
 gggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
-.FFFFFFF.mmm.m.m.mm.mmmmm.m.m.mmmmmmmmm.m.m.mmmmmmmmmmm
+.m.mmmm.mmmmmmmm
 
 
 

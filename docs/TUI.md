@@ -156,7 +156,15 @@ working.
   the condition to resume.
 - **TODO**: a bar with one segment per subtask and the list, with `✓` done, `●`
   in progress, `○` available, `◌` waiting on another subtask and `!` blocked.
-- **Backlog**: how many items are done, in progress, available or waiting.
+- **Spec in hand and pending specs**: the backlog grouped by spec. The **spec
+  card** is titled with the spec's id and title, with `em curso` (or `a seguir`
+  when nothing is active, the first available item's spec) and `done/total` on the
+  right, and lists the spec's items that are not done: `●` in progress, `○`
+  available, `◌` waiting (with `após B-NNN`) and `!` blocked. **Specs pendentes**
+  has one line per other spec with work left, and **Sem spec** for the items that
+  point at no spec file. When the screen is short they give way in this order:
+  the pending specs become one line, the spec card is cut at `+N itens`, and both
+  become a one-line count of the backlog.
 - **Next step**, one line above the footer: what to do next and which skill to
   call (for example `Retome T-002 de B-001 com relay-session.`), worked out from
   the same records. The panel only suggests: it never runs anything.

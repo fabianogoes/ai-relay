@@ -8,6 +8,7 @@
 mod cards;
 mod hint;
 mod history;
+mod specs;
 pub mod text;
 
 pub use history::{HistoryScreen, detail_extent, list_geometry, row_at};
@@ -18,7 +19,9 @@ use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::Widget;
 
-use crate::core::RelayState;
+use std::sync::LazyLock;
+
+use crate::core::{History, RelayState};
 use crate::theme;
 
 /// What the screen is showing.
@@ -39,11 +42,20 @@ pub enum Freshness {
 #[derive(Debug, Clone, Copy)]
 pub struct View<'a> {
     pub screen: Screen<'a>,
+    /// The extracted spec titles and files, which Agora needs to group the
+    /// backlog by spec. `no_history()` when there are none.
+    pub history: &'a History,
     /// The observed path, as it should be shown.
     pub workspace: &'a str,
     pub freshness: Freshness,
     /// The clock, in Unix seconds, for "há 4 min".
     pub now_unix: i64,
+}
+
+/// No spec files at all: for a screen that has nothing to group by.
+pub fn no_history() -> &'static History {
+    static EMPTY: LazyLock<History> = LazyLock::new(History::default);
+    &EMPTY
 }
 
 /// Below this many columns only the header and the status line are drawn.

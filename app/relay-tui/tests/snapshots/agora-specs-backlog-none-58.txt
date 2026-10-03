@@ -1,9 +1,11 @@
  relay  ~/Developer/relay                     ● atualizado
 
-╭ ● Inconsistente ──────────────────────────────────── 1 ╮
-│ handoff-names-no-pending-todo                          │
-│ O handoff aponta T-001, que está [x]; T-002 está [•].  │
-│ handoff · todo                                         │
+ ● A escolher  Sem handoff ativo
+╭ Specs pendentes ──────────────────────────────────── 4 ╮
+│ 20261002-001 relay-tui: observador de terminal em… 0/2 │
+│ 20261002-002 relay-tui: navegacao pelo historico … 0/1 │
+│ 20261002-003 Skill que abre o relay-tui em um spl… 0/1 │
+│ Sem spec                                           0/1 │
 ╰────────────────────────────────────────────────────────╯
 
 
@@ -17,7 +19,11 @@
 
 
 
-  Registros em conflito: relay-status e relay-continue.
+
+
+
+
+  Nenhum item disponível: relay-continue.
 
 ╭────────────────────────────────────────────────────────╮
 │ Tab histórico · r recarregar · q sair                  │
@@ -26,11 +32,13 @@
 --- colors ---
 #######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
 
-r.R.RRRRRRRRRRRRR.rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.m.r
-r.RRRRRRRRRRRRRRRRRRRRRRRRRRRRR..........................r
-r.f.fffffff.ffffff.ffffff.fff.ffff.ffff.fffff.ffff.ffff..r
-r.mmmmmmm.m.mmmm.........................................r
-rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+.U.U.UUUUUUUU..mmm.mmmmmmm.mmmmm
+d.FFFFF.FFFFFFFFF.dddddddddddddddddddddddddddddddddddd.m.d
+d.iiiiiiiiiiii.ffffffffff.ffffffffff.ff.ffffffff.fff.mmm.d
+d.iiiiiiiiiiii.ffffffffff.fffffffff.ffff.fffffffff.f.mmm.d
+d.iiiiiiiiiiii.fffff.fff.ffff.f.fffffffff.ff.ff.ffff.mmm.d
+d.fff.ffff...........................................mmm.d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 
 
 
@@ -43,7 +51,11 @@ rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
 
 
 
-..mmmmmmmmm.mm.mmmmmmmmm.FFFFFFFFFFFF.m.FFFFFFFFFFFFFFm
+
+
+
+
+..mmmmmm.mmmm.mmmmmmmmmmm.FFFFFFFFFFFFFFm
 
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d

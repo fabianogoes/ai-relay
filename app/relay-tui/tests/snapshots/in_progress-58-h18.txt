@@ -11,7 +11,7 @@
 │ ✓ T-001 Escrever a ADR-0003                            │
 │ +2 itens · ● T-002 em andamento                        │
 ╰────────────────────────────────────────────────────────╯
- Backlog 0/1 · 1 disponível
+ 1 spec pendente
 
 ╭────────────────────────────────────────────────────────╮
 │ Tab histórico · r recarregar · q sair                  │
@@ -31,7 +31,7 @@ d.gggggggg.gggggggg.uuuuuuuu.............................d
 d.G.iiiii.mmmmmmmm.m.mmmmmmmm............................d
 d.mm.mmmmm.m.m.mmmmm.mm.mmmmmmmmm........................d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-.FFFFFFF.mmm.m.m.mmmmmmmmmm
+.m.mmmm.mmmmmmmm
 
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d

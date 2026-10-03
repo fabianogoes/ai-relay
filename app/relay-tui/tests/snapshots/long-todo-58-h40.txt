@@ -24,8 +24,8 @@
 │ ◌ T-009 Publicar  após T-007                           │
 │ ◌ T-010 Anunciar  após T-009                           │
 ╰────────────────────────────────────────────────────────╯
-╭ Backlog ────────────────────────────────────────── 1/6 ╮
-│ ✓ 1 · ● 1 · ! 1 · ○ 2 · ◌ 1                            │
+╭ Specs pendentes ──────────────────────────────────── 1 ╮
+│ Sem spec                                           1/6 │
 ╰────────────────────────────────────────────────────────╯
 
 
@@ -66,8 +66,8 @@ d.Y.iiiii.fffffff.fffff..yyyyyyyyy.......................d
 d.m.iiiii.mmmmmmmm..yyyy.yyyyy...........................d
 d.m.iiiii.mmmmmmmm..yyyy.yyyyy...........................d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-d.FFFFFFF.dddddddddddddddddddddddddddddddddddddddddd.mmm.d
-d.G.f.m.G.f.m.Y.f.m.U.f.m.M.f............................d
+d.FFFFF.FFFFFFFFF.dddddddddddddddddddddddddddddddddddd.m.d
+d.fff.ffff...........................................mmm.d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 
 

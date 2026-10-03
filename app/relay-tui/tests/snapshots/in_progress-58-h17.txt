@@ -10,7 +10,7 @@
 │ ████████ ████████ ████████                             │
 │ +3 itens · ● T-002 em andamento                        │
 ╰────────────────────────────────────────────────────────╯
- Backlog 0/1 · 1 disponível
+ 1 spec pendente
 
 ╭────────────────────────────────────────────────────────╮
 │ Tab histórico · r recarregar · q sair                  │
@@ -29,7 +29,7 @@ d.FFFF.ddddddddddddddddddddddddddddddddddddddddddddd.mmm.d
 d.gggggggg.gggggggg.uuuuuuuu.............................d
 d.mm.mmmmm.m.m.mmmmm.mm.mmmmmmmmm........................d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-.FFFFFFF.mmm.m.m.mmmmmmmmmm
+.m.mmmm.mmmmmmmm
 
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d

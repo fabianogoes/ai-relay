@@ -816,7 +816,7 @@ um tom só dele. Tom e rótulo textual continuam obrigatórios (princípio 7).
 ### Estrutura
 
 - **Cartões** com borda arredondada (`╭ ╮ ╰ ╯`) e o título na própria borda:
-  cabeçalho, Handoff, TODO e Backlog. A borda é `dim`; a do Handoff herda o
+  cabeçalho, Handoff, TODO, Spec atual, Specs pendentes e rodapé. A borda é `dim`; a do Handoff herda o
   tom do status. Em `inconsistent`, um cartão de violações (`check` e `detail`)
   substitui o conteúdo.
 - **Marcadores do TODO** acompanham o protocolo e sempre trazem texto ao lado:
@@ -827,7 +827,8 @@ um tom só dele. Tom e rótulo textual continuam obrigatórios (princípio 7).
   nunca porcentagem (princípio 8; ADR-0003).
 - **Frescor em texto:** `atualizado` ou `atualizando`, no cabeçalho.
 - **Largura de referência: 58 colunas.** Sem rolagem: faltando altura, o TODO
-  trunca em "+N itens" e o Backlog reduz-se a uma linha de contagem; abaixo de
+  trunca em "+N itens" e o backlog (Spec atual e Specs pendentes) reduz-se a uma
+  linha de contagem; abaixo de
   cerca de 40 colunas aparecem só o cabeçalho e o status.
 - **Teclas:** em Agora, `q` e `Ctrl-C` saem na hora e `Esc` pergunta antes (ver
   "Confirmar a saída"); `Tab` abre a visão Histórico
@@ -858,11 +859,11 @@ couber, a versão compacta abaixo. O que passa do teto termina em `…`.
    andamento, `blue` disponível, `bar_empty` indisponível) — é contagem, nunca
    porcentagem. Cada item: marcador, ID em `id` e texto; feito em `meta`, em
    andamento em `fg` negrito, indisponível com `após T-NNN` em `yellow`.
-4. **Cartão Backlog**, quando há backlog. Título `Backlog`; à direita
-   `feitos/total`. Uma linha de contagens com palavra: `N feitos · N em curso ·
-   N disponíveis · N aguardando · N bloqueados`, omitindo as que são zero. Em
-   `backlog` (A escolher), onde não há TODO nem handoff, o cartão lista antes
-   os itens disponíveis (ID em `id` e texto).
+4. **Spec atual e Specs pendentes**, no lugar do antigo cartão Backlog, quando há
+   backlog (ver "Agrupado por spec" abaixo). Em `backlog` (A escolher), onde não
+   há TODO nem handoff, a linha `● A escolher  Sem handoff ativo` (como a de
+   `ready`) fica no lugar do Handoff e os dois cartões no lugar do cartão `A
+   escolher`.
 5. **Próximo passo**, uma linha logo acima do rodapé (ver "Próximo passo"
    abaixo).
 6. **Rodapé**, um cartão de três linhas (borda `dim`) com `Tab histórico · r
@@ -879,7 +880,10 @@ tecla nem interação. A skill vai em texto e em negrito `fg`; os IDs em `id`; o
 resto da frase em `meta`; nada depende só da cor. Ela começa na mesma coluna do conteúdo dos cartões e não
 passa da largura útil (a largura menos quatro): quando não cabe, o título entre
 parênteses encurta primeiro (e some se não sobrar espaço), de modo que a skill a
-chamar nunca é o que se corta. O primeiro caso que casar vale:
+chamar nunca é o que se corta. As frases longas têm uma forma curta, usada quando a
+longa não cabe nem sem o título (por exemplo `Próximo item: B-NNN (título).
+Comece com relay-session.`, `Nenhum item disponível: relay-continue.`, `Registros
+em conflito: relay-status e relay-continue.`). O primeiro caso que casar vale:
 
 | Caso | Condição | Frase |
 | --- | --- | --- |
@@ -921,9 +925,29 @@ lacuna aceita acima).
 de um minuto), `há N min`, `há N h` (menos de um dia), `há N d`. Um `Updated` no
 futuro, por relógio desajustado, também é `agora`.
 
+**Agrupado por spec.** O backlog aparece em dois cartões, na ordem do protocolo
+e sem recalcular nada (o `available` e o marcador vêm do core):
+
+- **Spec atual**: na borda, o id `AAAAMMDD-NNN` e o título da spec (o mesmo do
+  nível de specs de Histórico, cortado com `…` antes do lado direito); à direita
+  `em curso` (negrito `green`) ou `a seguir` (negrito `blue`) e `feitos/total`.
+  A spec atual é a do item ativo do TODO; sem item ativo (estado `backlog`), a do
+  primeiro item disponível em ordem textual, a recomendação padrão do protocolo, e
+  o cartão diz `a seguir`, sem afirmar prioridade. Dentro, os itens ainda não
+  feitos da spec, na ordem textual, com o marcador à esquerda e a palavra à direita
+  (`em curso`, `disponível`, `aguardando · após B-NNN` em `yellow`, `bloqueado`);
+  os feitos entram só na contagem. Sem item que ancore a spec (backlog sem item
+  disponível, ou item ativo sem spec válida) o cartão não aparece.
+- **Specs pendentes**: uma linha por spec, além da atual, que tem ao menos um item
+  não feito, na ordem em que aparecem pela primeira vez no `BACKLOG.md`: id,
+  título e `feitos/total`. Os itens sem spec válida formam a linha **Sem spec**,
+  por último. Sem outra spec pendente o cartão não aparece.
+
 **Altura.** Não há rolagem. O cabeçalho tem prioridade. Faltando altura, cede
-primeiro o Backlog, que perde a moldura e vira uma linha (`Backlog 32/37 · 1 em
-curso · 3 disponíveis`, omitindo o que não cabe inteiro); depois a linha de
+primeiro o backlog: Specs pendentes vira uma linha (`N specs pendentes`), depois
+Spec atual corta em `+N itens` (sempre com ao menos um item: abaixo disso não há
+cartão cortado) e, por fim, os dois viram a linha de contagem do Backlog (`Backlog
+32/37 · 1 em curso · 3 disponíveis`, omitindo o que não cabe inteiro); depois a linha de
 próximo passo, que some antes de o Handoff se compactar e, portanto, sempre antes
 de o TODO cortar; depois o Handoff, que
 perde o espaço extra e, se preciso, se compacta — sem a linha em branco e com

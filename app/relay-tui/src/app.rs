@@ -241,6 +241,7 @@ impl App {
                 Loaded::NotRelay => Screen::NotARelayWorkspace,
                 Loaded::State(state) => Screen::State(state),
             },
+            history: &self.history,
             workspace: &self.shown,
             freshness: self.freshness,
             now_unix,

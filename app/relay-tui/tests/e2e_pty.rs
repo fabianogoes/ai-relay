@@ -28,6 +28,12 @@ fn copy_tree(from: &Path, to: &Path) {
     }
 }
 
+/// A spec file the backlog can point at, so its card shows the spec and its items.
+fn add_spec(dir: &Path, name: &str) {
+    fs::create_dir_all(dir.join(".specs")).unwrap();
+    fs::write(dir.join(".specs").join(name), "# 20261002-001 - Spec de teste\n").unwrap();
+}
+
 /// A workspace on disk, copied from one of the conformance cases.
 fn workspace(case: &str) -> TempDir {
     let dir = TempDir::new().unwrap();
@@ -173,7 +179,7 @@ fn it_opens_and_shows_the_workspace() {
     assert!(screen.contains("relay"));
     assert!(screen.contains("Handoff") && screen.contains("B-001") && screen.contains("T-002"));
     assert!(screen.contains("Validar os fixtures contra o protocolo."));
-    assert!(screen.contains("TODO") && screen.contains("Backlog") && screen.contains("q sair"));
+    assert!(screen.contains("TODO") && screen.contains("Specs pendentes") && screen.contains("q sair"));
 }
 
 #[test]
@@ -182,6 +188,7 @@ fn a_change_on_disk_shows_up_without_restarting() {
     let session = Session::start(dir.path(), 24, 58, &[]);
     session.wait_for("the empty workspace", |s| s.contains("Sem trabalho") && s.contains("atualizado"));
 
+    add_spec(dir.path(), "20261002-001-x.md");
     fs::write(
         dir.path().join(".orchestration/BACKLOG.md"),
         "# Backlog\n\n- [ ] B-001 - Algo para escolher (spec: .specs/20261002-001-x.md)\n",
@@ -200,6 +207,7 @@ fn a_burst_of_writes_ends_in_a_single_settled_screen() {
     let session = Session::start(dir.path(), 24, 58, &[]);
     session.wait_for("the empty workspace", |s| s.contains("Sem trabalho"));
 
+    add_spec(dir.path(), "20261002-001-x.md");
     for n in 1..=5 {
         fs::write(
             dir.path().join(".orchestration/BACKLOG.md"),
@@ -223,6 +231,7 @@ fn a_directory_without_orchestration_says_so_and_keeps_watching() {
     session.wait_for("the not-a-workspace card", |s| s.contains("Não é um workspace Relay"));
 
     fs::create_dir_all(dir.path().join(".orchestration")).unwrap();
+    add_spec(dir.path(), "x.md");
     fs::write(dir.path().join(".orchestration/BACKLOG.md"), "# Backlog\n\n- [ ] B-001 - Chegou (spec: .specs/x.md)\n").unwrap();
     session.wait_for("the workspace that appeared", |s| s.contains("A escolher") && s.contains("Chegou"));
 }

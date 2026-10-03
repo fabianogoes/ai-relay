@@ -15,8 +15,8 @@
 │ ✓ T-002 Escrever tokens.css                                                                                          │
 │ ! T-003 Scaffold da relay-ui  bloqueado                                                                              │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-╭ Backlog ──────────────────────────────────────────────────────────────────────────────────────────────────────── 0/1 ╮
-│ ○ 1 disponível                                                                                                       │
+╭ Specs pendentes ────────────────────────────────────────────────────────────────────────────────────────────────── 1 ╮
+│ Sem spec                                                                                                         0/1 │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 
@@ -47,8 +47,8 @@ d.G.iiiii.mmmmmmmmmmmm.mm.mmmm.mmmmmmmm.........................................
 d.G.iiiii.mmmmmmmm.mmmmmmmmmm..........................................................................................d
 d.Y.iiiii.ffffffff.ff.ffffffff..yyyyyyyyy..............................................................................d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-d.FFFFFFF.dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.mmm.d
-d.U.f.ffffffffff.......................................................................................................d
+d.FFFFF.FFFFFFFFF.dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.m.d
+d.fff.ffff.........................................................................................................mmm.d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 
 

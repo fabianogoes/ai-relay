@@ -1,9 +1,12 @@
  relay  ~/Developer/relay                     ● atualizado
 
-╭ Handoff ─────────────────────────────── ● Em andamento ╮
-│ B-001 · T-002 · claude-code · há 7 h                   │
+ ● A escolher  Sem handoff ativo
+╭ 20261002-001 relay-tui: observador d… ─ a seguir · 1/3 ╮
+│ ○ B-011 Release e documentacao de uso       disponível │
+│ ! B-012 Assinatura dos binarios no macOS     bloqueado │
 ╰────────────────────────────────────────────────────────╯
- 1 spec pendente
+ 3 specs pendentes
+
 
 
 
@@ -14,10 +17,13 @@
 --- colors ---
 #######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
 
-g.FFFFFFF.ggggggggggggggggggggggggggggggg.G.GG.GGGGGGGGG.g
-g.IIIII.m.iiiii.m.mmmmmmmmmmm.m.mm.m.m...................g
-gggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
-.m.mmmm.mmmmmmmm
+.U.U.UUUUUUUU..mmm.mmmmmmm.mmmmm
+d.IIIIIIIIIIII.FFFFFFFFFF.FFFFFFFFFF.FF.d.U.UUUUUU.m.mmm.d
+d.U.iiiii.fffffff.f.ffffffffffff.ff.fff.......ffffffffff.d
+d.Y.iiiii.ffffffffff.fff.ffffffff.ff.fffff.....yyyyyyyyy.d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+.m.mmmmm.mmmmmmmmm
+
 
 
 

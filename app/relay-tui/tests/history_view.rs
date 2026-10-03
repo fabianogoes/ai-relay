@@ -255,7 +255,7 @@ fn footer_of(lines: &[String]) -> String {
 
 fn agora_footer(width: u16) -> String {
     let state = derive_state(&files(1));
-    let view = View { screen: Screen::State(&state), workspace: "~/relay", freshness: Freshness::Fresh, now_unix: 0 };
+    let view = View { history: relay_tui::view::no_history(), screen: Screen::State(&state), workspace: "~/relay", freshness: Freshness::Fresh, now_unix: 0 };
     let area = Rect::new(0, 0, width, 24);
     let mut buf = Buffer::empty(area);
     (&view).render(area, &mut buf);

@@ -95,7 +95,7 @@ fn check(name: &str, view: &View, width: u16, height: u16) {
 }
 
 fn view<'a>(state: &'a RelayState, freshness: Freshness) -> View<'a> {
-    View { screen: Screen::State(state), workspace: "~/Developer/relay", freshness, now_unix: now() }
+    View { history: relay_tui::view::no_history(), screen: Screen::State(state), workspace: "~/Developer/relay", freshness, now_unix: now() }
 }
 
 const STATUS_CASES: [&str; 7] = ["idle", "backlog", "ready", "in_progress", "blocked", "done", "inconsistent"];
@@ -124,7 +124,7 @@ fn a_change_in_flight_says_so_in_words() {
 
 #[test]
 fn a_directory_without_orchestration() {
-    let view = View {
+    let view = View { history: relay_tui::view::no_history(),
         screen: Screen::NotARelayWorkspace,
         workspace: "~/Developer/sem-relay",
         freshness: Freshness::Fresh,

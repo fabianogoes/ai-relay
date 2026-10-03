@@ -1,9 +1,8 @@
  relay  ~/Developer/relay                     ● atualizado
 
-╭ Handoff ─────────────────────────────── ● Em andamento ╮
-│ B-001 · T-002 · claude-code · há 7 h                   │
-╰────────────────────────────────────────────────────────╯
- 1 spec pendente
+ ● A escolher  Sem handoff ativo
+ Backlog 3/10 · 1 bloqueado · 5 disponíveis · 1 aguardando
+
 
 
 
@@ -14,10 +13,9 @@
 --- colors ---
 #######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
 
-g.FFFFFFF.ggggggggggggggggggggggggggggggg.G.GG.GGGGGGGGG.g
-g.IIIII.m.iiiii.m.mmmmmmmmmmm.m.mm.m.m...................g
-gggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
-.m.mmmm.mmmmmmmm
+.U.U.UUUUUUUU..mmm.mmmmmmm.mmmmm
+.FFFFFFF.mmmm.m.m.mmmmmmmmm.m.m.mmmmmmmmmmm.m.m.mmmmmmmmmm
+
 
 
 

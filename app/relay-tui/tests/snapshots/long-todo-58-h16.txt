@@ -9,7 +9,7 @@
 │ ████ ████ ████ ████ ████ ████ ████ ████ ████ ████      │
 │ +10 itens · ● T-004 em andamento                       │
 ╰────────────────────────────────────────────────────────╯
- Backlog 1/6 · 1 em curso · 1 bloqueado · 2 disponíveis
+ 1 spec pendente
 
 ╭────────────────────────────────────────────────────────╮
 │ Tab histórico · r recarregar · q sair                  │
@@ -27,7 +27,7 @@ d.FFFF.dddddddddddddddddddddddddddddddddddddddddddd.mmmm.d
 d.gggg.gggg.gggg.gggg.eeee.uuuu.eeee.yyyy.eeee.eeee......d
 d.mmm.mmmmm.m.m.mmmmm.mm.mmmmmmmmm.......................d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-.FFFFFFF.mmm.m.m.mm.mmmmm.m.m.mmmmmmmmm.m.m.mmmmmmmmmmm
+.m.mmmm.mmmmmmmm
 
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d

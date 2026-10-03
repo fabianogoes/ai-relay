@@ -17,7 +17,7 @@
 
 
 
-  Os registros se contradizem: relay-status mostra o di…
+  Registros em conflito: relay-status e relay-continue.
 
 ╭────────────────────────────────────────────────────────╮
 │ Tab histórico · r recarregar · q sair                  │
@@ -43,7 +43,7 @@ rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
 
 
 
-..mm.mmmmmmmmm.mm.mmmmmmmmmmmm.FFFFFFFFFFFF.mmmmmm.m.mmm
+..mmmmmmmmm.mm.mmmmmmmmm.FFFFFFFFFFFF.m.FFFFFFFFFFFFFFm
 
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d

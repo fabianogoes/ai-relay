@@ -13,6 +13,18 @@ use super::text;
 /// way first (cut with `…`, or left out when there is no room for even a few
 /// letters of it), so the skill to call is never what is cut.
 pub(super) fn segments(s: &Suggestion, width: usize) -> Vec<Seg> {
+    let whole = build(s, width, false);
+    let fits = |segs: &[Seg]| segs.iter().map(|(t, _)| text::width(t)).sum::<usize>() <= width;
+    if fits(&whole) {
+        return whole;
+    }
+    // Still too long with the title gone: the long wordings give way to a short
+    // one, so that the skill at their end is not what is cut.
+    let short = build(s, width, true);
+    if fits(&short) { short } else { whole }
+}
+
+fn build(s: &Suggestion, width: usize, short: bool) -> Vec<Seg> {
     let mut b = Builder(Vec::new(), None);
     let backlog = s.backlog_id.as_deref();
     let todo = s.todo_id.as_deref();
@@ -20,6 +32,9 @@ pub(super) fn segments(s: &Suggestion, width: usize) -> Vec<Seg> {
     match s.case {
         Case::NotAWorkspace => {
             b.meta("Instale o protocolo com ").skill(s.skill).meta(".");
+        }
+        Case::Inconsistent if short => {
+            b.meta("Registros em conflito: ").skill(s.skill).meta(" e ").skill("relay-continue").meta(".");
         }
         Case::Inconsistent => {
             b.meta("Os registros se contradizem: ")
@@ -31,12 +46,18 @@ pub(super) fn segments(s: &Suggestion, width: usize) -> Vec<Seg> {
         Case::InProgress => {
             b.meta("Retome ").id(todo).meta(" de ").id(backlog).meta(" com ").skill(s.skill).meta(".");
         }
+        Case::BlockedWithHandoff if short => {
+            b.meta("Bloqueio em ").id(todo).meta(": retome com ").skill(s.skill).meta(".");
+        }
         Case::BlockedWithHandoff => {
             b.meta("Resolva o bloqueio de ")
                 .id(todo)
                 .meta(" (ver Handoff) e retome com ")
                 .skill(s.skill)
                 .meta(".");
+        }
+        Case::BlockedWithoutHandoff if short => {
+            b.meta("Sem subtarefa disponível: ").skill(s.skill).meta(".");
         }
         Case::BlockedWithoutHandoff => {
             b.meta("Nenhuma subtarefa disponível");
@@ -52,6 +73,9 @@ pub(super) fn segments(s: &Suggestion, width: usize) -> Vec<Seg> {
             }
             b.meta(" com ").skill(s.skill).meta(".");
         }
+        Case::DoneWithTodo if short => {
+            b.id(backlog).meta(" concluído: feche com ").skill(s.skill).meta(".");
+        }
         Case::DoneWithTodo => {
             b.meta("Subtarefas de ")
                 .id(backlog)
@@ -60,11 +84,14 @@ pub(super) fn segments(s: &Suggestion, width: usize) -> Vec<Seg> {
                 .meta(".");
         }
         Case::BacklogWithAvailable => {
-            b.meta("Próximo item disponível: ").id(backlog);
+            b.meta(if short { "Próximo item: " } else { "Próximo item disponível: " }).id(backlog);
             if let Some(title) = title {
                 b.title(title);
             }
             b.meta(". Comece com ").skill(s.skill).meta(".");
+        }
+        Case::BacklogWithoutAvailable if short => {
+            b.meta("Nenhum item disponível: ").skill(s.skill).meta(".");
         }
         Case::BacklogWithoutAvailable => {
             b.meta("Nenhum item disponível: resolva os bloqueios ou dependências do backlog; ")
