@@ -1,7 +1,7 @@
 # Design do `relay-tui`
 
 **Status:** vigente — descreve o painel de terminal **implementado**. Decidido em
-2026-10-02 (ADR-0009, spec `20261002-001`), com a visão Histórico (ADR-0010).
+2026-10-02 (ADR-0003, spec `20261002-001`), com a visão Histórico (ADR-0004).
 
 Este documento é a autoridade sobre a aparência do `relay-tui`: paleta, status,
 estrutura e comportamento da tela. Uma mudança de cor, rótulo ou layout se faz
@@ -105,7 +105,7 @@ o estado que trava o resto da tela. Tom e rótulo textual são obrigatórios
   cerca de 40 colunas aparecem só o cabeçalho e o status.
 - **Teclas:** em Agora, `q` e `Ctrl-C` saem na hora e `Esc` pergunta antes (ver
   "Confirmar a saída"); `Tab` abre a visão Histórico
-  e `r` recarrega (ADR-0010; ver "Visão Histórico"). O rodapé mostra só as teclas
+  e `r` recarrega (ADR-0004; ver "Visão Histórico"). O rodapé mostra só as teclas
   válidas na tela atual.
 
 ## View
@@ -240,7 +240,7 @@ cabe, termina em `…`.
 ## Visão Histórico
 
 Segunda visão do `relay-tui`, ao lado de **Agora**, que continua sendo a padrão
-ao abrir (ADR-0010). O nome é Histórico, e não Trabalho, porque Trabalho
+ao abrir (ADR-0004). O nome é Histórico, e não Trabalho, porque Trabalho
 sugere o que está em curso, que é o que Agora já mostra; Histórico é o passado
 e o que falta. É estado local da tela e continua somente leitura: nenhuma
 tecla nem clique escreve num registro.

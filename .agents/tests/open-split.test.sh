@@ -2,7 +2,7 @@
 # Tests for skills/relay-tui-split/scripts/open-split.sh (spec 20261002-003).
 #
 # Repository tooling, not package surface: it lives here so the tests are not
-# published with the skill (ADR-0011). Run it with `sh .agents/tests/open-split.test.sh`.
+# published with the skill (ADR-0005). Run it with `sh .agents/tests/open-split.test.sh`.
 #
 # Nothing real is opened. Every run is `env -i` with a PATH that holds only
 # fake terminals (they log what they were called with), so the terminal the

@@ -1,5 +1,5 @@
 # CI for relay-tui. macOS is the requirement; Linux is best effort and never
-# fails the workflow. Windows is out for now (ADR-0009 decision 4).
+# fails the workflow. Windows is out for now (ADR-0003 decision 6).
 #
 # Repository tooling, not package surface: it only runs when app/relay-tui/**
 # or what it is checked against changes, so without app/ it never runs.

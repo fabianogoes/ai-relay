@@ -1,4 +1,4 @@
-//! The Histórico view (ADR-0010): one card with the open level of the
+//! The Histórico view (ADR-0004): one card with the open level of the
 //! navigation, a list of one-line rows or the detail of a task.
 //!
 //! A pure function of the `Nav`, the extracted `History` and the derived state;

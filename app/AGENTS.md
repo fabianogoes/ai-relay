@@ -7,7 +7,7 @@ isto quando chega aqui.
 ## Ordem de leitura
 
 1. `relay-tui/README.md` — estrutura do crate, compilar, testar e publicar.
-2. `../docs/adr/0009-relay-tui-observador-de-terminal-em-rust.md` — por que o
+2. `../docs/adr/0003-relay-tui-observador-de-terminal-em-rust.md` — por que o
    painel existe, em Rust, e só lê.
 3. `relay-tui/DESIGN.md` — autoridade sobre a aparência da tela. Cor, rótulo,
    layout ou tecla mudam **primeiro** nele, depois no código; uma divergência

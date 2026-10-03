@@ -1,11 +1,11 @@
-# ADR-0011 — relay-tui-split: skill de pacote fora do protocolo
+# ADR-0005 — relay-tui-split: skill de pacote fora do protocolo
 
 ## Status
 
-**Accepted** — 2026-10-02.
+**Accepted** — 2026-10-02. Renumerada em 2026-10-03 (era a ADR-0011).
 
-Não revisa nenhuma ADR anterior. Estende a ADR-0002 (como uma instrução chega à
-sessão) e respeita a decisão 7 da ADR-0009 (o `relay-tui` é só um observador).
+Estende a ADR-0001 (como uma instrução chega à sessão) e respeita a decisão 1 da
+ADR-0003 (o `relay-tui` é só um observador).
 
 ## Contexto
 
@@ -32,7 +32,7 @@ que até agora o pacote era só Markdown?
 3. **Um script POSIX `sh`, sem dependência além do terminal.** O script fica em
    `skills/relay-tui-split/scripts/`, não instala nada e não escreve registro.
    Seus testes ficam em `.agents/tests/`, fora de `skills/`, porque são
-   ferramenta do repositório e não pacote (ADR-0002).
+   ferramenta do repositório e não pacote (ADR-0001).
 4. **Sem Relay CLI.** O script só detecta o terminal e abre o painel; não deriva
    estado nem escreve. Isso preserva a regra de não criar um CLI antes de o
    protocolo ser validado.

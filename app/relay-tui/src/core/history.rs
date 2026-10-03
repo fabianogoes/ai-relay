@@ -1,4 +1,4 @@
-//! Text extraction for the Histórico view (ADR-0010): the title of each spec
+//! Text extraction for the Histórico view (ADR-0004): the title of each spec
 //! and the full changelog records.
 //!
 //! Only extraction. No protocol rule lives here: `RelayState`, the integrity
