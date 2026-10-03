@@ -49,4 +49,4 @@
 - [x] B-047 - Verificacao nos terminais reais (tmux, iTerm2, Warp) com evidencia (spec: `.specs/20261002-003-skill-relay-tui-abre-em-split.md`) (needs: B-046)
 - [x] B-048 - Funcao pura suggest, fora do core, com a tabela de sugestoes testada (spec: `.specs/20261002-004-relay-tui-sugestao-de-proximo-passo.md`)
 - [x] B-049 - Linha de proximo passo na visao Agora, snapshots, design system e guias (spec: `.specs/20261002-004-relay-tui-sugestao-de-proximo-passo.md`) (needs: B-048)
-- [ ] B-050 - Visao Agora agrupada por spec: spec atual com seus itens e specs pendentes (spec: `.specs/20261002-002-relay-tui-navegacao-pelo-historico.md`) (needs: B-041)
+- [x] B-050 - Visao Agora agrupada por spec: spec atual com seus itens e specs pendentes (spec: `.specs/20261002-002-relay-tui-navegacao-pelo-historico.md`) (needs: B-041)
