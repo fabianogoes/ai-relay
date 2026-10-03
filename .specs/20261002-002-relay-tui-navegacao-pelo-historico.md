@@ -93,9 +93,24 @@ que ainda tem trabalho pendente.
 - **Mouse.** A captura do mouse fica ligada so enquanto Trabalho esta aberta, para
   Agora continuar permitindo selecionar e copiar texto; e desligada ao voltar a
   Agora, ao sair e no panic, junto com a restauracao do terminal.
-- **Rodape.** Em Trabalho, as teclas do nivel (`Enter abre · Esc volta · Tab
-  Agora · q sai`, encurtado na largura). Em Agora, `q sair · Tab trabalho`, para
-  a visao nova ser descoberta.
+- **Recarregar.** `r` (em Agora e em Trabalho) forca uma releitura do workspace,
+  como saida quando o watcher nao entrega eventos (volume de rede, por exemplo);
+  a TUI continua se atualizando sozinha e `r` nao e necessario no uso normal. A
+  selecao e o nivel sobrevivem pelo id, como em qualquer recarga, e nada e
+  escrito. Nao ha teclas F: no macOS elas costumam ser teclas de midia e o
+  terminal e a IDE as usam para outras coisas; letras e `Tab` funcionam em
+  qualquer terminal e dentro do tmux.
+- **Rodape.** Mostra so as teclas validas na tela atual:
+  - Agora: `Tab trabalho · r recarregar · q sair`.
+  - Trabalho, nos niveis de lista: `↑↓ mover · Enter abrir · Esc voltar · Tab
+    agora · r recarregar · q sair`.
+  - Trabalho, no detalhe: `↑↓ rolar · Esc voltar · Tab agora · r recarregar · q
+    sair` (`Enter` la nao faz nada).
+  - **Corte na largura.** Quando o rodape nao cabe, saem indicacoes inteiras (nunca
+    meia), da menos para a mais importante: `r recarregar`, `↑↓`, `Enter abrir`,
+    `Esc voltar`, `Tab`. `q sair` fica sempre. Em 58 colunas cabem as indicacoes
+    de Tab e de `q sair` mais as que sobrarem; em 40, Agora mostra `Tab trabalho
+    · q sair`.
 - Core em Rust: extracao dos campos do changelog (data, titulo e todos os campos,
   inclusive as linhas de continuacao) e do titulo de cada spec. So extracao de
   texto: nenhuma regra nova do protocolo, `RelayState` e a suite de conformidade
@@ -179,20 +194,23 @@ regenera os snapshots de Agora e confere os elementos juntos.
   alternam Agora e Trabalho preservando nivel e selecao; `Enter` ou clique numa
   linha entram no nivel seguinte; `Esc` e `Backspace` voltam um nivel e, no nivel
   de specs, voltam a Agora; `Esc` em Agora, `q` e `Ctrl-C` saem; setas, `j`/`k` e
-  roda movem a selecao sem passar dos limites; a selecao sobrevive a uma recarga
-  pelo id e se reposiciona quando o item ou o nivel some.
+  roda movem a selecao sem passar dos limites; `r` forca a releitura do workspace
+  sem escrever nada e sem perder nivel nem selecao; a selecao sobrevive a uma
+  recarga pelo id e se reposiciona quando o item ou o nivel some.
 - A-004 - Cada nivel e o detalhe se desenham em 58 e 40 colunas, com linhas
   cortadas com `…`, o detalhe quebrado sem corte, a indicacao de linhas acima e
   abaixo numa lista e num detalhe maiores que a tela, a linha `Trabalho precisa
-  de 40 colunas` em 30 colunas e o rodape de Agora com `Tab trabalho`, verificado
-  por snapshots.
+  de 40 colunas` em 30 colunas e o rodape de Agora e de cada nivel de Trabalho com
+  o texto da decisao, inteiro em 80 colunas e cortado por indicacao inteira em 58
+  e 40 colunas, sempre com `q sair` e, em Agora a 40 colunas, `Tab trabalho · q
+  sair`, verificado por snapshots.
 - A-005 - No binario real, num pty: `Tab` liga a captura do mouse e um clique
   (sequencia SGR) numa linha a seleciona e abre o nivel seguinte; voltar a Agora
   e sair desligam a captura; o terminal e restaurado ao sair e o workspace
   continua inalterado.
 - A-006 - `app/relay-tui/README.md`, `docs/TUI.md` e `docs/TUI.pt-BR.md`
   descrevem a visao Trabalho e suas teclas, inclusive que `Esc` volta em vez de
-  sair nela.
+  sair nela, e a tecla `r` de recarregar.
 - A-007 - A visao Agora mostra o cartao Spec atual (id e titulo na borda,
   `feitos/total`, itens nao feitos com marcador e palavra) e, abaixo, o cartao
   Specs pendentes (id, titulo e `feitos/total` por spec, e a linha Sem spec),
