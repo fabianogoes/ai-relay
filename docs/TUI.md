@@ -44,8 +44,53 @@ Every file has a `.sha256` next to it: `shasum -a 256 -c <file>.sha256`.
 
 ## Open it in a split
 
-Open a pane next to the harness, go to the Relay repository and run
-`relay-tui`:
+Ask the agent to do it. In Claude Code the `relay-tui-split` skill is the command
+`/relay-tui-split`; in Codex and OpenCode, ask `Use relay-tui-split`. It finds out
+which terminal the harness is running in and opens a pane to the right with
+`relay-tui --workspace '<your repository>'`. It is a package skill outside the
+Relay protocol: it touches no record, installs nothing and never tries a
+terminal other than the one it detected.
+
+| Terminal | Detected by | What it runs |
+| --- | --- | --- |
+| **tmux** | `TMUX` | `tmux split-window -h` |
+| **zellij** | `ZELLIJ` | `zellij action new-pane --direction right --` |
+| **WezTerm** | `WEZTERM_PANE` | `wezterm cli split-pane --right` |
+| **kitty** | `KITTY_WINDOW_ID` | `kitten @ launch --location=vsplit` (needs `allow_remote_control yes` in `kitty.conf`) |
+| **iTerm2** | `TERM_PROGRAM=iTerm.app` | AppleScript: splits the session that ran it vertically and types the command |
+| **Warp** | `TERM_PROGRAM=WarpTerminal` | AppleScript through System Events: `Cmd+D`, then types the command |
+
+The first match wins, and multiplexers come before emulators because they run
+inside them: tmux inside iTerm2 opens a tmux pane. Anything else (Terminal.app, an
+editor's built-in terminal) gets the manual instruction below.
+
+Harness sandboxes can get in the way, because the script talks to the terminal
+(the tmux socket, Apple Events). Verified from inside tmux: Claude Code and
+OpenCode open the pane. **Codex's default sandbox blocks the tmux socket**
+(`error connecting to ... (Operation not permitted)`): the script then prints the
+manual instruction and exits with `2`, and the pane opens only if you run the
+script outside the sandbox (for example `codex exec -s danger-full-access`, or
+approving the command when Codex asks). The terminal's environment variables do
+reach the harness shell in every case checked.
+
+On macOS the first run may ask for permission, and denying it makes the skill
+fall back to the manual instruction:
+
+- **iTerm2**: allow your terminal to control iTerm2 under *System Settings >
+  Privacy & Security > Automation*.
+- **Warp**: it has no split command, so the skill sends `Cmd+D` through System
+  Events, which needs *Privacy & Security > Accessibility*. The keystrokes go to
+  whatever app is in front, so the skill first checks that Warp is, and stops
+  otherwise instead of typing into another application.
+
+Outside the harness, `sh skills/relay-tui-split/scripts/open-split.sh [dir]` does
+the same, and `--dry-run` prints what it would run without running it. Exit
+status: `0` opened (or `--dry-run`), `1` `relay-tui` is not on the `PATH` (it
+prints the link to this guide and installs nothing), `2` terminal not recognized
+or the split failed (it prints what to do by hand).
+
+Doing it by hand: open a pane next to the harness, go to the Relay repository and
+run `relay-tui`:
 
 | Terminal | How to open the pane next to it |
 | --- | --- |
@@ -70,8 +115,39 @@ relay-tui --version
 relay-tui --help
 ```
 
-Keys: `q`, `Esc` or `Ctrl-C` quit. There is nothing else to press: it is a panel
-to look at.
+The panel opens on **Agora**, what is in progress. `Tab` (or `t`) opens the
+second view, **Histórico**, and goes back; `r` reads the workspace again as a
+whole (only needed when the watcher delivers no events, on a network volume for
+example). `q` and `Ctrl-C` quit from any view, at once. `Esc` in Agora does not quit by
+itself: it asks `Sair?` in the footer, and `Esc`, `Enter` or `y` confirm while any
+other key cancels. In Histórico `Esc` goes back. Switching views, moving the selection and reloading write nothing: the panel
+stays read-only.
+
+### Histórico
+
+Four levels, each deepening the one before: the **specs** (newest first, with the
+`done/total` of their items), the spec's **backlog items**, the item's **tasks**
+(the changelog records) and the task's **detail**, with Result, Evidence,
+Criteria and Decisions. Each list row takes one line and ends in `…` when it does
+not fit; the detail wraps its text and never cuts it. The list scrolls to keep
+the selection visible and says how many rows there are above and below.
+
+| Key | Effect |
+| --- | --- |
+| `↑` `↓`, `j` `k`, mouse wheel | move the selection (in the detail, scroll) |
+| `PgUp` `PgDn` | move a page |
+| `Enter` or a click on a row | opens the next level |
+| `Esc` or `Backspace` | go back one level; from the specs level, back to Agora. In Histórico `Esc` goes back instead of quitting |
+| `Tab`, `t` | switch between Agora and Histórico, at the same level and selection |
+| `r` | reads the workspace again |
+| `q`, `Ctrl-C` | quit |
+
+The mouse is captured only while Histórico is open, so Agora still lets you select
+and copy text; the capture is turned off when going back to Agora, on quitting
+and on an internal error. While it is on, many terminals ask for a modifier key
+(`Shift`, or `Option` in iTerm2) to select text. Every mouse gesture has a key
+equivalent. Below 40 columns Histórico shows only a notice, and the keys keep
+working.
 
 ### What the screen shows
 
@@ -81,6 +157,9 @@ to look at.
 - **TODO**: a bar with one segment per subtask and the list, with `✓` done, `●`
   in progress, `○` available, `◌` waiting on another subtask and `!` blocked.
 - **Backlog**: how many items are done, in progress, available or waiting.
+- **Next step**, one line above the footer: what to do next and which skill to
+  call (for example `Retome T-002 de B-001 com relay-session.`), worked out from
+  the same records. The panel only suggests: it never runs anything.
 - **`● atualizando` / `● atualizado`**, in the corner: the panel waits for the
   files to stop changing (150 ms) and reads everything again.
 - **`Inconsistente`**, in red: the records contradict each other, and the panel
@@ -90,7 +169,8 @@ The color follows the status (green in progress or done, blue ready or
 available, yellow blocked, red inconsistent), but every state is also spelled
 out in words, never by color alone. The screen text is in Portuguese.
 
-When there is not enough height, the TODO is cut at `+N itens`. Below 40
+When there is not enough height, the next-step line goes first, then the Handoff
+is compacted and the TODO is cut at `+N itens`. Below 40
 columns only the header and the status are shown. A directory without
 `.orchestration/` shows "Não é um workspace Relay" and switches to the state as
 soon as Relay is installed there (`relay-setup`).
