@@ -37,27 +37,52 @@ fn quiet(watcher: &WorkspaceWatcher) {
     while watcher.events().recv_timeout(Duration::from_millis(600)).is_ok() {}
 }
 
+/// Five writes 20 ms apart. Returns when the last one finished and the longest
+/// gap between two of them: on a loaded machine a write can be descheduled for
+/// longer than the quiescence, and then it is no longer one burst.
+fn burst(dir: &Path) -> (Instant, Duration) {
+    let mut last_write = Instant::now();
+    let mut longest = Duration::ZERO;
+    for i in 0..5 {
+        let before = Instant::now();
+        fs::write(dir.join(".orchestration/TODO.md"), format!("# Active task: B-{i}\n")).unwrap();
+        // The reference is the last write, not the end of the sleep after it.
+        let now = Instant::now();
+        if i > 0 {
+            longest = longest.max(before.duration_since(last_write));
+        }
+        last_write = now;
+        thread::sleep(Duration::from_millis(20));
+    }
+    (last_write, longest)
+}
+
 #[test]
 fn a_burst_of_real_writes_yields_one_dirty_and_one_settled() {
     let dir = workspace_with_records();
     let watcher = started(dir.path());
-    quiet(&watcher);
 
-    let mut last_write = Instant::now();
-    for i in 0..5 {
-        fs::write(dir.path().join(".orchestration/TODO.md"), format!("# Active task: B-{i}\n")).unwrap();
-        // The reference is the last write, not the end of the sleep after it.
-        last_write = Instant::now();
-        thread::sleep(Duration::from_millis(20));
+    // A stall of the machine in the middle of the writes (a shared CI runner)
+    // splits the burst in two, which says nothing about the watcher: try again
+    // with a burst that really was one.
+    let mut checked = false;
+    for _ in 0..6 {
+        quiet(&watcher);
+        let (last_write, longest_gap) = burst(dir.path());
+        if longest_gap > QUIESCENCE / 2 {
+            continue;
+        }
+        assert_eq!(next(&watcher, LONG), Some(Dirty));
+        assert_eq!(next(&watcher, LONG), Some(Settled));
+        assert!(last_write.elapsed() >= QUIESCENCE - Duration::from_millis(30));
+        // The burst is one snapshot: nothing else follows it.
+        assert_eq!(next(&watcher, Duration::from_millis(700)), None);
+        // And the settled snapshot has the last write.
+        assert_eq!(read_workspace(dir.path()).todo, "# Active task: B-4\n");
+        checked = true;
+        break;
     }
-
-    assert_eq!(next(&watcher, LONG), Some(Dirty));
-    assert_eq!(next(&watcher, LONG), Some(Settled));
-    assert!(last_write.elapsed() >= QUIESCENCE - Duration::from_millis(30));
-    // The burst is one snapshot: nothing else follows it.
-    assert_eq!(next(&watcher, Duration::from_millis(700)), None);
-    // And the settled snapshot has the last write.
-    assert_eq!(read_workspace(dir.path()).todo, "# Active task: B-4\n");
+    assert!(checked, "the machine was too busy to write five files in a burst, six times");
 }
 
 #[test]
