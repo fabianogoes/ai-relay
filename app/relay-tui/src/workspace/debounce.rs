@@ -1,15 +1,14 @@
 //! Trailing debounce of raw file-system events into the two signals the view
 //! needs: the files started changing (`Dirty`) and they stopped (`Settled`).
 //!
-//! A port of `app/relay-host/src/watcher.ts` (ADR-0007 decision 4): every event
-//! restarts the window; once it elapses with no new event, the workspace is
-//! re-read as a whole. Over channels, so it is tested without a file system.
+//! Every event restarts the window; once it elapses with no new event, the
+//! workspace is re-read as a whole. Over channels, so it is tested without a file system.
 
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{Receiver, RecvTimeoutError, Sender};
 use std::time::Duration;
 
-/// The quiescence window of ADR-0007: 150 ms with no event.
+/// The quiescence window: 150 ms with no event.
 pub const QUIESCENCE: Duration = Duration::from_millis(150);
 
 /// How often an idle loop looks up from waiting, to see whether it was asked

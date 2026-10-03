@@ -2,9 +2,8 @@
 //! and the full changelog records.
 //!
 //! Only extraction. No protocol rule lives here: `RelayState`, the integrity
-//! checks and the conformance suite do not read any of this, and the TypeScript
-//! `relay-core` has no counterpart (spec 20261002-002, "O parse novo fica só no
-//! Rust"). Pure, like the rest of the core.
+//! checks and the conformance suite do not read any of this. Pure, like the rest
+//! of the core.
 
 use std::sync::LazyLock;
 

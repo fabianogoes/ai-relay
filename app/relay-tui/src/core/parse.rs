@@ -1,9 +1,9 @@
-//! Parsers for the five records. A port of `app/relay-core/src/parse.ts`.
+//! Parsers for the five records.
 //!
-//! The regular expressions are kept equivalent to the JavaScript ones, including
-//! their quirks, because the conformance suite holds both readers to the same
-//! answers. Where the Rust engine differs from JavaScript's, the pattern is
-//! adjusted rather than the behavior:
+//! The regular expressions keep the behavior of the first reader, written in
+//! JavaScript, quirks included, because the cases of `app/conformance/` were
+//! recorded from it. Where the Rust engine differs from JavaScript's, the
+//! pattern is adjusted rather than the behavior:
 //!
 //! * `\d` is `[0-9]` and `\b` is the ASCII boundary (JavaScript's are ASCII).
 //! * `.` is `[^\n\r\x{2028}\x{2029}]` (JavaScript's `.` does not match `\r`, so a
@@ -263,7 +263,7 @@ mod tests {
         items.iter().map(|i| i.to_string()).collect()
     }
 
-    // Expected values below are the outputs of the TypeScript parser on the
+    // Expected values below are the outputs of the first (TypeScript) parser on the
     // same inputs, including the inputs it silently skips.
     #[test]
     fn checklist_lines_follow_the_reference_parser() {

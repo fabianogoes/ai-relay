@@ -1,7 +1,7 @@
 //! Runs `app/conformance/` against the Rust core.
 //!
-//! The same cases are run by `app/relay-core/test/conformance.test.ts`; a
-//! divergence between the two readers fails whichever one diverged.
+//! Every case must derive exactly its `expected.json`; the cases, not this
+//! crate, are the reference.
 
 use std::collections::BTreeMap;
 use std::fs;
@@ -47,7 +47,7 @@ fn read_or_empty(path: &Path) -> String {
     fs::read_to_string(path).unwrap_or_default()
 }
 
-// Same mapping as the host and the TypeScript runner: a missing record reads
+// Same mapping as `workspace::read_workspace`: a missing record reads
 // as empty text and each spec is keyed `.specs/<name>`.
 fn load_workspace(workspace: &Path) -> RelayFiles {
     let orchestration = workspace.join(".orchestration");
@@ -101,7 +101,7 @@ fn violation_json(v: &Violation) -> Value {
     json!({ "check": v.check, "detail": v.detail, "records": v.records })
 }
 
-// Written by hand on purpose: a second reading of the ADR-0003 shape, with no
+// Written by hand on purpose: a second reading of the `RelayState` shape, with no
 // serializer in the production crate.
 fn state_json(state: &RelayState) -> Value {
     match state {

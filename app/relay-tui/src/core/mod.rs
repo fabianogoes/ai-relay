@@ -1,4 +1,4 @@
-//! Port of `app/relay-core`: parse the five records and derive a `RelayState`.
+//! The Relay reader: parse the five records and derive a `RelayState`.
 //!
 //! Pure by construction: nothing here touches the disk or the environment.
 

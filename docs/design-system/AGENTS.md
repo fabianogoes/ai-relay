@@ -6,7 +6,8 @@ ocupar contexto no `AGENTS.md` da raiz: você só lê isto quando chega aqui.
 ## Ordem de leitura
 
 1. `README.md` — a autoridade. Tokens, componentes e as regras que os governam.
-   Leia antes de qualquer mudança de interface.
+   Leia antes de qualquer mudança de interface. Para o `relay-tui`, leia
+   `terminal.md`, que não depende do `README.md`.
 2. `../adr/0001-arquitetura-inicial-da-ui.md` — a arquitetura que emoldura a UI.
    Leia quando a mudança for de estrutura, não de superfície.
 3. `ui-proposal.md` — análise exploratória e alternativas descartadas (~25 KB).

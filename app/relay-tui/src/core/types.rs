@@ -1,6 +1,6 @@
-//! The derived-state contract of ADR-0003, as Rust types.
+//! The derived-state contract, as Rust types.
 //!
-//! Mirrors `app/relay-core/src/types.ts`. The serialized form (camelCase keys,
+//! The serialized form (camelCase keys,
 //! an absent optional `spec`) is fixed by `app/conformance/`; this crate has no
 //! serializer of its own because the view consumes these types directly.
 

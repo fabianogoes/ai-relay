@@ -1,6 +1,5 @@
-//! The 13 integrity checks of `docs/PROTOCOL.md`. A port of
-//! `app/relay-core/src/integrity.ts`: same order, at most one violation per
-//! check, and the exact detail text, which the conformance suite compares.
+//! The 13 integrity checks of `docs/PROTOCOL.md`: in protocol order, at most
+//! one violation per check, and the exact detail text, which the conformance suite compares.
 
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::sync::LazyLock;
@@ -39,7 +38,7 @@ fn violation(check: &str, detail: String, records: &[&str]) -> Violation {
     }
 }
 
-/// Whether the TypeScript core's `Date.parse` accepts a string that already
+/// Whether the first (TypeScript) reader's `Date.parse` accepted a string that already
 /// has the RFC 3339 shape. V8 is lenient about the day (1–31 for every month,
 /// so `02-31` parses) and accepts `24:00:00` but no other hour 24; it rejects
 /// an out-of-range month, minute, second or offset.
@@ -398,7 +397,7 @@ pub(crate) fn run_integrity_checks(input: &IntegrityInput) -> Vec<Violation> {
 mod tests {
     use super::*;
 
-    // Each row is the answer of the TypeScript core's `Date.parse` (NaN or not)
+    // Each row is the answer of the first (TypeScript) reader's `Date.parse` (NaN or not)
     // for a string that matches the RFC 3339 shape.
     #[test]
     fn timestamps_are_accepted_exactly_as_the_reference_accepts_them() {

@@ -151,7 +151,7 @@ app/relay-tui/
 │   ├── nav.rs             ← troca entre Agora e Histórico, Esc, mouse
 │   ├── suggest.rs         ← sugestão do próximo passo
 │   ├── theme.rs           ← cores e estilos
-│   ├── core/              ← a lógica do relay-core (TS), reescrita em Rust
+│   ├── core/              ← o leitor do protocolo, puro (sem disco)
 │   │   ├── parse.rs       ← lê HANDOFF/TODO/BACKLOG/CHANGELOG/specs
 │   │   ├── derive.rs      ← calcula o estado
 │   │   ├── integrity.rs   ← checagens de integridade
@@ -167,8 +167,9 @@ app/relay-tui/
 ```
 
 Para mudar o que aparece na tela, os arquivos são os de `src/view/` e o
-`src/theme.rs`. A regra de qual estado mostrar fica em `src/core/`, que precisa
-continuar alinhado com o `relay-core` pela suíte de `../conformance/`.
+`src/theme.rs`. A regra de qual estado mostrar fica em `src/core/`, conferida pela suíte
+de `../conformance/`. O desenho da tela está em
+[`docs/design-system/terminal.md`](../../docs/design-system/terminal.md).
 
 ## Compilar do código
 
@@ -181,8 +182,8 @@ cargo test                                  # suíte inteira
 scripts/package.sh aarch64-apple-darwin     # gera dist/relay-tui-<versão>-<alvo>.tar.gz
 ```
 
-A pasta `../conformance/` tem os casos que o core em Rust e o `relay-core` em
-TypeScript precisam passar; ver o `README.md` dela e a
+A pasta `../conformance/` tem os casos que o core precisa passar; ver o
+`README.md` dela e a
 [ADR-0009](../../docs/adr/0009-relay-tui-observador-de-terminal-em-rust.md).
 
 ## Publicar uma versão

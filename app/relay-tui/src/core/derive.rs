@@ -1,5 +1,4 @@
-//! `derive_state`: the five records in, a `RelayState` out. A port of
-//! `app/relay-core/src/derive.ts`.
+//! `derive_state`: the five records in, a `RelayState` out.
 
 use std::collections::HashSet;
 

@@ -167,7 +167,7 @@ pub(super) fn body(view: &View, area: Rect, buf: &mut Buffer) {
 
 /// Whether the next-step line is drawn. As the height shrinks the Backlog
 /// gives up its frame first, then this line, then the Handoff is compacted,
-/// and last the TODO is cut (design system, section 10).
+/// and last the TODO is cut (`docs/design-system/terminal.md`, "Altura").
 fn hint_fits(view: &View, area: Rect) -> bool {
     let Some(spare) = area.height.checked_sub(1).filter(|h| *h >= 3) else {
         return false;
