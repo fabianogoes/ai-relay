@@ -10,8 +10,8 @@ use relay_tui::core::{RelayState, derive_state};
 use relay_tui::view::{Freshness, Screen, View};
 use relay_tui::workspace::read_workspace;
 
-fn conformance_case(name: &str) -> RelayState {
-    let dir: PathBuf = Path::new(env!("CARGO_MANIFEST_DIR")).join("../conformance").join(name).join("workspace");
+fn fixture(name: &str) -> RelayState {
+    let dir: PathBuf = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures").join(name).join("workspace");
     derive_state(&read_workspace(&dir))
 }
 
@@ -40,7 +40,7 @@ fn every_screen_renders_at_every_size_without_panicking() {
         .collect::<Vec<_>>();
     cases.push("check-needs-cycle".to_string());
     for name in cases {
-        let state = conformance_case(&name);
+        let state = fixture(&name);
         for screen in [Screen::State(&state), Screen::NotARelayWorkspace] {
             for freshness in [Freshness::Fresh, Freshness::Updating] {
                 let view = View { history: relay_tui::view::no_history(), screen, workspace: "~/Developer/relay", freshness, now_unix: 1_790_000_000 };
@@ -56,7 +56,7 @@ fn every_screen_renders_at_every_size_without_panicking() {
 
 #[test]
 fn an_area_that_does_not_start_at_the_origin_is_respected() {
-    let state = conformance_case("status-in_progress");
+    let state = fixture("status-in_progress");
     let view = View { history: relay_tui::view::no_history(),
         screen: Screen::State(&state),
         workspace: "~/x",

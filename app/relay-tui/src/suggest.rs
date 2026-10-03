@@ -2,9 +2,8 @@
 //!
 //! A pure function of the state the core already delivered: no clock, no disk,
 //! and no knowledge of how the sentence is worded, which is the view's job. It
-//! lives outside `core` because the core is the port of `relay-core` that the
-//! conformance suite keeps aligned with the TypeScript reference; a suggestion
-//! only this crate makes would have the core say more than the reference.
+//! lives outside `core` because the core holds only what `docs/PROTOCOL.md`
+//! defines and `tests/fixtures/` checks; a suggestion is not protocol.
 
 use crate::core::{ChecklistEntry, OkState, RelayState, WorkStatus};
 

@@ -41,7 +41,7 @@ um arquivo por alvo:
 **Melhor esforço** quer dizer que o build é tentado a cada release, mas o Linux
 não é testado à mão: se falhar, o release sai sem ele. O macOS é o que é
 verificado. O Windows saiu do build por enquanto; como retomá-lo está na
-[ADR-0009](../../docs/adr/0009-relay-tui-observador-de-terminal-em-rust.md).
+[ADR-0003](../../docs/adr/0003-relay-tui-observador-de-terminal-em-rust.md).
 
 No macOS:
 
@@ -131,8 +131,8 @@ O fundo não é pintado: vem do terminal. As cores presumem um terminal escuro.
 ## Limites conhecidos
 
 - Linhas de registro terminadas em CRLF (arquivos com `\r\n`, comuns no Windows
-  com `autocrlf`) são ignoradas. É o comportamento do core em TypeScript, que o
-  core em Rust reproduz de propósito até os dois serem corrigidos juntos.
+  com `autocrlf`) são ignoradas; corrigir exige mudar o `core` e os fixtures
+  juntos.
 - Um `SIGTERM` ou `SIGINT` vindo de fora do teclado não restaura o terminal;
   `Ctrl-C` pelo teclado, `q`, `Esc` e um erro interno restauram.
 - Só tema escuro.
@@ -143,6 +143,7 @@ O fundo não é pintado: vem do terminal. As cores presumem um terminal escuro.
 app/relay-tui/
 ├── Cargo.toml / Cargo.lock
 ├── README.md
+├── DESIGN.md              ← como a tela deve parecer (autoridade sobre a view)
 ├── scripts/package.sh     ← empacota o binário para o release
 ├── dist/                  ← tarballs gerados (.tar.gz + .sha256), fora do git
 ├── src/
@@ -151,7 +152,7 @@ app/relay-tui/
 │   ├── nav.rs             ← troca entre Agora e Histórico, Esc, mouse
 │   ├── suggest.rs         ← sugestão do próximo passo
 │   ├── theme.rs           ← cores e estilos
-│   ├── core/              ← a lógica do relay-core (TS), reescrita em Rust
+│   ├── core/              ← o leitor do protocolo, puro (sem disco)
 │   │   ├── parse.rs       ← lê HANDOFF/TODO/BACKLOG/CHANGELOG/specs
 │   │   ├── derive.rs      ← calcula o estado
 │   │   ├── integrity.rs   ← checagens de integridade
@@ -162,13 +163,16 @@ app/relay-tui/
 │   │   ├── history.rs     ← tela Histórico
 │   │   └── hint.rs, text.rs
 │   └── workspace/         ← leitura do disco e watcher (watch.rs, debounce.rs)
-└── tests/                 ← testes de integração e snapshots
+└── tests/                 ← testes de integração
+    ├── derive_state.rs    ← cada fixture deriva o seu expected.json
+    ├── fixtures/          ← workspaces de exemplo + estado esperado
     └── snapshots/*.txt    ← o layout esperado em cada largura e altura
 ```
 
 Para mudar o que aparece na tela, os arquivos são os de `src/view/` e o
-`src/theme.rs`. A regra de qual estado mostrar fica em `src/core/`, que precisa
-continuar alinhado com o `relay-core` pela suíte de `../conformance/`.
+`src/theme.rs`. A regra de qual estado mostrar fica em `src/core/`, conferida pela suíte
+de `tests/fixtures/`. O desenho da tela está em
+[`DESIGN.md`](DESIGN.md).
 
 ## Compilar do código
 
@@ -181,9 +185,9 @@ cargo test                                  # suíte inteira
 scripts/package.sh aarch64-apple-darwin     # gera dist/relay-tui-<versão>-<alvo>.tar.gz
 ```
 
-A pasta `../conformance/` tem os casos que o core em Rust e o `relay-core` em
-TypeScript precisam passar; ver o `README.md` dela e a
-[ADR-0009](../../docs/adr/0009-relay-tui-observador-de-terminal-em-rust.md).
+A pasta `tests/fixtures/` tem os casos que o core precisa derivar
+(`tests/derive_state.rs`); ver o `README.md` dela e a
+[ADR-0003](../../docs/adr/0003-relay-tui-observador-de-terminal-em-rust.md).
 
 ## Publicar uma versão
 

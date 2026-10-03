@@ -1,6 +1,6 @@
  relay  ~/Developer/relay   ● atualizado
 
-╭ Tarefa · T-002 ────────── ↑ 22 acima ╮
+╭ Tarefa · T-002 ────────── ↑ 21 acima ╮
 │ A-001                                │
 │                                      │
 │ Decisions                            │

@@ -1,7 +1,7 @@
 # Release of relay-tui: a tag `relay-tui-vX.Y.Z` publishes one archive per
 # target on the GitHub Release. The macOS targets are the requirement; Linux is
 # best effort and a failure there never blocks the release. Windows is out for
-# now (ADR-0009 decision 4).
+# now (ADR-0003 decision 6).
 #
 # Repository tooling, not package surface: it only runs on a relay-tui tag.
 name: relay-tui release

@@ -1,6 +1,5 @@
-//! The palette of `docs/design-system/README.md` section 10 (the terminal
-//! medium): One Dark with the Charm pink for identifiers. The background is
-//! never painted; it comes from the terminal.
+//! The palette of `DESIGN.md`: One Dark with the Charm pink for identifiers.
+//! The background is never painted; it comes from the terminal.
 
 use ratatui::style::{Color, Modifier, Style};
 
@@ -33,7 +32,7 @@ pub fn color(color: Color) -> Style {
     Style::new().fg(color)
 }
 
-/// The tone of a derived status (design system section 10, "Status").
+/// The tone of a derived status (`DESIGN.md`, "Status").
 pub fn status_tone(status: WorkStatus) -> Color {
     match status {
         WorkStatus::InProgress | WorkStatus::Done => GREEN,
@@ -43,7 +42,7 @@ pub fn status_tone(status: WorkStatus) -> Color {
     }
 }
 
-/// The label of a derived status, the same words as the web interface.
+/// The label of a derived status.
 pub fn status_label(status: WorkStatus) -> &'static str {
     match status {
         WorkStatus::Backlog => "A escolher",

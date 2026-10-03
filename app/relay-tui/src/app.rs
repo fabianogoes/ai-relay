@@ -164,7 +164,7 @@ impl App {
             AppEvent::Terminal(_) => {}
             // The last snapshot stays on screen, marked as in flight.
             AppEvent::Workspace(WorkspaceEvent::Dirty) => self.freshness = Freshness::Updating,
-            // The workspace is read again as a whole (ADR-0007 decision 4).
+            // The workspace is read again as a whole, never patched per event.
             AppEvent::Workspace(WorkspaceEvent::Settled) => self.reload(),
         }
     }

@@ -3,7 +3,7 @@
 //! protocol logic: `available`, status and counts arrive from the core.
 //!
 //! The layout rules (cards, heights, widths) are in
-//! `docs/design-system/README.md` section 10, "View".
+//! `DESIGN.md`, "View".
 
 mod cards;
 mod hint;
@@ -163,7 +163,7 @@ const BACK: Hint = Hint { key: "Esc", label: "voltar", rank: 3 };
 const TO_HISTORY: Hint = Hint { key: "Tab", label: "histórico", rank: 4 };
 const TO_NOW: Hint = Hint { key: "Tab", label: "agora", rank: 4 };
 
-/// The footers of the design system (section 10), in the order they are shown.
+/// The footers of `DESIGN.md`, in the order they are shown.
 pub(super) const FOOTER_NOW: [Hint; 3] = [TO_HISTORY, RELOAD, QUIT];
 pub(super) const FOOTER_LIST: [Hint; 6] = [MOVE, OPEN, BACK, TO_NOW, RELOAD, QUIT];
 pub(super) const FOOTER_DETAIL: [Hint; 5] = [SCROLL, BACK, TO_NOW, RELOAD, QUIT];

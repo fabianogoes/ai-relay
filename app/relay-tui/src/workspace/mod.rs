@@ -1,8 +1,7 @@
 //! The only place that touches the disk: resolve which workspace to observe,
 //! read its records, and (see `watch`) tell when they change.
 //!
-//! A port of `app/relay-host/src/reader.ts` plus the `--workspace` handling of
-//! ADR-0007. Reading never fails: whatever cannot be read is empty text, and
+//! Reading never fails: whatever cannot be read is empty text, and
 //! the core then derives what that implies.
 
 use std::collections::BTreeMap;

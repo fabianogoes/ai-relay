@@ -93,7 +93,7 @@ fn files(many_items: usize) -> RelayFiles {
             "# Change log\n\n\
              ## 2026-09-01 - T-001 - Tipos do estado derivado\n- Backlog: B-001\n- Spec: {SPEC_A}\n- Result: os tipos espelham o contrato.\n- Evidence: `cargo test`: 12 passed\n\n\
              ## 2026-09-02 - T-002 - Um fixture por status\n- Backlog: B-001\n- Spec: {SPEC_A}\n- Result: sete fixtures em disco, um por status, com o expected.json de cada um.\n  O runner compara os dois lados e lista todas as divergencias de uma vez.\n\
-             - Evidence: o runner TypeScript e o Rust passam os sete casos.\n- Criteria: A-001\n- Decisions: o formato e neutro de linguagem.\n\n\
+             - Evidence: o core passa os sete casos.\n- Criteria: A-001\n- Decisions: o formato e neutro de linguagem.\n\n\
              ## 2026-09-03 - T-002 - Correcao do fixture blocked\n- Backlog: B-001\n- Spec: {SPEC_A}\n- Result: o fixture blocked ganhou o handoff que faltava.\n- Criteria: none\n\n\
              ## 2026-10-02 - T-001 - Cartoes de status\n- Backlog: B-011\n- Spec: {SPEC_B}\n- Result: um cartao por status, com o tom do design system.\n- Evidence: snapshots em 58 e 40 colunas.\n- Criteria: A-003\n- Decisions: none\n"
         ),

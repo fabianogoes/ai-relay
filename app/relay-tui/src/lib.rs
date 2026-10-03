@@ -1,6 +1,6 @@
 //! `relay-tui`: a read-only terminal observer for Relay workspaces.
 //!
-//! `core` is a pure port of `relay-core` (content in, state out, no disk).
+//! `core` is pure (content in, state out, no disk).
 
 pub mod app;
 pub mod cli;

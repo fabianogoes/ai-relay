@@ -1,4 +1,4 @@
-//! Navigation state of the Histórico view (ADR-0010): which view is open, which
+//! Navigation state of the Histórico view (ADR-0004): which view is open, which
 //! level, which row is selected at each level, and how an input changes that.
 //!
 //! Local screen state and nothing else. No disk, no terminal: the lists it

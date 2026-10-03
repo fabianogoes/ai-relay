@@ -11,9 +11,8 @@ mostra-la, sem executar nada.
 
 - Uma linha de **proximo passo** na visao Agora, logo acima do rodape, derivada so
   do estado ja carregado: o que sugerir e qual skill chamar. A TUI sugere, nunca
-  executa e nunca escreve; quem age e a pessoa, no harness. E a "dica de proximo
-  passo derivada do estado" que a ADR-0009 (decisao 7) deixou como possibilidade
-  menor; nao acrescenta tecla nem interacao.
+  executa e nunca escreve; quem age e a pessoa, no harness. Nao acrescenta tecla
+  nem interacao.
 - A sugestao por caso, na ordem em que os casos sao testados (o primeiro que
   casar vale). `B-NNN`, `T-NNN` e titulos vem do estado; "titulo" e o texto da
   entrada sem as anotacoes `spec:`/`needs:`:
@@ -47,7 +46,7 @@ mostra-la, sem executar nada.
   de `core` e de `view`: recebe o `RelayState` ou a ausencia de workspace e
   devolve um valor estruturado (caso, skill, ids e titulo); o texto em portugues
   e montado pela view. Nao usa relogio nem disco.
-- Secao no design system e uma linha em `docs/TUI.md` e `docs/TUI.pt-BR.md`.
+- Secao no `DESIGN.md` e uma linha em `docs/TUI.md` e `docs/TUI.pt-BR.md`.
 
 ## Non-goals
 
@@ -65,10 +64,9 @@ mostra-la, sem executar nada.
 historico: mesma entrada, mesma linha. Por isso o "ha N min" do handoff fica so no
 cartao Handoff, que ja o mostra com o relogio injetado.
 
-**Fora do `RelayState` e fora do `core`.** O contrato ADR-0003 e a suite de
-conformidade ficam como estao, e o `core` continua sendo o porte do `relay-core`
-em TS que a suite mantem alinhado; uma funcao so do Rust ali faria o core dizer
-mais que a referencia. A sugestao e apresentacao de um estado que o core ja
+**Fora do `RelayState` e fora do `core`.** O contrato da ADR-0003 e os fixtures
+ficam como estao: o `core` guarda so o que o `docs/PROTOCOL.md` define, e uma
+sugestao nao e protocolo. A sugestao e apresentacao de um estado que o core ja
 entregou pronto. A escolha do "proximo disponivel" usa o proprio `available` vindo
 do core, sem recalcular dependencias.
 
@@ -83,7 +81,7 @@ instalado; a skill de instalacao so faz sentido no cartao "nao e um workspace
 Relay".
 
 **So uma linha.** Um cartao inteiro competiria com o handoff, que e o objeto
-central da tela (principio 1 do design system); uma linha basta para dizer o
+central da tela (principio 1 do `DESIGN.md`); uma linha basta para dizer o
 proximo passo.
 
 **Convivencia com a spec 20261002-002.** Aquela e dona do corpo de Agora (cartoes
@@ -94,7 +92,7 @@ dependencia: a que entrar depois regenera os snapshots de Agora.
 
 - A-001 - `suggest` devolve, para cada caso da tabela, a skill e os ids e o
   titulo da tabela, verificado por testes sobre os sete casos de status de
-  `app/conformance/` e por casos sinteticos para nao-workspace, `blocked` sem
+  `app/relay-tui/tests/fixtures/` e por casos sinteticos para nao-workspace, `blocked` sem
   handoff, `done` com TODO e `backlog` sem entrada disponivel; e testes mostram
   que a mesma entrada da a mesma sugestao, sem relogio.
 - A-002 - A linha de proximo passo se desenha na visao Agora em 58 e 40 colunas,
@@ -104,10 +102,10 @@ dependencia: a que entrar depois regenera os snapshots de Agora.
 - A-003 - A skill da sugestao aparece em texto e em negrito, nunca so em cor,
   verificado por teste de semantica da view; e o modulo `suggest` entra na lista
   do teste `read_only.rs` de modulos que nao leem disco.
-- A-004 - O design system (secao 10) descreve a linha, a tabela de casos e a
+- A-004 - O `DESIGN.md` descreve a linha, a tabela de casos e a
   regra de altura, e `docs/TUI.md` e `docs/TUI.pt-BR.md` a mencionam.
 
 ## Backlog candidates
 
 - B-001: Funcao pura `suggest`, fora do core, com a tabela de sugestoes testada.
-- B-002: Linha de proximo passo na visao Agora, snapshots, design system e guias.
+- B-002: Linha de proximo passo na visao Agora, snapshots, `DESIGN.md` e guias.

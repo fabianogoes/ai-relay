@@ -1,15 +1,13 @@
-//! Parsers for the five records. A port of `app/relay-core/src/parse.ts`.
+//! Parsers for the five records.
 //!
-//! The regular expressions are kept equivalent to the JavaScript ones, including
-//! their quirks, because the conformance suite holds both readers to the same
-//! answers. Where the Rust engine differs from JavaScript's, the pattern is
-//! adjusted rather than the behavior:
+//! The patterns follow these rules, which `tests/fixtures/` holds the reader
+//! to:
 //!
-//! * `\d` is `[0-9]` and `\b` is the ASCII boundary (JavaScript's are ASCII).
-//! * `.` is `[^\n\r\x{2028}\x{2029}]` (JavaScript's `.` does not match `\r`, so a
-//!   CRLF line never matches a pattern ending in `(.*)$`).
-//! * A checklist marker is one UTF-16 code unit in JavaScript, so a character
-//!   outside the BMP never forms a marker.
+//! * `\d` is `[0-9]` and `\b` is the ASCII word boundary.
+//! * `.` is `[^\n\r\x{2028}\x{2029}]`, so a CRLF line never matches a pattern
+//!   ending in `(.*)$`.
+//! * A checklist marker is one UTF-16 code unit, so a character outside the
+//!   BMP never forms a marker.
 
 use std::collections::HashMap;
 use std::sync::LazyLock;
@@ -263,8 +261,7 @@ mod tests {
         items.iter().map(|i| i.to_string()).collect()
     }
 
-    // Expected values below are the outputs of the TypeScript parser on the
-    // same inputs, including the inputs it silently skips.
+    // The expected values include the inputs the parser silently skips.
     #[test]
     fn checklist_lines_follow_the_reference_parser() {
         let text = "- [ ] B-001 - Um (spec: `.specs/a.md`) (needs: B-002, B-003)\n\

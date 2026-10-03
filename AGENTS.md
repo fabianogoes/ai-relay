@@ -22,8 +22,8 @@ summary that drifts from its source is worse than a pointer to it.
 | `docs/INSTALL.md` | When changing installation for Claude Code, Codex, or OpenCode. |
 | `docs/TUI.md` | When changing how the `relay-tui` is installed or used. |
 | `README.md` | When changing what Relay claims to do or how it is explained. |
-| `app/` | Before touching the interface. The folder carries its own `AGENTS.md`; its boundary is ADR-0004 and the data crossing it is ADR-0003. |
-| `docs/design-system/` | Before any UI change. The folder carries its own `AGENTS.md` with the reading order and the rule that its `.html` files are never read by an agent. Start at its `README.md`. |
+| `app/` | Before touching the interface, the `relay-tui` terminal panel. The folder carries its own `AGENTS.md`. |
+| `app/relay-tui/DESIGN.md` | Before any change to how the `relay-tui` looks: palette, status, layout, keys. |
 
 ## Architecture decisions
 
@@ -37,77 +37,35 @@ Write one when a decision affects structure, an architecture characteristic, a
 dependency, an interface, or a construction technique. Record the reasoning,
 not only the choice.
 
-- `docs/adr/0011-skill-de-pacote-fora-do-protocolo.md` — Accepted —
+- `docs/adr/0005-skill-de-pacote-fora-do-protocolo.md` — Accepted —
   `relay-tui-split`, a package skill that opens a terminal split running the
   `relay-tui` and touches no record: it lives in `skills/` but outside the
   protocol, with a name distinct from the binary, a POSIX `sh` script as the
   first executable in the package, and its tests in `.agents/tests/`, not in
   `skills/`.
-- `docs/adr/0010-navegacao-da-relay-tui-como-estado-local.md` — Accepted —
+- `docs/adr/0004-navegacao-da-relay-tui-como-estado-local.md` — Accepted —
   navigation in the `relay-tui` is local screen state and stays read-only: a
-  second view, **Histórico** (not Trabalho, a deliberate divergence from the web
-  UI), beside Agora, with `Esc` going back instead of quitting there, mouse
-  capture only while Histórico is open (every gesture with a key equivalent), and
-  the new changelog and spec-title extraction living only in Rust. It amends
-  ADR-0009 decision 1 ("only reacts to exit keys") and nothing else in it.
-- `docs/adr/0009-relay-tui-observador-de-terminal-em-rust.md` — Accepted —
-  `relay-tui`, a read-only, passive terminal observer in Rust (`ratatui`),
-  shipped as a single downloadable binary from a GitHub Release (macOS
-  is the requirement, Linux is best effort and Windows is out for now). It
-  carries a second implementation of the core, held in line with `relay-core` by
-  a language-neutral conformance suite in `app/conformance/`; it revises
-  ADR-0001 decision 2 and the repository-only distribution premise for the TUI
-  alone, and keeps decision 5 (the app never writes a record). It is not a Relay
-  CLI. A file-based question channel between harness and TUI is recorded as a
+  second view, **Histórico**, beside Agora, with `Esc` going back instead of
+  quitting there, mouse capture only while Histórico is open (every gesture with
+  a key equivalent), and the changelog and spec-title extraction kept out of the
+  protocol rules.
+- `docs/adr/0003-relay-tui-observador-de-terminal-em-rust.md` — Accepted —
+  `relay-tui`, the only interface: a read-only terminal observer in Rust
+  (`ratatui`), shipped as a single downloadable binary from a GitHub Release
+  (macOS is the requirement, Linux is best effort and Windows is out for now).
+  Its pure `core` is the only protocol reader and fixes the derived-state
+  contract (content in, state out; `inconsistent` as a separate shape; counts,
+  never percentages; stable integrity-check ids), checked by golden fixtures in
+  `app/relay-tui/tests/fixtures/`. It re-reads the workspace after 150 ms of
+  quiescence, is not a Relay CLI, and records a file-based question channel as a
   considered evolution, gated on a protocol amendment and a Claude Code spike.
-- `docs/adr/0008-testes-de-ui-com-vitest.md` — Accepted — UI component tests
-  use Vitest + `@vue/test-utils` + `jsdom`, as a `devDependency` of
-  `app/relay-ui` only, alongside (not replacing) the existing `node --test`
-  suite; Playwright and Testing Library were considered and rejected because
-  none of spec 013's six regression scenarios need a real browser or a second
-  DOM-query layer.
-- `docs/adr/0006-contrato-http-ws-do-relay-host.md` — Accepted — the HTTP/WS
-  surface between `relay-host` and `relay-ui`: bind only on `127.0.0.1` on an
-  ephemeral port, a per-execution token delivered in the initial HTML (never
-  in URL or query string), same-origin required on every API route with
-  `GET /` as the sole token bootstrap, raw-content routes for the second view,
-  the launch route reserved for spec 008 and absent under `--no-exec`
-  (authed request gets `404`, not `403`), harness detection on its own
-  endpoint outside the `UiPayload`, and whole-directory watching that pushes a
-  fresh `UiPayload` over WebSocket.
-- `docs/adr/0007-observador-read-only-como-primeira-entrega.md` — Accepted —
-  the first release opens read-only by default, keeps integrated execution
-  behind explicit `--exec`, accepts an explicit workspace path, preserves the
-  Agora/Trabalho hierarchy, and exposes transition/stale state while publishing
-  snapshots after 150 ms of quiescence. Decision 6 (added after visual
-  validation) serves the changelog **structured** as well, through
-  `relay-core`'s existing parser and a dedicated host route, so the Trabalho
-  view can cascade spec → backlog cards → changelog cards without the UI ever
-  parsing protocol grammar; the same revision drops the full spec text from
-  that view, and decision 3 carries the note.
-- `docs/adr/0001-arquitetura-inicial-da-ui.md` — Accepted — initial UI
-  architecture: the `relay-core` / `relay-host` / `relay-ui` boundary over
-  loopback HTTP and WebSocket, TypeScript throughout, browser UI with the
-  application shell deferred, and the rule that the application never writes a
-  protocol record.
-- `docs/adr/0005-framework-da-relay-ui.md` — Accepted — Vue 3 for `relay-ui`,
-  with Lit, Preact and React + Vite rejected; the view holds no logic; authoring
-  in SFC with TypeScript, because ADR-0003's guarantee about `inconsistent` is
-  the compiler's. Records that migration cost was weighed and **discarded** as a
-  criterion, since the loopback boundary already makes the UI cheap to replace.
-  Expected to be superseded; nothing else depends on it.
-- `docs/adr/0004-fronteira-e-estrutura-do-app.md` — Accepted — where the UI
-  lives and what it may not do: everything under `app/`, no root `package.json`,
-  no mandatory build step, the folder carrying its own instructions, and a third
-  layer declared — package surface, product, repository tooling — so the UI is
-  never shipped to someone who only wanted the skills.
-- `docs/adr/0003-contrato-do-estado-derivado.md` — Accepted — the derived-state
-  contract between `relay-core` and `relay-ui`: content in and state out with no
-  disk access, `inconsistent` as a separate shape rather than another status,
-  availability derived in the core, counts but never percentages or positions,
-  and no presentation field, so the design system keeps authority over how state
-  looks.
-- `docs/adr/0002-carregamento-condicional-de-instrucoes.md` — Accepted — how
+- `docs/adr/0002-fronteira-e-estrutura-do-app.md` — Accepted — where the
+  interface lives and what it may not do: everything under `app/`, no build
+  manifest at the root, no build step between clone and skills, the folder
+  carrying its own instructions, and a third layer declared — package surface,
+  product, repository tooling — so the interface is never shipped to someone
+  who only wanted the skills.
+- `docs/adr/0001-carregamento-condicional-de-instrucoes.md` — Accepted — how
   agent instructions reach a session: each rule sits at the trigger where it
   becomes relevant (skill, nested `AGENTS.md`, tool hook) instead of in the root
   router; one executable rule with a shell per harness; the neutral directory
@@ -127,8 +85,8 @@ not only the choice.
   harness, but only Relay skills mutate the five protocol records. If a client
   cannot derive a state it needs, change the protocol rather than adding a
   private write.
-- `.agents/`, `.claude/`, and `.opencode/plugin/` are tooling for developing
-  *this* repository, never package surface: the manifests ship `./skills/` only.
+- `.agents/` and `.claude/` are tooling for developing *this* repository,
+  never package surface: the manifests ship `./skills/` only.
 
 ## Development rules
 
@@ -140,8 +98,8 @@ not only the choice.
   repositories.
 - Keep installation guidance aligned across Claude Code, Codex, and OpenCode.
 - Keep each document in its layer: the contract in `docs/PROTOCOL.md`,
-  decisions and their reasoning in `docs/adr/`, exploratory analysis in
-  `docs/design-system/`. Do not copy content between layers.
+  decisions and their reasoning in `docs/adr/`, the terminal design in
+  `app/relay-tui/DESIGN.md`. Do not copy content between layers.
 - The package surface is English: `README.md`, `docs/PROTOCOL.md`,
   `docs/INSTALL.md`, `docs/TUI.md`, and the skills. Each of those documents has
   a Portuguese (Brazil) translation beside it, `<name>.pt-BR.md`. Change both in

@@ -1,6 +1,6 @@
  relay  ~/Developer/relay   ● atualizado
 
-╭ Tarefa · T-002 ───────── ↓ 22 abaixo ╮
+╭ Tarefa · T-002 ───────── ↓ 21 abaixo ╮
 │ T-002 · Um fixture por status        │
 │ 2026-09-02                           │
 │                                      │

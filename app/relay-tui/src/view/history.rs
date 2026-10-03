@@ -1,9 +1,9 @@
-//! The Histórico view (ADR-0010): one card with the open level of the
+//! The Histórico view (ADR-0004): one card with the open level of the
 //! navigation, a list of one-line rows or the detail of a task.
 //!
 //! A pure function of the `Nav`, the extracted `History` and the derived state;
 //! the layout rules (levels, rows, scroll, widths) are in
-//! `docs/design-system/README.md` section 10, "Visão Histórico".
+//! `DESIGN.md`, "Visão Histórico".
 
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;

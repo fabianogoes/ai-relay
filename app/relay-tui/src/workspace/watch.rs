@@ -1,9 +1,8 @@
 //! Watches a workspace's record directories and turns file-system events into
 //! `Dirty` / `Settled` signals.
 //!
-//! A port of `app/relay-host/src/watcher.ts`: `.orchestration/` and `.specs/`
-//! are watched, not the whole repository, so a build writing thousands of
-//! files elsewhere never wakes it.
+//! `.orchestration/` and `.specs/` are watched, not the whole repository, so a
+//! build writing thousands of files elsewhere never wakes it.
 
 use std::path::{Path, PathBuf};
 use std::sync::Arc;

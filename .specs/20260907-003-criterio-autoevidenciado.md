@@ -9,14 +9,13 @@ todo critério estiver nomeado por algum registro. O mecanismo verifica
 foi o próprio registro que nomeou, ou outro depois dele, que de fato demonstrou
 o critério.
 
-A prova está viva neste repositório. Em B-004/T-003 ("Scaffold da relay-ui"), o
-registro nomeou `Criteria: A-004` — "a tela principal renderiza os sete
-fixtures" — enquanto o `Result` daquele mesmo registro é só `package.json`,
-`vite.config.ts`, `tsconfig.json`, `main.ts`: nenhum componente de tela existia
-ainda. O critério só ficou verdadeiro dois registros depois, em T-004. O
-mecanismo de B-005 não acusou nada, porque T-004 e T-005 também nomeiam A-004 —
-"algum registro nomeia" ficou satisfeito, e a reivindicação falsa do T-003
-passou sem deixar rastro de erro.
+Um exemplo do furo: o registro de um scaffold nomeia `Criteria: A-004` — "a
+tela principal renderiza os sete fixtures" — enquanto o `Result` daquele mesmo
+registro lista só arquivos de configuração; nenhum componente de tela existe
+ainda. O critério só fica verdadeiro dois registros depois. O mecanismo de B-005
+não acusa nada, porque os registros seguintes também nomeiam A-004 — "algum
+registro nomeia" fica satisfeito, e a reivindicação falsa passa sem deixar
+rastro de erro.
 
 ## Scope
 

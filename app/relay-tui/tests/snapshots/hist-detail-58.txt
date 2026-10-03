@@ -16,7 +16,7 @@
 │ lados e lista todas as divergencias de uma vez.        │
 │                                                        │
 │ Evidence                                               │
-│ o runner TypeScript e o Rust passam os sete casos.     │
+│ o core passa os sete casos.                            │
 ╰────────────────────────────────────────────────────────╯
 
 ╭────────────────────────────────────────────────────────╮
@@ -42,7 +42,7 @@ d.fffffffffffff.ff.ffff.fff.f.ffffff.fffffff.ff.ffff.....d
 d.fffff.f.fffff.fffff.ff.ffffffffffff.ff.fff.ffff........d
 d........................................................d
 d.MMMMMMMM...............................................d
-d.f.ffffff.ffffffffff.f.f.ffff.ffffff.ff.ffff.ffffff.....d
+d.f.ffff.fffff.ff.ffff.ffffff............................d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
