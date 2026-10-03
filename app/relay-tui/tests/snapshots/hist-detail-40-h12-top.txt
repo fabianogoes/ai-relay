@@ -1,0 +1,26 @@
+ relay  ~/Developer/relay   ● atualizado
+
+╭ Tarefa · T-002 ───────── ↓ 22 abaixo ╮
+│ T-002 · Um fixture por status        │
+│ 2026-09-02                           │
+│                                      │
+│ Backlog                              │
+╰──────────────────────────────────────╯
+
+╭──────────────────────────────────────╮
+│ Esc voltar · Tab agora · q sair      │
+╰──────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm...g.mmmmmmmmmm
+
+d.FFFFFF.F.IIIII.ddddddddd.m.mm.mmmmmm.d
+d.FFFFF.F.FF.FFFFFFF.FFF.FFFFFF........d
+d.mmmmmmmmmm...........................d
+d......................................d
+d.MMMMMMM..............................d
+dddddddddddddddddddddddddddddddddddddddd
+
+dddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmm.m.FFF.mmmmm.m.F.mmmm......d
+dddddddddddddddddddddddddddddddddddddddd

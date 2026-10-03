@@ -17,11 +17,11 @@
 
 
 
+  Comece T-003 com relay-session.
 
-
-
-
- q sair
+╭──────────────────────────────────────╮
+│ Tab histórico · q sair               │
+╰──────────────────────────────────────╯
 
 --- colors ---
 #######.mmmmmmmmmmmmmmmmm...g.mmmmmmmmmm
@@ -43,8 +43,8 @@ dddddddddddddddddddddddddddddddddddddddd
 
 
 
+..mmmmmm.iiiii.mmm.FFFFFFFFFFFFFm
 
-
-
-
-.F.mmmm
+dddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmmmm.m.F.mmmm...............d
+dddddddddddddddddddddddddddddddddddddddd

@@ -1,0 +1,50 @@
+ relay  ~/Developer/relay   ● atualizado
+
+╭ Tarefa · T-002 ───────── ↓ 10 abaixo ╮
+│ T-002 · Um fixture por status        │
+│ 2026-09-02                           │
+│                                      │
+│ Backlog                              │
+│ B-001                                │
+│                                      │
+│ Spec                                 │
+│ .specs/20260901-001-contrato-do-core │
+│ .md                                  │
+│                                      │
+│ Result                               │
+│ sete fixtures em disco, um por       │
+│ status, com o expected.json de cada  │
+│ um. O runner compara os dois lados e │
+│ lista todas as divergencias de uma   │
+│ vez.                                 │
+╰──────────────────────────────────────╯
+
+╭──────────────────────────────────────╮
+│ Esc voltar · Tab agora · q sair      │
+╰──────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm...g.mmmmmmmmmm
+
+d.FFFFFF.F.IIIII.ddddddddd.m.mm.mmmmmm.d
+d.FFFFF.F.FF.FFFFFFF.FFF.FFFFFF........d
+d.mmmmmmmmmm...........................d
+d......................................d
+d.MMMMMMM..............................d
+d.iiiii................................d
+d......................................d
+d.MMMM.................................d
+d.ffffffffffffffffffffffffffffffffffff.d
+d.fff..................................d
+d......................................d
+d.MMMMMM...............................d
+d.ffff.ffffffff.ff.ffffff.ff.fff.......d
+d.fffffff.fff.f.fffffffffffff.ff.ffff..d
+d.fff.f.ffffff.fffffff.ff.ffff.fffff.f.d
+d.fffff.fffff.ff.ffffffffffff.ff.fff...d
+d.ffff.................................d
+dddddddddddddddddddddddddddddddddddddddd
+
+dddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmm.m.FFF.mmmmm.m.F.mmmm......d
+dddddddddddddddddddddddddddddddddddddddd

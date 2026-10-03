@@ -33,11 +33,11 @@
 
 
 
+  Retome T-004 de B-002 com relay-session.
 
-
-
-
- q sair
+╭────────────────────────────────────────────────────────╮
+│ Tab histórico · r recarregar · q sair                  │
+╰────────────────────────────────────────────────────────╯
 
 --- colors ---
 #######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
@@ -75,8 +75,8 @@ dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 
 
 
+..mmmmmm.iiiii.mm.iiiii.mmm.FFFFFFFFFFFFFm
 
-
-
-
-.F.mmmm
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

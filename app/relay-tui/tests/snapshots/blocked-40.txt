@@ -15,13 +15,13 @@
 ╰──────────────────────────────────────╯
 ╭ TODO ─────────────────────────── 2/3 ╮
 │ ████████ ████████ ████████           │
-│                                      │
-│ ✓ T-001 Materializar os sete fixtur… │
-│ ✓ T-002 Escrever tokens.css          │
-│ ! T-003 Scaffold da rela…  bloqueado │
+│ +3 itens                             │
 ╰──────────────────────────────────────╯
  Backlog 0/1 · 1 disponível
- q sair
+
+╭──────────────────────────────────────╮
+│ Tab histórico · q sair               │
+╰──────────────────────────────────────╯
 
 --- colors ---
 #######.mmmmmmmmmmmmmmmmm...g.mmmmmmmmmm
@@ -41,10 +41,10 @@ y...........fffff.fffffffff.ffffffff.f.y
 yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
 d.FFFF.ddddddddddddddddddddddddddd.mmm.d
 d.gggggggg.gggggggg.yyyyyyyy...........d
-d......................................d
-d.G.iiiii.mmmmmmmmmmmm.mm.mmmm.mmmmmmm.d
-d.G.iiiii.mmmmmmmm.mmmmmmmmmm..........d
-d.Y.iiiii.ffffffff.ff.fffff..yyyyyyyyy.d
+d.mm.mmmmm.............................d
 dddddddddddddddddddddddddddddddddddddddd
 .FFFFFFF.mmm.m.m.mmmmmmmmmm
-.F.mmmm
+
+dddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmmmm.m.F.mmmm...............d
+dddddddddddddddddddddddddddddddddddddddd

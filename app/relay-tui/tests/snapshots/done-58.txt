@@ -17,11 +17,11 @@
 
 
 
+  Tudo concluído. Para uma nova ideia: relay-spec.
 
-
-
-
- q sair
+╭────────────────────────────────────────────────────────╮
+│ Tab histórico · r recarregar · q sair                  │
+╰────────────────────────────────────────────────────────╯
 
 --- colors ---
 #######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
@@ -43,8 +43,8 @@ gggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
 
 
 
+..mmmm.mmmmmmmmmm.mmmm.mmm.mmmm.mmmmmm.FFFFFFFFFFm
 
-
-
-
-.F.mmmm
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

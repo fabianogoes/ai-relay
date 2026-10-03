@@ -23,11 +23,11 @@
 
 
 
+  Resolva o bloqueio de T-003 (ver Handoff) e retome com relay-session.
 
-
-
-
- q sair
+╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ Tab histórico · r recarregar · q sair                                                                                │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 --- colors ---
 #######.mmmmmmmmmmmmmmmmm...................................................................................g.mmmmmmmmmm
@@ -55,8 +55,8 @@ dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 
 
 
+..mmmmmmm.m.mmmmmmmm.mm.iiiii.mmmm.mmmmmmmm.m.mmmmmm.mmm.FFFFFFFFFFFFFm
 
-
-
-
-.F.mmmm
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm................................................................................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

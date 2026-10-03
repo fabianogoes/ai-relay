@@ -1,13 +1,14 @@
 use std::env;
 use std::io::{self, IsTerminal};
+use std::panic;
 use std::path::PathBuf;
 use std::process::ExitCode;
 use std::sync::mpsc;
 use std::thread;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use ratatui::crossterm::event;
-use ratatui::widgets::Widget;
+use ratatui::crossterm::event::{self, DisableMouseCapture, EnableMouseCapture};
+use ratatui::crossterm::execute;
 
 use relay_tui::app::{self, App, AppEvent};
 use relay_tui::cli::{self, Action};
@@ -53,15 +54,42 @@ fn run(workspace: Option<PathBuf>) -> io::Result<()> {
     // `init` enters raw mode and the alternate screen, and installs a panic
     // hook that puts the terminal back before the message is printed.
     let mut terminal = ratatui::init();
-    if cfg!(debug_assertions) && env::var_os("RELAY_TUI_TEST_PANIC").is_some() {
-        // Only in debug builds: lets the end-to-end test prove the restore.
-        terminal.draw(|frame| {
-            let area = frame.area();
-            (&app.view(now_unix())).render(area, frame.buffer_mut());
-        })?;
-        panic!("RELAY_TUI_TEST_PANIC");
+    // The mouse is reported only while Histórico is open (so that Agora keeps
+    // selectable text), and is turned off again on every way out: going back to
+    // Agora, quitting, and a panic. `init` put a hook that restores the
+    // terminal; this one runs first and then hands over to it.
+    let restoring = panic::take_hook();
+    panic::set_hook(Box::new(move |info| {
+        let _ = execute!(io::stdout(), DisableMouseCapture);
+        restoring(info);
+    }));
+    if cfg!(debug_assertions) {
+        if let Some(mode) = env::var_os("RELAY_TUI_TEST_PANIC") {
+            // Only in debug builds: lets the end-to-end test prove the restore,
+            // with Agora on screen or, for `history`, with the mouse reported.
+            if mode == "history" {
+                app.on_event(AppEvent::Terminal(event::Event::Key(
+                    event::KeyCode::Tab.into(),
+                )));
+                execute!(io::stdout(), EnableMouseCapture)?;
+            }
+            terminal.draw(|frame| {
+                let area = frame.area();
+                app.render(area, frame.buffer_mut(), now_unix());
+            })?;
+            panic!("RELAY_TUI_TEST_PANIC");
+        }
     }
-    let result = app::run(&mut terminal, &mut app, &rx, now_unix);
+    let result = app::run_with_mouse(&mut terminal, &mut app, &rx, now_unix, |on| {
+        let _ = if on {
+            execute!(io::stdout(), EnableMouseCapture)
+        } else {
+            execute!(io::stdout(), DisableMouseCapture)
+        };
+    });
+    // Before the terminal is given back, so the shell never inherits a mouse
+    // that reports into the prompt.
+    let _ = execute!(io::stdout(), DisableMouseCapture);
     ratatui::restore();
     result.map_err(io::Error::other)
 }

@@ -119,7 +119,8 @@ fn inconsistent_is_red_but_its_body_is_not() {
 
 #[test]
 fn a_blocked_item_and_an_unavailable_one_say_why_in_words() {
-    let blocked = render(&case("status-blocked"), Freshness::Fresh, 58, 24);
+    // Tall enough for the whole TODO (the footer card takes rows from the body).
+    let blocked = render(&case("status-blocked"), Freshness::Fresh, 58, 32);
     let (x, y) = find(&blocked, "bloqueado").expect("the blocked item says it is blocked");
     assert_eq!(blocked[(x, y)].fg, theme::YELLOW);
 }
@@ -171,5 +172,109 @@ fn no_cell_uses_a_color_outside_the_palette() {
                 assert!(palette.contains(&fg) || fg == theme::ON_BADGE, "status-{name}: {fg:?} at ({x},{y})");
             }
         }
+    }
+}
+
+// ------------------------------------------------- next-step line (spec 004)
+
+/// The row of the next-step line: the one just above the footer.
+/// The row of the next-step line: the last of the body, which is the row above
+/// the footer on a short screen, and above the blank row and the footer card
+/// (three rows) on a taller one.
+fn hint_y(buf: &Buffer) -> u16 {
+    if buf.area.height >= 10 { buf.area.height - 5 } else { buf.area.height - 2 }
+}
+
+fn hint_row(buf: &Buffer) -> String {
+    rows(buf)[hint_y(buf) as usize].clone()
+}
+
+fn has_hint(buf: &Buffer) -> bool {
+    hint_row(buf).contains("relay-")
+}
+
+#[test]
+fn the_skill_of_the_suggestion_is_text_in_bold_fg_never_only_a_color() {
+    let expected: [(&str, &[&str]); 7] = [
+        ("idle", &["relay-spec"]),
+        ("backlog", &["relay-session"]),
+        ("ready", &["relay-session"]),
+        ("in_progress", &["relay-session"]),
+        ("blocked", &["relay-session"]),
+        ("done", &["relay-spec"]),
+        ("inconsistent", &["relay-status", "relay-continue"]),
+    ];
+    for (name, skills) in expected {
+        let buf = render(&case(&format!("status-{name}")), Freshness::Fresh, 120, 24);
+        let y = hint_y(&buf);
+        let row = hint_row(&buf);
+        for skill in skills {
+            let byte = row.find(skill).unwrap_or_else(|| panic!("{name}: `{skill}` is not in `{row}`"));
+            let x0 = row[..byte].chars().count() as u16;
+            for x in x0..x0 + skill.chars().count() as u16 {
+                let cell = &buf[(x, y)];
+                assert!(cell.modifier.contains(Modifier::BOLD), "{name}: `{skill}` is not bold at column {x}");
+                assert_eq!(cell.fg, theme::FG, "{name}: `{skill}` is not fg at column {x}");
+            }
+        }
+        // Ids stay in the `id` color and the rest of the sentence in `meta`.
+        for (x, ch) in row.chars().enumerate() {
+            let cell = &buf[(x as u16, y)];
+            if ch == ' ' || cell.modifier.contains(Modifier::BOLD) {
+                continue;
+            }
+            assert!(cell.fg == theme::META || cell.fg == theme::ID, "{name}: column {x} (`{ch}`) is {:?}", cell.fg);
+        }
+    }
+}
+
+#[test]
+fn a_cut_suggestion_ends_in_an_ellipsis_and_narrow_screens_have_none() {
+    let state = case("status-in_progress");
+    let wide = render(&state, Freshness::Fresh, 58, 24);
+    assert!(hint_row(&wide).trim_end().ends_with("relay-session."));
+    let narrow = render(&state, Freshness::Fresh, 40, 24);
+    assert!(hint_row(&narrow).trim_end().ends_with('…'), "{}", hint_row(&narrow));
+    for width in [39, 30] {
+        let buf = render(&state, Freshness::Fresh, width, 24);
+        assert!(!text(&buf).contains("relay-session"), "a hint at {width} columns");
+    }
+}
+
+/// Rows of the card whose top border starts with `title`.
+fn card_rows(buf: &Buffer, title: &str) -> Option<u16> {
+    let all = rows(buf);
+    let top = all.iter().position(|r| r.starts_with(title))?;
+    let bottom = all[top..].iter().position(|r| r.starts_with('╰'))?;
+    Some(bottom as u16 + 1)
+}
+
+/// A compacted Handoff has no blank row after its first line.
+fn handoff_is_compact(buf: &Buffer) -> bool {
+    let all = rows(buf);
+    let Some(top) = all.iter().position(|r| r.starts_with("╭ Handoff")) else {
+        return false;
+    };
+    let second = &all[top + 2];
+    !second.trim_matches(|c| c == '│' || c == ' ').is_empty()
+}
+
+#[test]
+fn the_line_yields_before_the_handoff_is_compacted_or_the_todo_is_cut() {
+    for name in ["status-in_progress", "status-blocked"] {
+        let state = case(name);
+        let mut appeared = false;
+        for height in 6..=40 {
+            let buf = render(&state, Freshness::Fresh, 100, height);
+            let shown = has_hint(&buf);
+            assert!(!appeared || shown, "{name}: the line vanished again at height {height}");
+            appeared |= shown;
+            if shown {
+                assert!(!handoff_is_compact(&buf), "{name}: the line is shown over a compact Handoff at height {height}");
+                let cut = rows(&buf).iter().any(|r| r.starts_with("│ +") && r.contains("iten"));
+                assert!(!cut, "{name}: the line is shown over a cut TODO at height {height}");
+            }
+        }
+        assert!(appeared, "{name}: the line never appears");
     }
 }

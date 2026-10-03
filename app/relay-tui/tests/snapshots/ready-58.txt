@@ -17,11 +17,11 @@
 
 
 
+  Comece T-003 (Scaffold da relay-ui) com relay-session.
 
-
-
-
- q sair
+╭────────────────────────────────────────────────────────╮
+│ Tab histórico · r recarregar · q sair                  │
+╰────────────────────────────────────────────────────────╯
 
 --- colors ---
 #######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
@@ -43,8 +43,8 @@ dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 
 
 
+..mmmmmm.iiiii.mmmmmmmmm.mm.mmmmmmmmm.mmm.FFFFFFFFFFFFFm
 
-
-
-
-.F.mmmm
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

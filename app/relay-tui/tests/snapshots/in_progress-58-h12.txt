@@ -1,0 +1,26 @@
+ relay  ~/Developer/relay                     ● atualizado
+
+╭ Handoff ─────────────────────────────── ● Em andamento ╮
+│ B-001 · T-002 · claude-code · há 7 h                   │
+╰────────────────────────────────────────────────────────╯
+ Backlog 0/1 · 1 disponível
+
+
+
+╭────────────────────────────────────────────────────────╮
+│ Tab histórico · r recarregar · q sair                  │
+╰────────────────────────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
+
+g.FFFFFFF.ggggggggggggggggggggggggggggggg.G.GG.GGGGGGGGG.g
+g.IIIII.m.iiiii.m.mmmmmmmmmmm.m.mm.m.m...................g
+gggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+.FFFFFFF.mmm.m.m.mmmmmmmmmm
+
+
+
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

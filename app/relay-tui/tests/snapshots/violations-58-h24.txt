@@ -17,11 +17,11 @@
 
 
 
+  Os registros se contradizem: relay-status mostra o di…
 
-
-
-
- q sair
+╭────────────────────────────────────────────────────────╮
+│ Tab histórico · r recarregar · q sair                  │
+╰────────────────────────────────────────────────────────╯
 
 --- colors ---
 #######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
@@ -43,8 +43,8 @@ rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
 
 
 
+..mm.mmmmmmmmm.mm.mmmmmmmmmmmm.FFFFFFFFFFFF.mmmmmm.m.mmm
 
-
-
-
-.F.mmmm
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

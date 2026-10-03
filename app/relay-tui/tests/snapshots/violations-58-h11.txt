@@ -1,24 +1,24 @@
  relay  ~/Developer/relay                     ● atualizado
 
 ╭ ● Inconsistente ──────────────────────────────────── 3 ╮
-│ handoff-names-no-pending-todo                          │
-│ O handoff aponta T-001, que está [x]; T-002 está [•].  │
-│ handoff · todo                                         │
+│ +3 violações                                           │
 │                                                        │
-│ +2 violações                                           │
 │                                                        │
 ╰────────────────────────────────────────────────────────╯
- q sair
+
+╭────────────────────────────────────────────────────────╮
+│ Tab histórico · r recarregar · q sair                  │
+╰────────────────────────────────────────────────────────╯
 
 --- colors ---
 #######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
 
 r.R.RRRRRRRRRRRRR.rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.m.r
-r.RRRRRRRRRRRRRRRRRRRRRRRRRRRRR..........................r
-r.f.fffffff.ffffff.ffffff.fff.ffff.ffff.fffff.ffff.ffff..r
-r.mmmmmmm.m.mmmm.........................................r
-r........................................................r
 r.mm.mmmmmmmmm...........................................r
 r........................................................r
+r........................................................r
 rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
-.F.mmmm
+
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

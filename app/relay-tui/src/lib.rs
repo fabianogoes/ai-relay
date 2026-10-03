@@ -5,6 +5,8 @@
 pub mod app;
 pub mod cli;
 pub mod core;
+pub mod nav;
+pub mod suggest;
 pub mod theme;
 pub mod view;
 pub mod workspace;

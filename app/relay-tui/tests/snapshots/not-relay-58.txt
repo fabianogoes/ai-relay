@@ -7,9 +7,9 @@
 │ Continuo vigiando: ele aparece quando for criado.      │
 ╰────────────────────────────────────────────────────────╯
 
-
-
- q sair
+╭────────────────────────────────────────────────────────╮
+│ Tab histórico · r recarregar · q sair                  │
+╰────────────────────────────────────────────────────────╯
 
 --- colors ---
 #######.mmmmmmmmmmmmmmmmmmmmm.................g.mmmmmmmmmm
@@ -21,6 +21,6 @@ d.fff.ff.fffffffffffffff.fffff.ffffffffff................d
 d.mmmmmmmm.mmmmmmmmm.mmm.mmmmmmm.mmmmmm.mmm.mmmmmmm......d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 
-
-
-.F.mmmm
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

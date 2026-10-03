@@ -10,8 +10,10 @@ use ratatui::widgets::{Block, BorderType, Widget};
 use crate::core::{
     ChecklistEntry, Handoff, OkState, RelayState, Violation, WorkStatus,
 };
+use crate::suggest::suggest;
 use crate::theme;
 
+use super::hint;
 use super::text::{relative_time, truncate, width, wrap_capped};
 use super::{Screen, View};
 
@@ -19,17 +21,17 @@ use super::{Screen, View};
 const TODO_MIN: u16 = 4;
 
 /// A run of text and its style.
-type Seg = (String, Style);
+pub(super) type Seg = (String, Style);
 
-fn seg(text: impl Into<String>, style: Style) -> Seg {
+pub(super) fn seg(text: impl Into<String>, style: Style) -> Seg {
     (text.into(), style)
 }
 
-fn seg_width(segs: &[Seg]) -> usize {
+pub(super) fn seg_width(segs: &[Seg]) -> usize {
     segs.iter().map(|(t, _)| width(t)).sum()
 }
 
-fn plural(n: usize, one: &str, many: &str) -> String {
+pub(super) fn plural(n: usize, one: &str, many: &str) -> String {
     format!("{n} {}", if n == 1 { one } else { many })
 }
 
@@ -48,13 +50,19 @@ fn fit(segs: &[Seg], max: usize) -> Line<'static> {
         let rest = max - used;
         if rest > 0 {
             spans.push(Span::styled(truncate(text, rest), *style));
+        } else if let Some(last) = spans.pop() {
+            // The cut falls between two runs: the previous one takes the `…`,
+            // so a cut line never ends as if it were whole.
+            let kept = last.content.chars().count().saturating_sub(1);
+            let cut: String = last.content.chars().take(kept).collect();
+            spans.push(Span::styled(format!("{cut}…"), last.style));
         }
         break;
     }
     Line::from(spans)
 }
 
-fn put(buf: &mut Buffer, area: Rect, row: usize, segs: &[Seg]) {
+pub(super) fn put(buf: &mut Buffer, area: Rect, row: usize, segs: &[Seg]) {
     if row < area.height as usize {
         buf.set_line(area.x, area.y + row as u16, &fit(segs, area.width as usize), area.width);
     }
@@ -62,7 +70,7 @@ fn put(buf: &mut Buffer, area: Rect, row: usize, segs: &[Seg]) {
 
 /// Draws the frame of a card and returns the area for its content: inside the
 /// border, with one column of padding on each side.
-fn card(buf: &mut Buffer, area: Rect, title: &[Seg], right: &[Seg], border: Color) -> Rect {
+pub(super) fn card(buf: &mut Buffer, area: Rect, title: &[Seg], right: &[Seg], border: Color) -> Rect {
     let to_line = |segs: &[Seg]| {
         Line::from(segs.iter().map(|(t, s)| Span::styled(t.clone(), *s)).collect::<Vec<_>>())
     };
@@ -82,7 +90,7 @@ fn card(buf: &mut Buffer, area: Rect, title: &[Seg], right: &[Seg], border: Colo
     }
 }
 
-fn plain_title(text: &str) -> Vec<Seg> {
+pub(super) fn plain_title(text: &str) -> Vec<Seg> {
     vec![seg(format!(" {text} "), theme::bold(theme::FG))]
 }
 
@@ -129,13 +137,59 @@ pub(super) fn body(view: &View, area: Rect, buf: &mut Buffer) {
     if area.height < 3 {
         return;
     }
+    // The next-step line sits on the last row of the area, just above the
+    // footer; the cards above it get one row less.
+    let hinted = hint_fits(view, area);
+    let cards = if hinted { Rect { height: area.height - 1, ..area } } else { area };
     match view.screen {
-        Screen::NotARelayWorkspace => not_relay_card(view, Rect { height: area.height.min(6), ..area }, buf),
+        Screen::NotARelayWorkspace => not_relay_card(view, Rect { height: cards.height.min(6), ..cards }, buf),
+        Screen::State(RelayState::Inconsistent { violations }) => {
+            let rows = violation_rows(violations, cards.width.saturating_sub(4) as usize);
+            violations_card(violations, Rect { height: cards.height.min(rows as u16 + 2), ..cards }, buf);
+        }
+        Screen::State(RelayState::Ok(ok)) => ok_body(view, ok, cards, buf),
+    }
+    if hinted {
+        // Aligned with the content of the cards (inside their border and
+        // padding), and inside the same width.
+        let line = Rect { x: area.x + 2, y: area.bottom() - 1, width: area.width.saturating_sub(4), height: 1, ..area };
+        let segs = hint::segments(
+            &suggest(match view.screen {
+                Screen::NotARelayWorkspace => None,
+                Screen::State(state) => Some(state),
+            }),
+            line.width as usize,
+        );
+        put(buf, line, 0, &segs);
+    }
+}
+
+/// Whether the next-step line is drawn. As the height shrinks the Backlog
+/// gives up its frame first, then this line, then the Handoff is compacted,
+/// and last the TODO is cut (design system, section 10).
+fn hint_fits(view: &View, area: Rect) -> bool {
+    let Some(spare) = area.height.checked_sub(1).filter(|h| *h >= 3) else {
+        return false;
+    };
+    match view.screen {
+        Screen::NotARelayWorkspace => spare >= 6,
         Screen::State(RelayState::Inconsistent { violations }) => {
             let rows = violation_rows(violations, area.width.saturating_sub(4) as usize);
-            violations_card(violations, Rect { height: area.height.min(rows as u16 + 2), ..area }, buf);
+            spare >= rows as u16 + 2
         }
-        Screen::State(RelayState::Ok(ok)) => ok_body(view, ok, area, buf),
+        Screen::State(RelayState::Ok(ok)) => match ok.status {
+            WorkStatus::Idle | WorkStatus::Done => spare >= 3,
+            WorkStatus::Backlog => spare >= backlog_choose_height(ok),
+            WorkStatus::Ready | WorkStatus::InProgress | WorkStatus::Blocked => {
+                // The line is the first to give way: it stays only while, without
+                // its row, the Handoff is not compacted (one line per field)
+                // and the TODO is not cut.
+                let reduced = plan(view, ok, Rect { height: spare, ..area });
+                let compact = reduced.handoff.is_some_and(|(d, _)| d == Density::Compact);
+                let todo_whole = ok.todo.is_empty() || reduced.todo == ok.todo.len() as u16 + 4;
+                !compact && todo_whole
+            }
+        },
     }
 }
 
@@ -221,32 +275,79 @@ fn done_card(ok: &OkState, area: Rect, buf: &mut Buffer) {
     );
 }
 
-fn work_body(view: &View, ok: &OkState, area: Rect, buf: &mut Buffer) {
-    let mut y = area.y;
+/// How the rows of a work body are shared: the Handoff card (its density and
+/// height), the one-line status that stands in for it, the TODO card and the
+/// Backlog (3 rows as a card, 1 as a line, 0 when absent).
+#[derive(Clone, Copy, PartialEq, Eq)]
+struct Plan {
+    handoff: Option<(Density, u16)>,
+    lead_line: u16,
+    todo: u16,
+    backlog: u16,
+}
+
+fn plan(view: &View, ok: &OkState, area: Rect) -> Plan {
     let mut remaining = area.height;
-    let at = |y: u16, height: u16| Rect { y, height, ..area };
+    let mut plan = Plan { handoff: None, lead_line: 0, todo: 0, backlog: 0 };
+    // The TODO and the Backlog, whole; and the least they need to still say
+    // something.
+    let todo_full = if ok.todo.is_empty() { 0 } else { ok.todo.len() as u16 + 4 };
 
     if let Some(handoff) = &ok.handoff {
-        let tone = theme::status_tone(ok.status);
         let inner_width = area.width.saturating_sub(4) as usize;
-        // What the TODO and the Backlog need to still say something.
-        // The TODO and the Backlog, whole; and the least they need to still
-        // say something.
-        let todo_full = if ok.todo.is_empty() { 0 } else { ok.todo.len() as u16 + 4 };
         let backlog_full = if ok.backlog.is_empty() { 0 } else { 3 };
         let min_rest = if ok.todo.is_empty() { 0 } else { TODO_MIN } + u16::from(!ok.backlog.is_empty());
         // The handoff takes the most text that still leaves everything else
         // whole; failing that, the standard caps; failing that, one line per
         // field.
         let fits = |lines: &[Vec<Seg>], rest: u16| lines.len() as u16 + 2 + rest <= remaining;
-        let mut lines = handoff_lines(handoff, ok.status, inner_width, view.now_unix, Density::Full);
+        let mut density = Density::Full;
+        let mut lines = handoff_lines(handoff, ok.status, inner_width, view.now_unix, density);
         if !fits(&lines, todo_full + backlog_full) {
-            lines = handoff_lines(handoff, ok.status, inner_width, view.now_unix, Density::Standard);
+            density = Density::Standard;
+            lines = handoff_lines(handoff, ok.status, inner_width, view.now_unix, density);
             if !fits(&lines, min_rest) {
-                lines = handoff_lines(handoff, ok.status, inner_width, view.now_unix, Density::Compact);
+                density = Density::Compact;
+                lines = handoff_lines(handoff, ok.status, inner_width, view.now_unix, density);
             }
         }
         let height = (lines.len() as u16 + 2).min(remaining.saturating_sub(min_rest).max(3)).min(remaining);
+        plan.handoff = Some((density, height));
+        remaining -= height;
+    } else if ok.status == WorkStatus::Ready && remaining > 0 {
+        // No Handoff card to carry the status, so the line carries it.
+        plan.lead_line = 1;
+        remaining -= 1;
+    }
+
+    if remaining == 0 {
+        return plan;
+    }
+
+    // The Backlog gives up its frame before the TODO is cut.
+    plan.backlog = if ok.backlog.is_empty() {
+        0
+    } else if remaining >= todo_full + 3 {
+        3
+    } else {
+        1
+    };
+    let todo_height = remaining.saturating_sub(plan.backlog).min(todo_full);
+    if !ok.todo.is_empty() && todo_height >= TODO_MIN {
+        plan.todo = todo_height;
+    }
+    plan
+}
+
+fn work_body(view: &View, ok: &OkState, area: Rect, buf: &mut Buffer) {
+    let plan = plan(view, ok, area);
+    let mut y = area.y;
+    let at = |y: u16, height: u16| Rect { y, height, ..area };
+
+    if let (Some(handoff), Some((density, height))) = (&ok.handoff, plan.handoff) {
+        let tone = theme::status_tone(ok.status);
+        let inner_width = area.width.saturating_sub(4) as usize;
+        let mut lines = handoff_lines(handoff, ok.status, inner_width, view.now_unix, density);
         lines.truncate(height.saturating_sub(2) as usize);
         let inner = card(
             buf,
@@ -259,9 +360,7 @@ fn work_body(view: &View, ok: &OkState, area: Rect, buf: &mut Buffer) {
             put(buf, inner, row, line);
         }
         y += height;
-        remaining -= height;
-    } else if ok.status == WorkStatus::Ready && remaining > 0 {
-        // No Handoff card to carry the status, so the line carries it.
+    } else if plan.lead_line == 1 {
         let tone = theme::status_tone(ok.status);
         put(
             buf,
@@ -274,28 +373,13 @@ fn work_body(view: &View, ok: &OkState, area: Rect, buf: &mut Buffer) {
             ],
         );
         y += 1;
-        remaining -= 1;
     }
 
-    if remaining == 0 {
-        return;
+    if plan.todo > 0 {
+        todo_card(ok, at(y, plan.todo), buf);
+        y += plan.todo;
     }
-
-    // The Backlog gives up its frame before the TODO is cut.
-    let todo_full = if ok.todo.is_empty() { 0 } else { ok.todo.len() as u16 + 4 };
-    let backlog_height: u16 = if ok.backlog.is_empty() {
-        0
-    } else if remaining >= todo_full + 3 {
-        3
-    } else {
-        1
-    };
-    let todo_height = remaining.saturating_sub(backlog_height).min(todo_full);
-    if !ok.todo.is_empty() && todo_height >= TODO_MIN {
-        todo_card(ok, at(y, todo_height), buf);
-        y += todo_height;
-    }
-    match backlog_height {
+    match plan.backlog {
         3 => backlog_card(ok, at(y, 3), buf),
         1 => backlog_line(ok, at(y, 1), buf),
         _ => {}
@@ -509,6 +593,13 @@ fn backlog_line(ok: &OkState, area: Rect, buf: &mut Buffer) {
         }
     }
     put(buf, area, 0, &segs);
+}
+
+/// Rows of the "A escolher" card: the counts line, then a blank row and the
+/// available items when there are any, inside the frame.
+fn backlog_choose_height(ok: &OkState) -> u16 {
+    let available = ok.backlog.iter().filter(|e| e.available).count();
+    (1 + if available == 0 { 0 } else { 1 + available } + 2) as u16
 }
 
 /// The `backlog` status ("A escolher"): no TODO and no handoff, so the card

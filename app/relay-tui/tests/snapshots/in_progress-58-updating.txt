@@ -17,11 +17,11 @@
 │ ○ 1 disponível                                         │
 ╰────────────────────────────────────────────────────────╯
 
+  Retome T-002 de B-001 com relay-session.
 
-
-
-
- q sair
+╭────────────────────────────────────────────────────────╮
+│ Tab histórico · r recarregar · q sair                  │
+╰────────────────────────────────────────────────────────╯
 
 --- colors ---
 #######.mmmmmmmmmmmmmmmmm....................y.mmmmmmmmmmm
@@ -43,8 +43,8 @@ d.FFFFFFF.dddddddddddddddddddddddddddddddddddddddddd.mmm.d
 d.U.f.ffffffffff.........................................d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 
+..mmmmmm.iiiii.mm.iiiii.mmm.FFFFFFFFFFFFFm
 
-
-
-
-.F.mmmm
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
