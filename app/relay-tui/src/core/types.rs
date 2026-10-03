@@ -1,7 +1,7 @@
 //! The derived-state contract, as Rust types.
 //!
 //! The serialized form (camelCase keys,
-//! an absent optional `spec`) is fixed by `app/conformance/`; this crate has no
+//! an absent optional `spec`) is fixed by `tests/fixtures/`; this crate has no
 //! serializer of its own because the view consumes these types directly.
 
 use std::collections::BTreeMap;

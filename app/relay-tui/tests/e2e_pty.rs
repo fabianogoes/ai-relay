@@ -34,10 +34,10 @@ fn add_spec(dir: &Path, name: &str) {
     fs::write(dir.join(".specs").join(name), "# 20261002-001 - Spec de teste\n").unwrap();
 }
 
-/// A workspace on disk, copied from one of the conformance cases.
+/// A workspace on disk, copied from one of `tests/fixtures/`.
 fn workspace(case: &str) -> TempDir {
     let dir = TempDir::new().unwrap();
-    let from = Path::new(env!("CARGO_MANIFEST_DIR")).join("../conformance").join(case).join("workspace");
+    let from = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures").join(case).join("workspace");
     copy_tree(&from, dir.path());
     dir
 }

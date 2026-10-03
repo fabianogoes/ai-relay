@@ -1,4 +1,5 @@
-//! Runs `app/conformance/` against the Rust core.
+//! Derives every case of `tests/fixtures/` and compares it with its
+//! `expected.json`.
 //!
 //! Every case must derive exactly its `expected.json`; the cases, not this
 //! crate, are the reference.
@@ -39,8 +40,8 @@ const CHECK_IDS: [&str; 13] = [
     "criteria-without-evidence",
 ];
 
-fn conformance_dir() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../conformance")
+fn fixtures_dir() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures")
 }
 
 fn read_or_empty(path: &Path) -> String {
@@ -123,8 +124,8 @@ fn state_json(state: &RelayState) -> Value {
 }
 
 fn case_names() -> Vec<String> {
-    let mut names: Vec<String> = fs::read_dir(conformance_dir())
-        .expect("app/conformance/ must exist")
+    let mut names: Vec<String> = fs::read_dir(fixtures_dir())
+        .expect("tests/fixtures/ must exist")
         .flatten()
         .filter(|e| e.path().is_dir())
         .map(|e| e.file_name().to_string_lossy().into_owned())
@@ -148,7 +149,7 @@ fn the_suite_has_every_status_case_and_one_case_per_integrity_check() {
 fn every_case_derives_the_expected_state() {
     let mut failures = Vec::new();
     for name in case_names() {
-        let dir = conformance_dir().join(&name);
+        let dir = fixtures_dir().join(&name);
         let expected: Value = serde_json::from_str(&read_or_empty(&dir.join("expected.json")))
             .unwrap_or_else(|e| panic!("{name}: expected.json is not valid JSON: {e}"));
         let actual = state_json(&derive_state(&load_workspace(&dir.join("workspace"))));

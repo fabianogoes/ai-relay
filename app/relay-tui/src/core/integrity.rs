@@ -1,5 +1,6 @@
 //! The 13 integrity checks of `docs/PROTOCOL.md`: in protocol order, at most
-//! one violation per check, and the exact detail text, which the conformance suite compares.
+//! one violation per check, and the exact detail text, which
+//! `tests/fixtures/` compares.
 
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::sync::LazyLock;

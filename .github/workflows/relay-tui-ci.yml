@@ -10,12 +10,10 @@ on:
     branches: [main]
     paths:
       - 'app/relay-tui/**'
-      - 'app/conformance/**'
       - '.github/workflows/relay-tui-ci.yml'
   pull_request:
     paths:
       - 'app/relay-tui/**'
-      - 'app/conformance/**'
       - '.github/workflows/relay-tui-ci.yml'
 
 jobs:

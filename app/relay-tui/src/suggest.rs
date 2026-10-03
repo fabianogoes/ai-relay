@@ -3,7 +3,7 @@
 //! A pure function of the state the core already delivered: no clock, no disk,
 //! and no knowledge of how the sentence is worded, which is the view's job. It
 //! lives outside `core` because the core holds only what `docs/PROTOCOL.md`
-//! defines and the conformance suite checks; a suggestion is not protocol.
+//! defines and `tests/fixtures/` checks; a suggestion is not protocol.
 
 use crate::core::{ChecklistEntry, OkState, RelayState, WorkStatus};
 

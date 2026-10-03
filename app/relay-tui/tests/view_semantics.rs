@@ -15,7 +15,7 @@ use relay_tui::view::{Freshness, Screen, View};
 use relay_tui::workspace::read_workspace;
 
 fn case(name: &str) -> RelayState {
-    let dir: PathBuf = Path::new(env!("CARGO_MANIFEST_DIR")).join("../conformance").join(name).join("workspace");
+    let dir: PathBuf = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures").join(name).join("workspace");
     derive_state(&read_workspace(&dir))
 }
 

@@ -1,7 +1,7 @@
 //! Parsers for the five records.
 //!
 //! The regular expressions keep the behavior of the first reader, written in
-//! JavaScript, quirks included, because the cases of `app/conformance/` were
+//! JavaScript, quirks included, because the cases of `tests/fixtures/` were
 //! recorded from it. Where the Rust engine differs from JavaScript's, the
 //! pattern is adjusted rather than the behavior:
 //!

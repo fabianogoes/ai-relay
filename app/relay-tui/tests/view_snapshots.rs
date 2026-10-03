@@ -24,8 +24,8 @@ fn root() -> &'static Path {
     Path::new(env!("CARGO_MANIFEST_DIR"))
 }
 
-fn conformance_case(name: &str) -> RelayState {
-    derive_state(&read_workspace(&root().join("../conformance").join(name).join("workspace")))
+fn fixture(name: &str) -> RelayState {
+    derive_state(&read_workspace(&root().join("tests/fixtures").join(name).join("workspace")))
 }
 
 /// 2026-09-07T14:10:00Z: 10 minutes after the `blocked` handoff and a little
@@ -103,7 +103,7 @@ const STATUS_CASES: [&str; 7] = ["idle", "backlog", "ready", "in_progress", "blo
 #[test]
 fn every_status_at_58_columns() {
     for case in STATUS_CASES {
-        let state = conformance_case(&format!("status-{case}"));
+        let state = fixture(&format!("status-{case}"));
         check(&format!("{case}-58"), &view(&state, Freshness::Fresh), 58, 24);
     }
 }
@@ -111,14 +111,14 @@ fn every_status_at_58_columns() {
 #[test]
 fn every_status_at_40_columns() {
     for case in STATUS_CASES {
-        let state = conformance_case(&format!("status-{case}"));
+        let state = fixture(&format!("status-{case}"));
         check(&format!("{case}-40"), &view(&state, Freshness::Fresh), 40, 24);
     }
 }
 
 #[test]
 fn a_change_in_flight_says_so_in_words() {
-    let state = conformance_case("status-in_progress");
+    let state = fixture("status-in_progress");
     check("in_progress-58-updating", &view(&state, Freshness::Updating), 58, 24);
 }
 
@@ -225,9 +225,9 @@ fn several_violations_are_listed_and_cut_by_height() {
 
 #[test]
 fn narrow_and_short_screens_degrade_to_the_status() {
-    let state = conformance_case("status-blocked");
+    let state = fixture("status-blocked");
     check("blocked-30-h10", &view(&state, Freshness::Fresh), 30, 10);
-    let bad = conformance_case("status-inconsistent");
+    let bad = fixture("status-inconsistent");
     check("inconsistent-30-h10", &view(&bad, Freshness::Fresh), 30, 10);
     check("blocked-58-h5", &view(&state, Freshness::Fresh), 58, 5);
 }
@@ -237,13 +237,13 @@ fn a_tall_or_wide_terminal_shows_the_handoff_nearly_whole() {
     // Room to spare: the fields use it instead of stopping at three lines.
     let long = long_todo();
     check("long-todo-58-h40", &view(&long, Freshness::Fresh), 58, 40);
-    let blocked = conformance_case("status-blocked");
+    let blocked = fixture("status-blocked");
     check("blocked-120-h30", &view(&blocked, Freshness::Fresh), 120, 30);
 }
 
 #[test]
 fn the_next_step_line_yields_with_the_height() {
-    let state = conformance_case("status-in_progress");
+    let state = fixture("status-in_progress");
     for height in [12, 17, 18, 20] {
         check(&format!("in_progress-58-h{height}"), &view(&state, Freshness::Fresh), 58, height);
     }

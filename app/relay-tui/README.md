@@ -162,13 +162,15 @@ app/relay-tui/
 │   │   ├── history.rs     ← tela Histórico
 │   │   └── hint.rs, text.rs
 │   └── workspace/         ← leitura do disco e watcher (watch.rs, debounce.rs)
-└── tests/                 ← testes de integração e snapshots
+└── tests/                 ← testes de integração
+    ├── derive_state.rs    ← cada fixture deriva o seu expected.json
+    ├── fixtures/          ← workspaces de exemplo + estado esperado
     └── snapshots/*.txt    ← o layout esperado em cada largura e altura
 ```
 
 Para mudar o que aparece na tela, os arquivos são os de `src/view/` e o
 `src/theme.rs`. A regra de qual estado mostrar fica em `src/core/`, conferida pela suíte
-de `../conformance/`. O desenho da tela está em
+de `tests/fixtures/`. O desenho da tela está em
 [`docs/design-system/terminal.md`](../../docs/design-system/terminal.md).
 
 ## Compilar do código
@@ -182,8 +184,8 @@ cargo test                                  # suíte inteira
 scripts/package.sh aarch64-apple-darwin     # gera dist/relay-tui-<versão>-<alvo>.tar.gz
 ```
 
-A pasta `../conformance/` tem os casos que o core precisa passar; ver o
-`README.md` dela e a
+A pasta `tests/fixtures/` tem os casos que o core precisa derivar
+(`tests/derive_state.rs`); ver o `README.md` dela e a
 [ADR-0009](../../docs/adr/0009-relay-tui-observador-de-terminal-em-rust.md).
 
 ## Publicar uma versão

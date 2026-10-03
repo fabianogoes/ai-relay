@@ -2,7 +2,7 @@
 //! and the full changelog records.
 //!
 //! Only extraction. No protocol rule lives here: `RelayState`, the integrity
-//! checks and the conformance suite do not read any of this. Pure, like the rest
+//! checks and `tests/fixtures/` do not read any of this. Pure, like the rest
 //! of the core.
 
 use std::sync::LazyLock;

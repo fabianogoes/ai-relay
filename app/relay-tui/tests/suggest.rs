@@ -1,6 +1,6 @@
 //! The suggestion table of spec 20261002-004, case by case.
 //!
-//! The seven status fixtures of `app/conformance/` give the real states; the
+//! The seven status fixtures of `tests/fixtures/` give the real states; the
 //! four cases the status alone does not name are built from record text.
 
 use std::collections::BTreeMap;
@@ -10,8 +10,8 @@ use std::path::{Path, PathBuf};
 use relay_tui::core::{RelayFiles, RelayState, derive_state};
 use relay_tui::suggest::{Case, Suggestion, suggest};
 
-fn conformance_dir() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../conformance")
+fn fixtures_dir() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures")
 }
 
 fn read_or_empty(path: &Path) -> String {
@@ -19,7 +19,7 @@ fn read_or_empty(path: &Path) -> String {
 }
 
 fn fixture(status: &str) -> RelayState {
-    let orchestration = conformance_dir().join(format!("status-{status}/workspace/.orchestration"));
+    let orchestration = fixtures_dir().join(format!("status-{status}/workspace/.orchestration"));
     derive_state(&RelayFiles {
         backlog: read_or_empty(&orchestration.join("BACKLOG.md")),
         todo: read_or_empty(&orchestration.join("TODO.md")),
