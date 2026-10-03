@@ -137,6 +137,39 @@ O fundo não é pintado: vem do terminal. As cores presumem um terminal escuro.
   `Ctrl-C` pelo teclado, `q`, `Esc` e um erro interno restauram.
 - Só tema escuro.
 
+## Estrutura
+
+```
+app/relay-tui/
+├── Cargo.toml / Cargo.lock
+├── README.md
+├── scripts/package.sh     ← empacota o binário para o release
+├── dist/                  ← tarballs gerados (.tar.gz + .sha256), fora do git
+├── src/
+│   ├── main.rs, cli.rs    ← entrada e flags (--workspace, --version…)
+│   ├── app.rs             ← loop principal e estado da aplicação
+│   ├── nav.rs             ← troca entre Agora e Histórico, Esc, mouse
+│   ├── suggest.rs         ← sugestão do próximo passo
+│   ├── theme.rs           ← cores e estilos
+│   ├── core/              ← a lógica do relay-core (TS), reescrita em Rust
+│   │   ├── parse.rs       ← lê HANDOFF/TODO/BACKLOG/CHANGELOG/specs
+│   │   ├── derive.rs      ← calcula o estado
+│   │   ├── integrity.rs   ← checagens de integridade
+│   │   ├── history.rs     ← changelog e títulos das specs
+│   │   └── types.rs
+│   ├── view/              ← o que é desenhado na tela
+│   │   ├── mod.rs, cards.rs, specs.rs   ← Agora (cards, agrupado por spec)
+│   │   ├── history.rs     ← tela Histórico
+│   │   └── hint.rs, text.rs
+│   └── workspace/         ← leitura do disco e watcher (watch.rs, debounce.rs)
+└── tests/                 ← testes de integração e snapshots
+    └── snapshots/*.txt    ← o layout esperado em cada largura e altura
+```
+
+Para mudar o que aparece na tela, os arquivos são os de `src/view/` e o
+`src/theme.rs`. A regra de qual estado mostrar fica em `src/core/`, que precisa
+continuar alinhado com o `relay-core` pela suíte de `../conformance/`.
+
 ## Compilar do código
 
 Precisa de Rust (`rustup`, versão estável).
