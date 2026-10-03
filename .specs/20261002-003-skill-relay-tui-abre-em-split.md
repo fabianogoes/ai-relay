@@ -52,7 +52,7 @@ detectar em qual terminal esta e abrir o painel ao lado do harness.
   de cada terminal, um `PATH` com um `relay-tui` falso e comparam a saida de
   `--dry-run`.
 - Este repositorio passa a usar a skill pelos links por item de `.agents/skills/`
-  e `.claude/skills/`, como as demais (ADR-0002).
+  e `.claude/skills/`, como as demais (ADR-0001).
 - Docs: o laco de skills dos comandos de instalacao (`docs/INSTALL.md` e
   `docs/INSTALL.pt-BR.md`), a tabela de skills de `README.md` e `README.pt-BR.md`
   com a nota de que a skill esta fora do protocolo, a secao "Open it in a split"
@@ -70,7 +70,7 @@ detectar em qual terminal esta e abrir o painel ao lado do harness.
 
 ## Decisions
 
-**A skill e do pacote, nao do protocolo.** (ADR-0011.) Ela nao interpreta nem muda registros
+**A skill e do pacote, nao do protocolo.** (ADR-0005.) Ela nao interpreta nem muda registros
 (`docs/PROTOCOL.md`); so abre uma janela. Por isso vive em `skills/` (vai nos
 manifestos, que publicam `./skills/` inteiro, e nas instalacoes), mas e
 documentada como fora do protocolo, e o `docs/PROTOCOL.md` nao muda: sua lista de

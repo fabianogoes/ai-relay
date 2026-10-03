@@ -6,10 +6,10 @@ O template de spec tem `## Acceptance criteria`. O `relay-spec` os **escreve**.
 E acaba aí: nenhuma skill os lê, nenhuma transição os marca, nenhuma das doze
 verificações de integridade os menciona. São write-once.
 
-A prova está viva neste repositório. `B-001` foi marcada `[x]` em
-`.orchestration/BACKLOG.md` enquanto os oito critérios de
-`.specs/20260907-001-ui-primeiro-marco-visual.md` seguiam todos `[ ]`. Não foi
-descuido pontual: **não existe mecanismo que obrigasse a olhar**.
+A prova está viva neste repositório: um item de backlog foi marcado `[x]` em
+`.orchestration/BACKLOG.md` enquanto os oito critérios da spec dele seguiam
+todos `[ ]`. Não foi descuido pontual: **não existe mecanismo que obrigasse a
+olhar**.
 
 O buraco é maior que ele parece. As doze verificações de integridade são todas
 estruturais e de referência cruzada — nenhuma olha para o conteúdo de
@@ -79,7 +79,7 @@ que já vale para nomes de arquivo de spec.
 - A-006 - `relay-spec`, `relay-session` e `relay-status` refletem o contrato, e
   nenhuma skill passa de 39 linhas
 - A-007 - Specs com critérios em checkbox continuam válidas
-- A-008 - A spec `20260907-001` foi convertida e seus critérios têm evidência
+- A-008 - As specs existentes foram convertidas e seus critérios têm evidência
   atribuída retroativamente ou registrados como pendentes
 - A-009 - Um critério nomeado no changelog identifica sem ambiguidade a spec a
   que pertence, mesmo quando a subtarefa corre sob outra spec
@@ -88,6 +88,6 @@ que já vale para nomes de arquivo de spec.
 
 - B-005: Protocolo exige que a evidência nomeie o critério de aceite
 - B-006: Skills alinhadas ao novo contrato (needs: B-005)
-- B-007: Spec `20260907-001` convertida e seus critérios reconciliados
+- B-007: Specs existentes convertidas e seus critérios reconciliados
   (needs: B-005)
 - B-008: Critério nomeado no changelog é qualificado pela spec (needs: B-005)

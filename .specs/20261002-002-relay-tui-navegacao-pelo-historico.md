@@ -4,7 +4,7 @@
 
 O painel mostra so o agora. Para saber o que ja foi feito (quais specs, quais
 itens de backlog, quais tarefas, e o que cada uma entregou) a pessoa abre os
-arquivos ou a UI web. Isso deveria caber no proprio painel, em listas curtas que
+arquivos. Isso deveria caber no proprio painel, em listas curtas que
 se aprofundam por selecao: spec, backlog, tarefa, detalhe.
 
 A propria visao Agora tambem nao diz de qual spec e o trabalho: o cartao Backlog
@@ -44,8 +44,7 @@ que ainda tem trabalho pendente.
     colunas vale a linha de status da spec 20261002-001, sem cartoes.
 
 - Uma segunda visao, **Histórico**, ao lado de **Agora**, que continua sendo a
-  padrao ao abrir. **Agora** e o nome da UI web (ADR-0007); a visao que la se
-  chama Trabalho aqui se chama **Histórico**. `Tab` (ou `t`) alterna
+  padrao ao abrir. `Tab` (ou `t`) alterna
   entre as duas, de qualquer nivel; voltar ao Histórico reabre o nivel e a selecao
   em que a pessoa estava.
 - Quatro niveis, cada um aprofundando o anterior: **specs**, os **itens de
@@ -114,42 +113,40 @@ que ainda tem trabalho pendente.
     · q sair`.
 - Core em Rust: extracao dos campos do changelog (data, titulo e todos os campos,
   inclusive as linhas de continuacao) e do titulo de cada spec. So extracao de
-  texto: nenhuma regra nova do protocolo, `RelayState` e a suite de conformidade
-  ficam como estao.
-- ADR-0010 (emenda a decisao 1 da ADR-0009, "so reage as teclas de saida"), a
-  entrada dela no indice de ADRs do `AGENTS.md` e uma secao no design system.
+  texto: nenhuma regra nova do protocolo, `RelayState` e os fixtures ficam como
+  estao.
+- ADR-0004 (detalha a decisao 1 da ADR-0003: as teclas so mudam o que a tela
+  mostra), a entrada dela no indice de ADRs do `AGENTS.md` e uma secao no
+  `DESIGN.md`.
 - Continua somente leitura: a navegacao e estado local da tela; o modulo de
   navegacao nao le disco e entra na lista do teste `read_only.rs`.
 
 ## Non-goals
 
 - Escrever, editar ou abrir arquivo no editor; busca e filtro; mostrar o texto
-  integral da spec (a ADR-0007 decisao 3 ja o retirou da UI web).
+  integral da spec.
 - Voltar um nivel pelo mouse; menu ou botoes clicaveis.
-- Paridade do parse novo no `relay-core` em TypeScript e caso de conformidade
-  para ele (ver Decisions).
+- Tornar a extracao do historico regra do protocolo (ver Decisions).
 - Tema claro; Windows.
 
 ## Decisions
 
 **A tarefa concluida vem do changelog.** O `TODO.md` e esvaziado quando o item de
 backlog fecha, entao o unico registro de uma subtarefa feita e o do changelog
-(`T-NNN`, titulo, Backlog, Spec, Result, Evidence). E o mesmo caminho da cascata
-spec, backlog e changelog da UI web (ADR-0007 decisao 6).
+(`T-NNN`, titulo, Backlog, Spec, Result, Evidence).
 
-**Emenda a spec 20261002-001 e a ADR-0009.** Aquela spec deixou "navegar,
-selecionar" e "changelog e texto de spec na TUI" como nao-objetivos, e a ADR-0009
-decisao 1 diz que o binario so reage as teclas de saida. Isto muda depois do uso
+**Emenda a spec 20261002-001.** Aquela spec deixou "navegar, selecionar" e
+"changelog e texto de spec na TUI" como nao-objetivos. Isto muda depois do uso
 real, como a propria spec previa ("Passivo agora"). O texto de spec continua fora.
-A ADR-0010 registra a emenda; a ADR-0009 segue `Accepted` no resto.
+A ADR-0004 registra a navegacao.
 
 **Mouse e teclado, os dois.** O pedido e clicar, e a captura do mouse tira a
 selecao de texto do terminal; por isso ela so existe na visao Histórico, e todo
 gesto do mouse tem equivalente de teclado (acessibilidade e terminais sem mouse).
 
 **Histórico, nao Trabalho.** "Trabalho" sugere o que esta em curso, que e o que
-Agora ja mostra; a visao nova e o passado e o que falta. O nome diverge da UI web
-de proposito e a ADR-0010 registra a divergencia.
+Agora ja mostra; a visao nova e o passado e o que falta. A ADR-0004 registra o
+nome.
 
 **`Esc` volta em Histórico e sai em Agora.** Em Histórico, `Esc` e o gesto natural
 de voltar; manter nele a saida faria perder a navegacao num toque. Em Agora, o
@@ -164,10 +161,9 @@ repositorio) so e navegavel se rolar; a selecao visivel e a regra.
 que acabou de acontecer; dentro de uma spec, a ordem textual do backlog e do
 changelog e a do protocolo e nao e reinterpretada.
 
-**O parse novo fica so no Rust.** E extracao de texto sem regra, entao o risco de
-divergencia e baixo; fica coberto por testes contra os registros reais deste
-repositorio, que tem dezenas de specs, backlogs e registros. Estender a suite de
-conformidade e o `relay-core` e uma decisao a tomar se isso virar regra.
+**A extracao nao e regra do protocolo.** E extracao de texto, coberta por testes
+contra os registros reais deste repositorio. Se ela virar regra, o lugar e o
+`docs/PROTOCOL.md` primeiro, com fixtures novos.
 
 **Agora agrupada por spec mora aqui.** Ela precisa exatamente do que esta spec
 ja cria no core (titulo de cada spec e backlog agrupado por spec, B-041) e do
@@ -184,17 +180,17 @@ regenera os snapshots de Agora e confere os elementos juntos.
 
 ## Acceptance criteria
 
-- A-001 - A ADR-0010 registra a navegacao como estado local da tela, ainda somente
-  de leitura, como emenda da decisao 1 da ADR-0009 e dos nao-objetivos de
+- A-001 - A ADR-0004 registra a navegacao como estado local da tela, ainda somente
+  de leitura, detalhando a decisao 1 da ADR-0003 e emendando os nao-objetivos de
   navegacao da spec 20261002-001; o indice de ADRs do `AGENTS.md` a lista; e o
-  design system descreve a visao Histórico: niveis, ordem, linhas, detalhe,
+  `DESIGN.md` descreve a visao Histórico: niveis, ordem, linhas, detalhe,
   rolagem, largura minima, teclas e cliques.
 - A-002 - O core em Rust extrai dos registros reais deste repositorio a lista de
   specs com titulo, o backlog por spec (incluindo o grupo Sem spec) e as tarefas
   por item com todos os campos do registro, verificado por testes, que cobrem
   tambem campo com linhas de continuacao, registro sem `Criteria`, `T-NNN`
-  repetido e spec sem `# ` no formato esperado; `RelayState` e a suite de
-  conformidade nao mudam.
+  repetido e spec sem `# ` no formato esperado; `RelayState` e os fixtures nao
+  mudam.
 - A-003 - O estado da navegacao, verificado por testes sem terminal: `Tab` e `t`
   alternam Agora e Histórico preservando nivel e selecao; `Enter` ou clique numa
   linha entram no nivel seguinte; `Esc` e `Backspace` voltam um nivel e, no nivel
@@ -225,12 +221,12 @@ regenera os snapshots de Agora e confere os elementos juntos.
   altura reduzida que mostram a ordem de ceder; os snapshots de `done`, `idle` e
   `inconsistent` continuam sem cartoes de spec.
   A escolha da spec atual usa o `available` vindo do core, sem recalcular
-  dependencias. O design system (secao 10), `docs/TUI.md` e `docs/TUI.pt-BR.md`
+  dependencias. O `DESIGN.md`, `docs/TUI.md` e `docs/TUI.pt-BR.md`
   descrevem os dois cartoes no lugar do cartao Backlog.
 
 ## Backlog candidates
 
-- B-001: ADR-0010 e a visao Histórico registradas no design system.
+- B-001: ADR-0004 e a visao Histórico registradas no `DESIGN.md`.
 - B-002: Core em Rust extrai specs, backlog por spec e tarefas por item dos registros.
 - B-003: Estado da navegacao (niveis, selecao, teclas e cliques) sem terminal.
 - B-004: Listas e detalhe desenhados em 58 e 40 colunas, com snapshots.

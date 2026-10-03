@@ -40,7 +40,7 @@ fn backlog_items_are_grouped_under_the_spec_they_point_at() {
     let ids: Vec<&str> = navigation.items.iter().map(|i| i.id.as_str()).collect();
     assert!(ids.contains(&"B-040") && ids.contains(&"B-041"), "{ids:?}");
     let b040 = navigation.items.iter().find(|i| i.id == "B-040").unwrap();
-    assert!(b040.text.contains("ADR-0010"), "annotations are stripped: {}", b040.text);
+    assert!(b040.text.contains("ADR-0004"), "annotations are stripped: {}", b040.text);
     assert!(!b040.text.contains("spec:") && !b040.text.contains("needs:"));
     // The oldest spec's items are all done and counted, never a percentage.
     let old = h.specs.iter().find(|s| s.id == "20260907-002").unwrap();
