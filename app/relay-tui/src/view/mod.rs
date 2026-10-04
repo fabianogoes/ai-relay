@@ -8,10 +8,12 @@
 mod cards;
 mod hint;
 mod history;
+mod settings;
 mod specs;
 pub mod text;
 
 pub use history::{HistoryScreen, detail_extent, list_geometry, row_at};
+pub use settings::SettingsScreen;
 
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
@@ -22,6 +24,7 @@ use ratatui::widgets::Widget;
 use std::sync::LazyLock;
 
 use crate::core::{History, RelayState};
+use crate::language::Language;
 use crate::theme;
 
 /// What the screen is showing.
@@ -50,6 +53,7 @@ pub struct View<'a> {
     pub freshness: Freshness,
     /// The clock, in Unix seconds, for "há 4 min".
     pub now_unix: i64,
+    pub language: Language,
 }
 
 /// No spec files at all: for a screen that has nothing to group by.
@@ -81,13 +85,24 @@ pub(super) struct Layout {
 pub(super) fn layout(area: Rect) -> Layout {
     let boxed = area.height >= AIRY_HEIGHT;
     let footer_height = if boxed { 3 } else { 1 };
-    let footer = Rect { y: area.bottom().saturating_sub(footer_height), height: footer_height.min(area.height), ..area };
+    let footer = Rect {
+        y: area.bottom().saturating_sub(footer_height),
+        height: footer_height.min(area.height),
+        ..area
+    };
     let top = area.y + if boxed { 2 } else { 1 };
     // The blank row between the body and the footer card.
     let bottom = footer.y.saturating_sub(u16::from(boxed));
     Layout {
-        header: Rect { height: 1.min(area.height), ..area },
-        body: Rect { y: top, height: bottom.saturating_sub(top), ..area },
+        header: Rect {
+            height: 1.min(area.height),
+            ..area
+        },
+        body: Rect {
+            y: top,
+            height: bottom.saturating_sub(top),
+            ..area
+        },
         footer,
         boxed,
     }
@@ -99,11 +114,17 @@ impl Widget for &View<'_> {
             return;
         }
         let places = layout(area);
-        header(self.workspace, self.freshness, places.header, buf);
+        header(
+            self.workspace,
+            self.freshness,
+            self.language,
+            places.header,
+            buf,
+        );
         if area.height == 1 {
             return;
         }
-        footer(&FOOTER_NOW, places, buf);
+        footer(&FOOTER_NOW, self.language, places, buf);
         if area.height < MIN_HEIGHT {
             return;
         }
@@ -116,12 +137,26 @@ impl Widget for &View<'_> {
     }
 }
 
-fn header(workspace: &str, freshness: Freshness, area: Rect, buf: &mut Buffer) {
+fn header(workspace: &str, freshness: Freshness, language: Language, area: Rect, buf: &mut Buffer) {
     let width = area.width as usize;
     let badge = " relay ";
     let (dot, word) = match freshness {
-        Freshness::Fresh => (theme::GREEN, "atualizado"),
-        Freshness::Updating => (theme::YELLOW, "atualizando"),
+        Freshness::Fresh => (
+            theme::GREEN,
+            if language == Language::En {
+                "up to date"
+            } else {
+                "atualizado"
+            },
+        ),
+        Freshness::Updating => (
+            theme::YELLOW,
+            if language == Language::En {
+                "updating"
+            } else {
+                "atualizando"
+            },
+        ),
     };
     let right = vec![
         Span::styled("●", theme::color(dot)),
@@ -130,12 +165,18 @@ fn header(workspace: &str, freshness: Freshness, area: Rect, buf: &mut Buffer) {
     let right_width = 2 + word.len();
     let mut left = vec![Span::styled(
         badge,
-        Style::new().fg(theme::ON_BADGE).bg(theme::GREEN).add_modifier(Modifier::BOLD),
+        Style::new()
+            .fg(theme::ON_BADGE)
+            .bg(theme::GREEN)
+            .add_modifier(Modifier::BOLD),
     )];
     let room = width.saturating_sub(badge.len() + 1 + right_width + 1);
     if room >= 4 {
         left.push(Span::raw(" "));
-        left.push(Span::styled(text::truncate(workspace, room), theme::color(theme::META)));
+        left.push(Span::styled(
+            text::truncate(workspace, room),
+            theme::color(theme::META),
+        ));
     }
     buf.set_line(area.x, area.y, &Line::from(left), area.width);
     if width > badge.len() + right_width {
@@ -154,22 +195,73 @@ pub(super) struct Hint {
 }
 
 const QUIT_RANK: u8 = u8::MAX;
-const QUIT: Hint = Hint { key: "q", label: "sair", rank: QUIT_RANK };
-const RELOAD: Hint = Hint { key: "r", label: "recarregar", rank: 0 };
-const MOVE: Hint = Hint { key: "↑↓", label: "mover", rank: 1 };
-const SCROLL: Hint = Hint { key: "↑↓", label: "rolar", rank: 1 };
-const OPEN: Hint = Hint { key: "Enter", label: "abrir", rank: 2 };
-const BACK: Hint = Hint { key: "Esc", label: "voltar", rank: 3 };
-const TO_HISTORY: Hint = Hint { key: "Tab", label: "histórico", rank: 4 };
-const TO_NOW: Hint = Hint { key: "Tab", label: "agora", rank: 4 };
+const QUIT: Hint = Hint {
+    key: "q",
+    label: "sair",
+    rank: QUIT_RANK,
+};
+const RELOAD: Hint = Hint {
+    key: "r",
+    label: "recarregar",
+    rank: 0,
+};
+const MOVE: Hint = Hint {
+    key: "↑↓",
+    label: "mover",
+    rank: 1,
+};
+const SCROLL: Hint = Hint {
+    key: "↑↓",
+    label: "rolar",
+    rank: 1,
+};
+const OPEN: Hint = Hint {
+    key: "Enter",
+    label: "abrir",
+    rank: 2,
+};
+const BACK: Hint = Hint {
+    key: "Esc",
+    label: "voltar",
+    rank: 3,
+};
+const TO_HISTORY: Hint = Hint {
+    key: "Tab",
+    label: "histórico",
+    rank: 4,
+};
+const TO_NOW: Hint = Hint {
+    key: "Tab",
+    label: "agora",
+    rank: 4,
+};
+const CONFIG: Hint = Hint {
+    key: "c",
+    label: "config.",
+    rank: 8,
+};
+const SELECT: Hint = Hint {
+    key: "↑↓",
+    label: "selecionar",
+    rank: 1,
+};
+const APPLY: Hint = Hint {
+    key: "Enter",
+    label: "aplicar",
+    rank: 2,
+};
 
 /// The footers of `DESIGN.md`, in the order they are shown.
-pub(super) const FOOTER_NOW: [Hint; 3] = [TO_HISTORY, RELOAD, QUIT];
-pub(super) const FOOTER_LIST: [Hint; 6] = [MOVE, OPEN, BACK, TO_NOW, RELOAD, QUIT];
-pub(super) const FOOTER_DETAIL: [Hint; 5] = [SCROLL, BACK, TO_NOW, RELOAD, QUIT];
+pub(super) const FOOTER_NOW: [Hint; 4] = [TO_HISTORY, RELOAD, CONFIG, QUIT];
+pub(super) const FOOTER_LIST: [Hint; 7] = [MOVE, OPEN, BACK, TO_NOW, RELOAD, CONFIG, QUIT];
+pub(super) const FOOTER_DETAIL: [Hint; 6] = [SCROLL, BACK, TO_NOW, RELOAD, CONFIG, QUIT];
+pub(super) const FOOTER_SETTINGS: [Hint; 4] = [SELECT, APPLY, BACK, QUIT];
 
 fn hints_width(hints: &[Hint]) -> usize {
-    let words: usize = hints.iter().map(|h| text::width(h.key) + 1 + text::width(h.label)).sum();
+    let words: usize = hints
+        .iter()
+        .map(|h| text::width(h.key) + 1 + text::width(h.label))
+        .sum();
     words + 3 * hints.len().saturating_sub(1)
 }
 
@@ -178,7 +270,12 @@ fn hints_width(hints: &[Hint]) -> usize {
 fn fitting(hints: &[Hint], budget: usize) -> Vec<Hint> {
     let mut kept = hints.to_vec();
     while hints_width(&kept) > budget {
-        let Some(lowest) = kept.iter().filter(|h| h.rank != QUIT_RANK).map(|h| h.rank).min() else {
+        let Some(lowest) = kept
+            .iter()
+            .filter(|h| h.rank != QUIT_RANK)
+            .map(|h| h.rank)
+            .min()
+        else {
             break;
         };
         let at = kept.iter().position(|h| h.rank == lowest).unwrap();
@@ -190,7 +287,7 @@ fn fitting(hints: &[Hint], budget: usize) -> Vec<Hint> {
 /// The footer: the keys in a framed card, or on one plain line when the screen
 /// is short. Either way they stay inside the width of the cards' content (the
 /// width minus four), so a hint is never cut in half.
-fn footer(hints: &[Hint], places: Layout, buf: &mut Buffer) {
+fn footer(hints: &[Hint], language: Language, places: Layout, buf: &mut Buffer) {
     let area = places.footer;
     let kept = fitting(hints, (area.width as usize).saturating_sub(4));
     let mut spans = Vec::new();
@@ -199,7 +296,25 @@ fn footer(hints: &[Hint], places: Layout, buf: &mut Buffer) {
             spans.push(Span::styled(" · ", theme::color(theme::META)));
         }
         spans.push(Span::styled(hint.key, theme::bold(theme::FG)));
-        spans.push(Span::styled(format!(" {}", hint.label), theme::color(theme::META)));
+        let label = if language == Language::En {
+            match hint.label {
+                "sair" => "quit",
+                "recarregar" => "reload",
+                "mover" => "move",
+                "rolar" => "scroll",
+                "abrir" => "open",
+                "voltar" => "back",
+                "histórico" => "history",
+                "agora" => "now",
+                "config." => "settings",
+                "selecionar" => "select",
+                "aplicar" => "apply",
+                other => other,
+            }
+        } else {
+            hint.label
+        };
+        spans.push(Span::styled(format!(" {label}"), theme::color(theme::META)));
     }
     footer_line(places, spans, buf);
 }
@@ -221,34 +336,66 @@ fn footer_line(places: Layout, mut spans: Vec<Span<'static>>, buf: &mut Buffer) 
 /// is confirmed by `Esc`, `Enter` or `y`, and any other key cancels. The longest
 /// wording that fits the width of the cards' content (the width minus four) is
 /// used; the answer keys are never cut in half.
-pub fn quit_prompt(area: Rect, buf: &mut Buffer) {
+pub fn quit_prompt(area: Rect, buf: &mut Buffer, language: Language) {
     if area.width == 0 || area.height < 2 {
         return;
     }
     let places = layout(area);
     let budget = (area.width as usize).saturating_sub(4);
-    let wordings = [
-        "Esc, Enter ou y confirmam · outra tecla cancela",
-        "Esc, Enter ou y confirmam",
-        "Esc ou y confirmam",
-        "y confirma",
-        "y",
-    ];
+    let wordings = if language == Language::En {
+        [
+            "Esc, Enter or y confirm · any other key cancels",
+            "Esc, Enter or y confirm",
+            "Esc or y confirm",
+            "y confirms",
+            "y",
+        ]
+    } else {
+        [
+            "Esc, Enter ou y confirmam · outra tecla cancela",
+            "Esc, Enter ou y confirmam",
+            "Esc ou y confirmam",
+            "y confirma",
+            "y",
+        ]
+    };
     let rest = wordings
         .iter()
-        .find(|w| text::width("Sair? ") + text::width(w) <= budget)
+        .find(|w| {
+            text::width(if language == Language::En {
+                "Quit? "
+            } else {
+                "Sair? "
+            }) + text::width(w)
+                <= budget
+        })
         .copied()
         .unwrap_or("");
     // The frame stays; only its row is rewritten.
     let row = if places.boxed {
-        Rect { x: places.footer.x + 2, y: places.footer.y + 1, width: places.footer.width.saturating_sub(4), height: 1 }
+        Rect {
+            x: places.footer.x + 2,
+            y: places.footer.y + 1,
+            width: places.footer.width.saturating_sub(4),
+            height: 1,
+        }
     } else {
-        Rect { y: places.footer.y, ..places.footer }
+        Rect {
+            y: places.footer.y,
+            ..places.footer
+        }
     };
     let blank = " ".repeat(row.width as usize);
     buf.set_line(row.x, row.y, &Line::from(blank), row.width);
     let mut spans = vec![
-        Span::styled("Sair?", theme::bold(theme::YELLOW)),
+        Span::styled(
+            if language == Language::En {
+                "Quit?"
+            } else {
+                "Sair?"
+            },
+            theme::bold(theme::YELLOW),
+        ),
         Span::styled(format!(" {rest}"), theme::color(theme::META)),
     ];
     if !places.boxed {

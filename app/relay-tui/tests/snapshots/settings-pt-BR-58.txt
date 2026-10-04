@@ -1,0 +1,34 @@
+ relay  ~/Developer/relay                     ● atualizado
+
+╭ Configurações ─────────────────────────────────────────╮
+│ Idioma                                                 │
+│ ▸ Português (Brasil) · atual                           │
+│   English                                              │
+│                                                        │
+│                                                        │
+│                                                        │
+│                                                        │
+│                                                        │
+╰────────────────────────────────────────────────────────╯
+
+╭────────────────────────────────────────────────────────╮
+│ ↑↓ selecionar · Enter aplicar · Esc voltar · q sair    │
+╰────────────────────────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
+
+d.FFFFFFFFFFFFF.dddddddddddddddddddddddddddddddddddddddddd
+d.FFFFFF.................................................d
+d.U.UUUUUUUUU.UUUUUUUU.m.mmmmm...........................d
+d...fffffff..............................................d
+d........................................................d
+d........................................................d
+d........................................................d
+d........................................................d
+d........................................................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FF.mmmmmmmmmm.m.FFFFF.mmmmmmm.m.FFF.mmmmmm.m.F.mmmm....d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

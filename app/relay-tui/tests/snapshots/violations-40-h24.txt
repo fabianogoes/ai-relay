@@ -2,25 +2,25 @@
 
 ╭ ● Inconsistente ────────────────── 3 ╮
 │ handoff-names-no-pending-todo        │
-│ O handoff aponta T-001, que está     │
-│ [x]; T-002 está [•].                 │
+│ in_progress_id=T-002, todo_id=T-001  │
 │ handoff · todo                       │
 │                                      │
 │ needs-cycle                          │
-│ Ciclo em todo: T-001 -> T-002 ->     │
-│ T-001.                               │
+│ cycle=T-001 -> T-002 -> T-001,       │
+│ record=todo                          │
 │ todo                                 │
 │                                      │
 │ criteria-without-evidence            │
-│ Spec                                 │
-│ .specs/20260907-001-ui-primeiro-marc │
-│ o-visual.md: critérios sem …         │
+│ criteria=A-001, A-002,               │
+│ spec=.specs/20260907-001-contrato-es │
+│ tado-derivado.md                     │
 │ backlog · changelog · spec           │
 ╰──────────────────────────────────────╯
+
   Os registros se contradizem: relay-…
 
 ╭──────────────────────────────────────╮
-│ Tab histórico · q sair               │
+│ Tab histórico · c config. · q sair   │
 ╰──────────────────────────────────────╯
 
 --- colors ---
@@ -28,23 +28,23 @@
 
 r.R.RRRRRRRRRRRRR.rrrrrrrrrrrrrrrrrr.m.r
 r.RRRRRRRRRRRRRRRRRRRRRRRRRRRRR........r
-r.f.fffffff.ffffff.ffffff.fff.ffff.....r
-r.ffff.fffff.ffff.ffff.................r
+r.fffffffffffffffffffff.fffffffffffff..r
 r.mmmmmmm.m.mmmm.......................r
 r......................................r
 r.RRRRRRRRRRR..........................r
-r.fffff.ff.fffff.fffff.ff.fffff.ff.....r
-r.ffffff...............................r
+r.fffffffffff.ff.fffff.ff.ffffff.......r
+r.fffffffffff..........................r
 r.mmmm.................................r
 r......................................r
 r.RRRRRRRRRRRRRRRRRRRRRRRRR............r
-r.ffff.................................r
+r.fffffffffffffff.ffffff...............r
 r.ffffffffffffffffffffffffffffffffffff.r
-r.ffffffffffff.fffffffff.fff.f.........r
+r.ffffffffffffffff.....................r
 r.mmmmmmm.m.mmmmmmmmm.m.mmmm...........r
 rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+
 ..mm.mmmmmmmmm.mm.mmmmmmmmmmmm.FFFFFFF
 
 dddddddddddddddddddddddddddddddddddddddd
-d.FFF.mmmmmmmmm.m.F.mmmm...............d
+d.FFF.mmmmmmmmm.m.F.mmmmmmm.m.F.mmmm...d
 dddddddddddddddddddddddddddddddddddddddd

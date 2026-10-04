@@ -7,33 +7,12 @@ description: Use when a repository needs Relay operational memory initialized or
 
 Execute this skill; do not quote it. Return only a concise result.
 
-Inspect existing `AGENTS.md`, `.specs/`, and `.orchestration/` first. Create
-the missing directories and these empty files, each ending with a newline:
+Read `references/contract.md` first. Inspect `AGENTS.md`, `.specs/`, and `.orchestration/`. Create missing directories and empty `BACKLOG.md`, `TODO.md`, and `HANDOFF.md` with trailing newlines. `relay-session` creates the per-spec changelog with its first record. Never create a legacy `CHANGELOG.md`; if one exists with records, read `migrating.md` and offer migration.
 
-- `BACKLOG.md`: `# Backlog`
-- `TODO.md`: `# Active task` followed by `No active task.`
-- `HANDOFF.md`: `# Handoff` followed by `No active handoff.`
-- `CHANGELOG.md`: `# Change log`
+For `.orchestration/SETTINGS.md`, follow the contract: if absent, ask one native selectable question for `en` or `pt-BR`, recommend the conversation language, then save the choice; do not ask again when a file exists. Preserve existing settings, report and ignore unknown values, and change a stored value only on the user's explicit request. Use a valid workspace language for free-form setup text, otherwise the conversation language.
 
-Never overwrite populated files. If `AGENTS.md` exists, ensure it ends with a
-newline, then append one `## Relay Protocol` section only when absent;
-otherwise create `# Agent guidance` followed by the Relay section. The section
-must require reading handoff, TODO, backlog, and the referenced spec before
-Relay work, let work the user requests directly skip the flow, and state that
-clients and interfaces may read, validate, derive state, and launch a harness,
-but only Relay skills may mutate the five protocol records. Handle `CLAUDE.md`:
+Never overwrite populated files, except SETTINGS after an explicit language-change request. If `AGENTS.md` exists, ensure a trailing newline and append one `## Relay Protocol` section only if absent; otherwise create `# Agent guidance` plus that section. Require reading handoff, TODO, backlog and the referenced spec before Relay work; allow direct user requests to skip the flow; state only Relay skills mutate the five protocol records.
 
-- If it is absent, create a real symlink with `ln -s AGENTS.md CLAUDE.md`.
-- If it is already a symlink, preserve it and verify `readlink CLAUDE.md`
-  returns `AGENTS.md`.
-- If it is a regular file whose complete content is only `AGENTS.md`, treat it
-  as an invalid Relay stub, replace it with the symlink, and verify it.
-- If it is a regular file with any other content, preserve it and report a
-  conflict; never overwrite user guidance.
+For `CLAUDE.md`: create a real symlink to `AGENTS.md` if absent; preserve and verify an existing symlink; replace a regular file containing only `AGENTS.md` with the symlink; preserve and report any other regular file as a conflict. Never create a regular file containing `AGENTS.md`; report symlink failures.
 
-Never create a regular file containing the text `AGENTS.md`. If the symlink
-fails, report the failure instead of silently writing a stub.
-
-Re-read the result, report created paths, and report any inconsistency. On a
-second run, create nothing. Do not select work, write a handoff, or modify a
-specification.
+Re-read the result, report created paths and inconsistencies. On a second run, create nothing. Do not select work, write a handoff, or modify a specification.

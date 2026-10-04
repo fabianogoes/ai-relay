@@ -1,0 +1,45 @@
+# CI for the Relay package: the skills, the script one of them ships and the
+# contract they copy from docs/PROTOCOL.md. It is separate from the relay-tui
+# workflows on purpose (ADR-0007): skills/ and .agents/ are not app/, and app/
+# has to stay removable.
+#
+# Repository tooling, not package surface: it only runs when skills/**,
+# .agents/tests/** or docs/PROTOCOL.md change.
+name: package CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'skills/**'
+      - '.agents/tests/**'
+      - 'docs/PROTOCOL.md'
+      - '.github/workflows/package-ci.yml'
+  pull_request:
+    paths:
+      - 'skills/**'
+      - '.agents/tests/**'
+      - 'docs/PROTOCOL.md'
+      - '.github/workflows/package-ci.yml'
+
+jobs:
+  tests:
+    # macOS is the requirement, and it is where `osascript` (iTerm2 and Warp) exists.
+    name: .agents/tests (macOS)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Skill contract (references match docs/PROTOCOL.md, SKILL.md length)
+        run: sh .agents/tests/skill-contract.test.sh
+      - name: relay-tui-split script
+        run: sh .agents/tests/open-split.test.sh
+
+  shellcheck:
+    # Preinstalled on the Ubuntu runner. Warnings and errors fail; the "info"
+    # level flags functions that are called through a variable.
+    name: shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: shellcheck
+        run: find skills .agents/tests -name '*.sh' -print0 | xargs -0 shellcheck -S warning

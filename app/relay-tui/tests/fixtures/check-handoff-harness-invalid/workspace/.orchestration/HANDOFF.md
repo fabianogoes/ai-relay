@@ -3,6 +3,6 @@
 - Status: in_progress
 - Backlog: B-001
 - TODO: T-002
-- Spec: .specs/20260907-001-ui-primeiro-marco-visual.md
+- Spec: .specs/20260907-001-contrato-estado-derivado.md
 - Harness: BAD HARNESS
 - Updated: 2026-09-07T06:49:14Z

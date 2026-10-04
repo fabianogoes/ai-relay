@@ -1,0 +1,50 @@
+ relay  ~/Developer/relay                     ● up to date
+
+╭ Handoff ──────────────────────────────── ● In progress ╮
+│ B-001 · T-002 · claude-code · 7 h ago                  │
+│                                                        │
+│ Objective Validar os fixtures contra o protocolo.      │
+│ Next      Rodar as verificações de integridade.        │
+╰────────────────────────────────────────────────────────╯
+╭ TODO ───────────────────────────────────────────── 1/3 ╮
+│ ████████ ████████ ████████                             │
+│                                                        │
+│ ✓ T-001 Escrever a ADR-0003                            │
+│ ● T-002 Validar os fixtures                            │
+│ ○ T-003 Registrar no índice                            │
+╰────────────────────────────────────────────────────────╯
+╭ Pending specs ────────────────────────────────────── 1 ╮
+│ No spec                                            0/1 │
+╰────────────────────────────────────────────────────────╯
+
+  Resume T-002 from B-001 with relay-session.
+
+╭────────────────────────────────────────────────────────╮
+│ Tab history · r reload · c settings · q quit           │
+╰────────────────────────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mm.mm.mmmm
+
+g.FFFFFFF.gggggggggggggggggggggggggggggggg.G.GG.GGGGGGGG.g
+g.IIIII.m.iiiii.m.mmmmmmmmmmm.m.m.m.mmm..................g
+g........................................................g
+g.mmmmmmmmm.fffffff.ff.ffffffff.ffffff.f.ffffffffff......g
+g.mmmm......fffff.ff.ffffffffffff.ff.ffffffffffff........g
+gggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+d.FFFF.ddddddddddddddddddddddddddddddddddddddddddddd.mmm.d
+d.gggggggg.gggggggg.uuuuuuuu.............................d
+d........................................................d
+d.G.iiiii.mmmmmmmm.m.mmmmmmmm............................d
+d.G.iiiii.FFFFFFF.FF.FFFFFFFF............................d
+d.u.iiiii.fffffffff.ff.ffffff............................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFFFFFF.FFFFF.dddddddddddddddddddddddddddddddddddddd.m.d
+d.ff.ffff............................................mmm.d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+
+..mmmmmm.iiiii.mmmm.iiiii.mmmm.FFFFFFFFFFFFFm
+
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmm.m.F.mmmmmm.m.F.mmmmmmmm.m.F.mmmm...........d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

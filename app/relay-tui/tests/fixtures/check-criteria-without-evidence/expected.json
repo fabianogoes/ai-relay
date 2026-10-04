@@ -3,12 +3,15 @@
   "violations": [
     {
       "check": "criteria-without-evidence",
-      "detail": "Spec .specs/20260907-001-ui-primeiro-marco-visual.md: critérios sem evidência: A-001, A-002.",
       "records": [
         "backlog",
         "changelog",
         "spec"
-      ]
+      ],
+      "params": {
+        "spec": ".specs/20260907-001-contrato-estado-derivado.md",
+        "criteria": "A-001, A-002"
+      }
     }
   ]
 }

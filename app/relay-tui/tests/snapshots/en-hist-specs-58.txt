@@ -1,0 +1,34 @@
+ relay  ~/Developer/relay                     ● up to date
+
+╭ Specs ─────────────────────────────────────────────────╮
+│ ▸ 20261002-001 relay-tui                           1/5 │
+│   20260901-001 Contrato do estado derivado entre … 1/1 │
+│   20260101-001 20260101-001-sem-itens.md           0/0 │
+│   No spec                                          0/1 │
+│                                                        │
+│                                                        │
+│                                                        │
+│                                                        │
+╰────────────────────────────────────────────────────────╯
+
+╭────────────────────────────────────────────────────────╮
+│ Esc back · Tab now · c settings · q quit               │
+╰────────────────────────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mm.mm.mmmm
+
+d.FFFFF.dddddddddddddddddddddddddddddddddddddddddddddddddd
+d.U.iiiiiiiiiiii.FFFFFFFFF...........................mmm.d
+d...iiiiiiiiiiii.ffffffff.ff.ffffff.ffffffff.fffff.f.mmm.d
+d...iiiiiiiiiiii.fffffffffffffffffffffffff...........mmm.d
+d...ff.ffff..........................................mmm.d
+d........................................................d
+d........................................................d
+d........................................................d
+d........................................................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmm.m.FFF.mmm.m.F.mmmmmmmm.m.F.mmmm...............d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

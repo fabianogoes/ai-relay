@@ -1,0 +1,50 @@
+ relay  ~/Developer/relay   ● up to date
+
+╭ Handoff ────────────── ● In progress ╮
+│ B-001 · T-002 · claude-code · 7 h a… │
+│                                      │
+│ Objective Validar os fixtures contra │
+│           o protocolo.               │
+│ Next      Rodar as verificações de   │
+│           integridade.               │
+╰──────────────────────────────────────╯
+╭ TODO ─────────────────────────── 1/3 ╮
+│ ████████ ████████ ████████           │
+│                                      │
+│ ✓ T-001 Escrever a ADR-0003          │
+│ ● T-002 Validar os fixtures          │
+│ ○ T-003 Registrar no índice          │
+╰──────────────────────────────────────╯
+ 1 pending spec
+
+  Resume T-002 from B-001 with relay-…
+
+╭──────────────────────────────────────╮
+│ Tab history · c settings · q quit    │
+╰──────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm...g.mm.mm.mmmm
+
+g.FFFFFFF.gggggggggggggg.G.GG.GGGGGGGG.g
+g.IIIII.m.iiiii.m.mmmmmmmmmmm.m.m.m.mm.g
+g......................................g
+g.mmmmmmmmm.fffffff.ff.ffffffff.ffffff.g
+g...........f.ffffffffff...............g
+g.mmmm......fffff.ff.ffffffffffff.ff...g
+g...........ffffffffffff...............g
+gggggggggggggggggggggggggggggggggggggggg
+d.FFFF.ddddddddddddddddddddddddddd.mmm.d
+d.gggggggg.gggggggg.uuuuuuuu...........d
+d......................................d
+d.G.iiiii.mmmmmmmm.m.mmmmmmmm..........d
+d.G.iiiii.FFFFFFF.FF.FFFFFFFF..........d
+d.u.iiiii.fffffffff.ff.ffffff..........d
+dddddddddddddddddddddddddddddddddddddddd
+.m.mmmmmmm.mmmm
+
+..mmmmmm.iiiii.mmmm.iiiii.mmmm.FFFFFFF
+
+dddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmm.m.F.mmmmmmmm.m.F.mmmm....d
+dddddddddddddddddddddddddddddddddddddddd

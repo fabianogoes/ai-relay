@@ -1,0 +1,36 @@
+{
+  "kind": "ok",
+  "status": "done",
+  "handoff": null,
+  "activeBacklogId": "B-001",
+  "todo": [
+    {
+      "id": "T-001",
+      "text": "Primeiro",
+      "marker": "x",
+      "needs": [],
+      "available": false
+    },
+    {
+      "id": "T-002",
+      "text": "Segundo",
+      "marker": "x",
+      "needs": [
+        "T-001"
+      ],
+      "available": false
+    }
+  ],
+  "backlog": [
+    {
+      "id": "B-001",
+      "text": "Um",
+      "marker": " ",
+      "needs": [],
+      "available": true,
+      "spec": ".specs/20260907-001-contrato-estado-derivado.md"
+    }
+  ],
+  "completed": 2,
+  "total": 2
+}

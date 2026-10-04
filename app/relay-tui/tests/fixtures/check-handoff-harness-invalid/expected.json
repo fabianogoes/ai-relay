@@ -3,10 +3,12 @@
   "violations": [
     {
       "check": "handoff-harness-invalid",
-      "detail": "Harness inválido: \"BAD HARNESS\".",
       "records": [
         "handoff"
-      ]
+      ],
+      "params": {
+        "harness": "BAD HARNESS"
+      }
     }
   ]
 }

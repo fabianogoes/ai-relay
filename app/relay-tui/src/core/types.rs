@@ -51,6 +51,8 @@ pub struct ChecklistEntry {
     pub needs: Vec<String>,
     pub available: bool,
     pub spec: Option<String>,
+    /// The reason of a dropped (`[-]`) backlog entry.
+    pub dropped: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -67,10 +69,13 @@ pub struct OkState {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Violation {
     pub check: String,
-    pub detail: String,
+    pub params: BTreeMap<String, String>,
     pub records: Vec<String>,
 }
 
+// A state is derived, shown and dropped; boxing the `Ok` variant would only add
+// an indirection to every `match` on a value that is never stored in bulk.
+#[allow(clippy::large_enum_variant)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum RelayState {
     Ok(OkState),
@@ -78,12 +83,14 @@ pub enum RelayState {
 }
 
 /// The content of the five records, already read. A missing record is `""`;
-/// each spec is keyed `.specs/<file name>`.
+/// each spec is keyed `.specs/<file name>` and each per-spec changelog
+/// `changelog/<file name>`. `changelog` is the legacy single file.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct RelayFiles {
     pub backlog: String,
     pub todo: String,
     pub handoff: String,
     pub changelog: String,
+    pub changelogs: BTreeMap<String, String>,
     pub specs: BTreeMap<String, String>,
 }

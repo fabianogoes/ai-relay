@@ -3,10 +3,12 @@
   "violations": [
     {
       "check": "handoff-updated-invalid",
-      "detail": "Updated inválido: \"ontem\".",
       "records": [
         "handoff"
-      ]
+      ],
+      "params": {
+        "updated": "ontem"
+      }
     }
   ]
 }

@@ -1,0 +1,26 @@
+ relay  ~/Developer/relay   ● atualizado
+
+╭ Itens · 20261003-001 ────────────────╮
+│ ▸ B-051 Protocolo e ADR      ✓ feito │
+│   B-052 Protocolo com leitu… ✓ feito │
+│   B-053 Visao em carto… × descartado │
+│                                      │
+╰──────────────────────────────────────╯
+
+╭──────────────────────────────────────╮
+│ Tab agora · c config. · q sair       │
+╰──────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm...g.mmmmmmmmmm
+
+d.FFFFF.F.IIIIIIIIIIII.ddddddddddddddddd
+d.U.iiiii.FFFFFFFFF.F.FFF......G.fffff.d
+d...iiiii.mmmmmmmmm.mmm.mmmmmm.G.fffff.d
+d...iiiii.mmmmm.mm.mmmmmm.M.mmmmmmmmmm.d
+d......................................d
+dddddddddddddddddddddddddddddddddddddddd
+
+dddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmm.m.F.mmmmmmm.m.F.mmmm.......d
+dddddddddddddddddddddddddddddddddddddddd

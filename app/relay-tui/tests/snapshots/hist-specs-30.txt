@@ -8,7 +8,7 @@
 
 
 ╭────────────────────────────╮
-│ Tab agora · q sair         │
+│ c config. · q sair         │
 ╰────────────────────────────╯
 
 --- colors ---
@@ -22,5 +22,5 @@
 
 
 dddddddddddddddddddddddddddddd
-d.FFF.mmmmm.m.F.mmmm.........d
+d.F.mmmmmmm.m.F.mmmm.........d
 dddddddddddddddddddddddddddddd

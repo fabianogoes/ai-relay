@@ -4,6 +4,7 @@
 use ratatui::style::{Color, Modifier, Style};
 
 use crate::core::WorkStatus;
+use crate::language::Language;
 
 pub const FG: Color = Color::Rgb(0xab, 0xb2, 0xbf);
 pub const META: Color = Color::Rgb(0x9b, 0xa6, 0xb4);
@@ -51,6 +52,20 @@ pub fn status_label(status: WorkStatus) -> &'static str {
         WorkStatus::Blocked => "Bloqueado",
         WorkStatus::Done => "Concluído",
         WorkStatus::Idle => "Sem trabalho",
+    }
+}
+
+pub fn status_label_in(status: WorkStatus, language: Language) -> &'static str {
+    match language {
+        Language::PtBr => status_label(status),
+        Language::En => match status {
+            WorkStatus::Backlog => "Backlog",
+            WorkStatus::Ready => "Ready",
+            WorkStatus::InProgress => "In progress",
+            WorkStatus::Blocked => "Blocked",
+            WorkStatus::Done => "Done",
+            WorkStatus::Idle => "Idle",
+        },
     }
 }
 
@@ -108,7 +123,14 @@ mod tests {
         .collect();
         assert_eq!(
             labels,
-            ["Em andamento", "Bloqueado", "Pronto", "A escolher", "Concluído", "Sem trabalho"]
+            [
+                "Em andamento",
+                "Bloqueado",
+                "Pronto",
+                "A escolher",
+                "Concluído",
+                "Sem trabalho"
+            ]
         );
     }
 }

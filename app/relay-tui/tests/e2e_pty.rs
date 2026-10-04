@@ -31,13 +31,20 @@ fn copy_tree(from: &Path, to: &Path) {
 /// A spec file the backlog can point at, so its card shows the spec and its items.
 fn add_spec(dir: &Path, name: &str) {
     fs::create_dir_all(dir.join(".specs")).unwrap();
-    fs::write(dir.join(".specs").join(name), "# 20261002-001 - Spec de teste\n").unwrap();
+    fs::write(
+        dir.join(".specs").join(name),
+        "# 20261002-001 - Spec de teste\n",
+    )
+    .unwrap();
 }
 
 /// A workspace on disk, copied from one of `tests/fixtures/`.
 fn workspace(case: &str) -> TempDir {
     let dir = TempDir::new().unwrap();
-    let from = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures").join(case).join("workspace");
+    let from = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures")
+        .join(case)
+        .join("workspace");
     copy_tree(&from, dir.path());
     dir
 }
@@ -55,11 +62,19 @@ struct Session {
 
 impl Session {
     fn start(dir: &Path, rows: u16, cols: u16, env: &[(&str, &str)]) -> Session {
-        let size = PtySize { rows, cols, pixel_width: 0, pixel_height: 0 };
+        let size = PtySize {
+            rows,
+            cols,
+            pixel_width: 0,
+            pixel_height: 0,
+        };
         let pair = native_pty_system().openpty(size).unwrap();
         let mut command = CommandBuilder::new(BIN);
         command.arg("--workspace");
         command.arg(dir);
+        // Keep assertions stable regardless of the host machine's locale.
+        command.arg("--lang");
+        command.arg("pt-BR");
         command.env("TERM", "xterm-256color");
         for (key, value) in env {
             command.env(key, value);
@@ -105,9 +120,29 @@ impl Session {
         self.writer.flush().unwrap();
     }
 
+    fn signal(&self, signal: &str) {
+        let pid = self.child.process_id().expect("child process id");
+        let status = std::process::Command::new("kill")
+            .args([signal, &pid.to_string()])
+            .status()
+            .expect("run kill");
+        assert!(status.success(), "could not send {signal} to {pid}");
+    }
+
     fn resize(&self, rows: u16, cols: u16) {
-        self.parser.lock().unwrap().screen_mut().set_size(rows, cols);
-        self.master.resize(PtySize { rows, cols, pixel_width: 0, pixel_height: 0 }).unwrap();
+        self.parser
+            .lock()
+            .unwrap()
+            .screen_mut()
+            .set_size(rows, cols);
+        self.master
+            .resize(PtySize {
+                rows,
+                cols,
+                pixel_width: 0,
+                pixel_height: 0,
+            })
+            .unwrap();
     }
 
     fn wait_for(&self, what: &str, condition: impl Fn(&str) -> bool) {
@@ -118,11 +153,18 @@ impl Session {
             }
             thread::sleep(Duration::from_millis(5));
         }
-        panic!("timed out waiting for {what}; the screen was:\n{}", self.screen());
+        panic!(
+            "timed out waiting for {what}; the screen was:\n{}",
+            self.screen()
+        );
     }
 
     fn saw(&self, word: &str) -> bool {
-        self.history.lock().unwrap().iter().any(|screen| screen.contains(word))
+        self.history
+            .lock()
+            .unwrap()
+            .iter()
+            .any(|screen| screen.contains(word))
     }
 
     /// Waits for the process to exit and for all its output to be read.
@@ -132,7 +174,11 @@ impl Session {
             if let Some(status) = self.child.try_wait().unwrap() {
                 break status;
             }
-            assert!(started.elapsed() < PATIENCE, "the process did not exit; screen:\n{}", self.screen());
+            assert!(
+                started.elapsed() < PATIENCE,
+                "the process did not exit; screen:\n{}",
+                self.screen()
+            );
             thread::sleep(Duration::from_millis(10));
         };
         self.reader.take().unwrap().join().unwrap();
@@ -149,14 +195,43 @@ impl Session {
     fn assert_restored(&self) {
         let parser = self.parser.lock().unwrap();
         let screen = parser.screen();
-        assert!(!screen.alternate_screen(), "the alternate screen was not left");
+        assert!(
+            !screen.alternate_screen(),
+            "the alternate screen was not left"
+        );
         assert!(!screen.hide_cursor(), "the cursor was left hidden");
         assert_eq!(
             screen.mouse_protocol_mode(),
             vt100::MouseProtocolMode::None,
             "the mouse was left reported"
         );
+        self.assert_cooked_mode();
     }
+
+    #[cfg(unix)]
+    fn assert_cooked_mode(&self) {
+        let tty = self.master.tty_name().expect("pty name");
+        let mut command = std::process::Command::new("stty");
+        #[cfg(target_os = "linux")]
+        command.arg("-F");
+        #[cfg(not(target_os = "linux"))]
+        command.arg("-f");
+        let output = command.arg(tty).arg("-a").output().expect("run stty");
+        assert!(output.status.success(), "stty failed: {output:?}");
+        let settings = String::from_utf8_lossy(&output.stdout);
+        let enabled: Vec<_> = settings
+            .split_whitespace()
+            .map(|setting| setting.trim_matches(';'))
+            .collect();
+        assert!(
+            enabled.contains(&"icanon"),
+            "canonical mode is off: {settings}"
+        );
+        assert!(enabled.contains(&"echo"), "echo is off: {settings}");
+    }
+
+    #[cfg(not(unix))]
+    fn assert_cooked_mode(&self) {}
 }
 
 impl Drop for Session {
@@ -168,7 +243,9 @@ impl Drop for Session {
 fn open_in_progress() -> (TempDir, Session) {
     let dir = workspace("status-in_progress");
     let session = Session::start(dir.path(), 24, 58, &[]);
-    session.wait_for("the handoff card", |s| s.contains("Em andamento") && s.contains("atualizado"));
+    session.wait_for("the handoff card", |s| {
+        s.contains("Em andamento") && s.contains("atualizado")
+    });
     (dir, session)
 }
 
@@ -179,14 +256,18 @@ fn it_opens_and_shows_the_workspace() {
     assert!(screen.contains("relay"));
     assert!(screen.contains("Handoff") && screen.contains("B-001") && screen.contains("T-002"));
     assert!(screen.contains("Validar os fixtures contra o protocolo."));
-    assert!(screen.contains("TODO") && screen.contains("Specs pendentes") && screen.contains("q sair"));
+    assert!(
+        screen.contains("TODO") && screen.contains("Specs pendentes") && screen.contains("q sair")
+    );
 }
 
 #[test]
 fn a_change_on_disk_shows_up_without_restarting() {
     let dir = workspace("status-idle");
     let session = Session::start(dir.path(), 24, 58, &[]);
-    session.wait_for("the empty workspace", |s| s.contains("Sem trabalho") && s.contains("atualizado"));
+    session.wait_for("the empty workspace", |s| {
+        s.contains("Sem trabalho") && s.contains("atualizado")
+    });
 
     add_spec(dir.path(), "20261002-001-x.md");
     fs::write(
@@ -195,8 +276,12 @@ fn a_change_on_disk_shows_up_without_restarting() {
     )
     .unwrap();
 
-    session.wait_for("the new backlog", |s| s.contains("A escolher") && s.contains("Algo para escolher"));
-    session.wait_for("a settled snapshot", |s| s.contains("atualizado") && !s.contains("atualizando"));
+    session.wait_for("the new backlog", |s| {
+        s.contains("A escolher") && s.contains("Algo para escolher")
+    });
+    session.wait_for("a settled snapshot", |s| {
+        s.contains("atualizado") && !s.contains("atualizando")
+    });
     // The change was in flight for a while, and the screen said so in words.
     assert!(session.saw("atualizando"), "never showed `atualizando`");
 }
@@ -217,7 +302,9 @@ fn a_burst_of_writes_ends_in_a_single_settled_screen() {
         thread::sleep(Duration::from_millis(20));
     }
 
-    session.wait_for("the last write", |s| s.contains("Versao 5") && s.contains("atualizado") && !s.contains("atualizando"));
+    session.wait_for("the last write", |s| {
+        s.contains("Versao 5") && s.contains("atualizado") && !s.contains("atualizando")
+    });
     // The intermediate versions were never read: the burst is one snapshot.
     for n in 1..=4 {
         assert!(!session.saw(&format!("Versao {n}")), "Versao {n} was drawn");
@@ -228,12 +315,20 @@ fn a_burst_of_writes_ends_in_a_single_settled_screen() {
 fn a_directory_without_orchestration_says_so_and_keeps_watching() {
     let dir = TempDir::new().unwrap();
     let session = Session::start(dir.path(), 24, 58, &[]);
-    session.wait_for("the not-a-workspace card", |s| s.contains("Não é um workspace Relay"));
+    session.wait_for("the not-a-workspace card", |s| {
+        s.contains("Não é um workspace Relay")
+    });
 
     fs::create_dir_all(dir.path().join(".orchestration")).unwrap();
     add_spec(dir.path(), "x.md");
-    fs::write(dir.path().join(".orchestration/BACKLOG.md"), "# Backlog\n\n- [ ] B-001 - Chegou (spec: .specs/x.md)\n").unwrap();
-    session.wait_for("the workspace that appeared", |s| s.contains("A escolher") && s.contains("Chegou"));
+    fs::write(
+        dir.path().join(".orchestration/BACKLOG.md"),
+        "# Backlog\n\n- [ ] B-001 - Chegou (spec: .specs/x.md)\n",
+    )
+    .unwrap();
+    session.wait_for("the workspace that appeared", |s| {
+        s.contains("A escolher") && s.contains("Chegou")
+    });
 }
 
 fn width_of_card_top(screen: &str, title: &str) -> Option<usize> {
@@ -249,13 +344,19 @@ fn it_redraws_when_the_terminal_is_resized() {
     assert_eq!(width_of_card_top(&session.screen(), "Handoff"), Some(58));
 
     session.resize(24, 40);
-    session.wait_for("the narrow layout", |s| width_of_card_top(s, "Handoff") == Some(40));
+    session.wait_for("the narrow layout", |s| {
+        width_of_card_top(s, "Handoff") == Some(40)
+    });
     session.resize(24, 80);
-    session.wait_for("the wide layout", |s| width_of_card_top(s, "Handoff") == Some(80));
+    session.wait_for("the wide layout", |s| {
+        width_of_card_top(s, "Handoff") == Some(80)
+    });
     // Below the card width only the status line remains in the body (the footer
     // is still a card).
     session.resize(12, 30);
-    session.wait_for("the compact status", |s| !s.contains("╭ Handoff") && s.contains("Em andamento"));
+    session.wait_for("the compact status", |s| {
+        !s.contains("╭ Handoff") && s.contains("Em andamento")
+    });
 }
 
 fn quits_with(keys: &[u8]) {
@@ -276,9 +377,14 @@ fn escape_asks_first_and_a_second_answer_leaves_and_restores_the_terminal() {
     for answer in [&b"\x1b"[..], &b"\r"[..], &b"y"[..]] {
         let (_dir, mut session) = open_in_progress();
         session.send(b"\x1b");
-        session.wait_for("the question", |s| s.contains("Sair?") && s.contains("outra tecla cancela"));
+        session.wait_for("the question", |s| {
+            s.contains("Sair?") && s.contains("outra tecla cancela")
+        });
         // Asking leaves nothing: the panel is still there and the process runs.
-        assert!(session.child.try_wait().unwrap().is_none(), "Esc alone must not leave");
+        assert!(
+            session.child.try_wait().unwrap().is_none(),
+            "Esc alone must not leave"
+        );
         assert!(session.screen().contains("Handoff"), "{}", session.screen());
         session.send(answer);
         let status = session.exit();
@@ -293,8 +399,13 @@ fn any_other_key_cancels_the_question_and_the_panel_goes_on() {
     session.send(b"\x1b");
     session.wait_for("the question", |s| s.contains("Sair?"));
     session.send(b"x");
-    session.wait_for("the footer again", |s| !s.contains("Sair?") && s.contains("Tab histórico"));
-    assert!(session.child.try_wait().unwrap().is_none(), "the panel left on a cancel");
+    session.wait_for("the footer again", |s| {
+        !s.contains("Sair?") && s.contains("Tab histórico")
+    });
+    assert!(
+        session.child.try_wait().unwrap().is_none(),
+        "the panel left on a cancel"
+    );
     // And it still leaves with `q`.
     session.send(b"q");
     let status = session.exit();
@@ -308,6 +419,29 @@ fn ctrl_c_quits_and_restores_the_terminal() {
 }
 
 #[test]
+fn external_signals_restore_the_terminal_and_use_shell_exit_codes() {
+    for (signal, code) in [("-TERM", 143), ("-INT", 130), ("-HUP", 129)] {
+        let (_dir, mut session) = open_in_progress();
+        session.signal(signal);
+        let status = session.exit();
+        assert_eq!(status.exit_code(), code, "{signal}: {status:?}");
+        session.assert_restored();
+    }
+}
+
+#[test]
+fn external_signals_turn_off_mouse_and_restore_the_terminal_from_history() {
+    for (signal, code) in [("-TERM", 143), ("-INT", 130), ("-HUP", 129)] {
+        let (_dir, mut session) = open_history();
+        assert!(session.mouse_reported());
+        session.signal(signal);
+        let status = session.exit();
+        assert_eq!(status.exit_code(), code, "{signal}: {status:?}");
+        session.assert_restored();
+    }
+}
+
+#[test]
 fn a_panic_restores_the_terminal_before_the_message() {
     let dir = workspace("status-in_progress");
     let mut session = Session::start(dir.path(), 24, 58, &[("RELAY_TUI_TEST_PANIC", "1")]);
@@ -315,7 +449,11 @@ fn a_panic_restores_the_terminal_before_the_message() {
     assert!(!status.success(), "a panic must not exit 0");
     session.assert_restored();
     // The message is on the normal screen, where the user can read it.
-    assert!(session.screen().contains("RELAY_TUI_TEST_PANIC"), "{}", session.screen());
+    assert!(
+        session.screen().contains("RELAY_TUI_TEST_PANIC"),
+        "{}",
+        session.screen()
+    );
 }
 
 #[test]
@@ -326,7 +464,11 @@ fn nothing_else_is_written_to_the_workspace() {
     session.wait_for("the handoff card", |s| s.contains("Em andamento"));
     session.send(b"q");
     session.exit();
-    assert_eq!(snapshot(dir.path()), before, "the workspace changed while it was only observed");
+    assert_eq!(
+        snapshot(dir.path()),
+        before,
+        "the workspace changed while it was only observed"
+    );
 }
 
 fn snapshot(root: &Path) -> Vec<(String, Vec<u8>)> {
@@ -337,7 +479,10 @@ fn snapshot(root: &Path) -> Vec<(String, Vec<u8>)> {
             if path.is_dir() {
                 walk(root, &path, files);
             } else {
-                files.push((path.strip_prefix(root).unwrap().display().to_string(), fs::read(&path).unwrap()));
+                files.push((
+                    path.strip_prefix(root).unwrap().display().to_string(),
+                    fs::read(&path).unwrap(),
+                ));
             }
         }
     }
@@ -351,7 +496,11 @@ fn snapshot(root: &Path) -> Vec<(String, Vec<u8>)> {
 #[test]
 #[ignore]
 fn print_the_real_screens() {
-    for (case, rows, cols) in [("status-in_progress", 24, 58), ("status-blocked", 24, 58), ("status-in_progress", 20, 40)] {
+    for (case, rows, cols) in [
+        ("status-in_progress", 24, 58),
+        ("status-blocked", 24, 58),
+        ("status-in_progress", 20, 40),
+    ] {
         let dir = workspace(case);
         let mut session = Session::start(dir.path(), rows, cols, &[]);
         session.wait_for("a screen", |s| s.contains("atualizado"));
@@ -368,7 +517,11 @@ fn print_the_real_screens() {
 fn history_workspace() -> TempDir {
     let dir = workspace("status-idle");
     fs::create_dir_all(dir.path().join(".specs")).unwrap();
-    fs::write(dir.path().join(".specs/20260101-001-primeira.md"), "# 20260101-001 - Primeira spec\n").unwrap();
+    fs::write(
+        dir.path().join(".specs/20260101-001-primeira.md"),
+        "# 20260101-001 - Primeira spec\n",
+    )
+    .unwrap();
     fs::write(
         dir.path().join(".orchestration/BACKLOG.md"),
         "# Backlog\n\n- [x] B-001 - Primeiro item (spec: `.specs/20260101-001-primeira.md`)\n\
@@ -381,10 +534,17 @@ fn history_workspace() -> TempDir {
 fn open_history() -> (TempDir, Session) {
     let dir = history_workspace();
     let mut session = Session::start(dir.path(), 24, 58, &[]);
-    session.wait_for("Agora", |s| s.contains("atualizado") && s.contains("Tab histórico"));
-    assert!(!session.mouse_reported(), "Agora must leave the mouse alone, so its text can be selected");
+    session.wait_for("Agora", |s| {
+        s.contains("atualizado") && s.contains("Tab histórico")
+    });
+    assert!(
+        !session.mouse_reported(),
+        "Agora must leave the mouse alone, so its text can be selected"
+    );
     session.send(b"\t");
-    session.wait_for("Histórico", |s| s.contains("Specs") && s.contains("Primeira spec"));
+    session.wait_for("Histórico", |s| {
+        s.contains("Specs") && s.contains("Primeira spec")
+    });
     (dir, session)
 }
 
@@ -399,7 +559,9 @@ fn tab_turns_the_mouse_on_and_a_click_on_a_row_opens_the_next_level() {
     assert!(session.mouse_reported(), "Histórico must ask for the mouse");
     // The card starts on screen row 3 and its first row is row 4 (1-based).
     click(&mut session, 6, 4);
-    session.wait_for("the items level", |s| s.contains("Itens · 20260101-001") && s.contains("B-002"));
+    session.wait_for("the items level", |s| {
+        s.contains("Itens · 20260101-001") && s.contains("B-002")
+    });
     // Clicking the second item opens its tasks.
     click(&mut session, 6, 5);
     session.wait_for("the tasks level", |s| s.contains("Tarefas · B-002"));
@@ -409,7 +571,11 @@ fn tab_turns_the_mouse_on_and_a_click_on_a_row_opens_the_next_level() {
     click(&mut session, 6, 24);
     session.send(b"j");
     thread::sleep(Duration::from_millis(150));
-    assert!(session.screen().contains("Tarefas · B-002"), "{}", session.screen());
+    assert!(
+        session.screen().contains("Tarefas · B-002"),
+        "{}",
+        session.screen()
+    );
 }
 
 #[test]
@@ -417,14 +583,18 @@ fn going_back_to_agora_turns_the_mouse_off() {
     let (_dir, mut session) = open_history();
     // Esc from the specs level goes to Agora instead of quitting.
     session.send(b"\x1b");
-    session.wait_for("Agora", |s| s.contains("Tab histórico") && !s.contains("Specs"));
+    session.wait_for("Agora", |s| {
+        s.contains("Tab histórico") && !s.contains("Specs")
+    });
     assert!(!session.mouse_reported(), "the mouse stayed on in Agora");
     // And the same with Tab.
     session.send(b"\t");
     session.wait_for("Histórico again", |s| s.contains("Specs"));
     assert!(session.mouse_reported());
     session.send(b"t");
-    session.wait_for("Agora again", |s| s.contains("Tab histórico") && !s.contains("Specs"));
+    session.wait_for("Agora again", |s| {
+        s.contains("Tab histórico") && !s.contains("Specs")
+    });
     assert!(!session.mouse_reported());
 }
 
@@ -447,7 +617,11 @@ fn a_panic_in_historico_turns_the_mouse_off_before_the_message() {
     let status = session.exit();
     assert!(!status.success(), "a panic must not exit 0");
     session.assert_restored();
-    assert!(session.screen().contains("RELAY_TUI_TEST_PANIC"), "{}", session.screen());
+    assert!(
+        session.screen().contains("RELAY_TUI_TEST_PANIC"),
+        "{}",
+        session.screen()
+    );
 }
 
 #[test]
@@ -464,5 +638,9 @@ fn navigating_with_keys_and_the_mouse_writes_nothing_to_the_workspace() {
     session.send(b"\x1b\x1b");
     session.send(b"q");
     session.exit();
-    assert_eq!(snapshot(dir.path()), before, "navigating changed the workspace");
+    assert_eq!(
+        snapshot(dir.path()),
+        before,
+        "navigating changed the workspace"
+    );
 }

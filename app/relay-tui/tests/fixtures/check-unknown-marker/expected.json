@@ -3,11 +3,14 @@
   "violations": [
     {
       "check": "unknown-marker",
-      "detail": "Marcador desconhecido \"[?]\" em T-002.",
       "records": [
         "todo",
         "backlog"
-      ]
+      ],
+      "params": {
+        "marker": "?",
+        "id": "T-002"
+      }
     }
   ]
 }

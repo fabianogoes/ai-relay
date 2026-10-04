@@ -36,7 +36,7 @@
   Retome T-002 de B-041 com relay-ses…
 
 ╭──────────────────────────────────────╮
-│ Tab histórico · q sair               │
+│ Tab histórico · c config. · q sair   │
 ╰──────────────────────────────────────╯
 
 --- colors ---
@@ -78,5 +78,5 @@ dddddddddddddddddddddddddddddddddddddddd
 ..mmmmmm.iiiii.mm.iiiii.mmm.FFFFFFFFFF
 
 dddddddddddddddddddddddddddddddddddddddd
-d.FFF.mmmmmmmmm.m.F.mmmm...............d
+d.FFF.mmmmmmmmm.m.F.mmmmmmm.m.F.mmmm...d
 dddddddddddddddddddddddddddddddddddddddd

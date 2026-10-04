@@ -25,8 +25,11 @@ fn an_explicit_absolute_path_is_kept() {
 #[test]
 fn a_relative_path_resolves_against_the_current_directory() {
     let cwd = abs("home/me/projects");
-    assert_eq!(resolve_workspace(Some(Path::new("repo")), &cwd), abs("home/me/projects/repo"));
-    // `.` and `..` collapse lexically, like node's path.resolve.
+    assert_eq!(
+        resolve_workspace(Some(Path::new("repo")), &cwd),
+        abs("home/me/projects/repo")
+    );
+    // `.` and `..` collapse lexically.
     assert_eq!(
         resolve_workspace(Some(Path::new("../other/./repo")), &cwd),
         abs("home/me/other/repo")
@@ -57,8 +60,45 @@ fn the_four_records_and_the_specs_are_read() {
     assert_eq!(files.handoff, "# Handoff\n");
     assert_eq!(files.changelog, "# Change log\n");
     let keys: Vec<&str> = files.specs.keys().map(String::as_str).collect();
-    assert_eq!(keys, [".specs/20260101-001-a.md", ".specs/20260101-002-b.md"]);
+    assert_eq!(
+        keys,
+        [".specs/20260101-001-a.md", ".specs/20260101-002-b.md"]
+    );
     assert_eq!(files.specs[".specs/20260101-002-b.md"], "# b\n");
+}
+
+#[test]
+fn the_per_spec_changelogs_are_read_keyed_by_file_name() {
+    let dir = TempDir::new().unwrap();
+    let root = dir.path();
+    write(
+        root,
+        ".orchestration/changelog/20260101-001.md",
+        "# Change log 20260101-001\n",
+    );
+    write(
+        root,
+        ".orchestration/changelog/20260101-002.md",
+        "# Change log 20260101-002\n",
+    );
+    write(
+        root,
+        ".orchestration/changelog/notes.txt",
+        "not a changelog",
+    );
+
+    let files = read_workspace(root);
+    let keys: Vec<&str> = files.changelogs.keys().map(String::as_str).collect();
+    assert_eq!(
+        keys,
+        ["changelog/20260101-001.md", "changelog/20260101-002.md"]
+    );
+    assert_eq!(
+        files.changelogs["changelog/20260101-002.md"],
+        "# Change log 20260101-002\n"
+    );
+    // The legacy file is a separate record.
+    assert_eq!(files.changelog, "");
 }
 
 #[test]
@@ -67,7 +107,14 @@ fn a_missing_record_reads_as_empty_text() {
     write(dir.path(), ".orchestration/TODO.md", "# Active task\n");
     let files = read_workspace(dir.path());
     assert_eq!(files.todo, "# Active task\n");
-    assert_eq!((files.backlog.as_str(), files.handoff.as_str(), files.changelog.as_str()), ("", "", ""));
+    assert_eq!(
+        (
+            files.backlog.as_str(),
+            files.handoff.as_str(),
+            files.changelog.as_str()
+        ),
+        ("", "", "")
+    );
     assert!(files.specs.is_empty());
 }
 

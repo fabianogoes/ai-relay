@@ -8,9 +8,7 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use relay_tui::core::{
-    ChecklistEntry, Handoff, RelayFiles, RelayState, Violation, derive_state,
-};
+use relay_tui::core::{ChecklistEntry, Handoff, RelayFiles, RelayState, Violation, derive_state};
 use serde_json::{Value, json};
 
 const STATUS_CASES: [&str; 7] = [
@@ -23,8 +21,24 @@ const STATUS_CASES: [&str; 7] = [
     "inconsistent",
 ];
 
-// The 13 integrity checks of docs/PROTOCOL.md.
-const CHECK_IDS: [&str; 13] = [
+// Cases of the changelog structure that are not a status or a check: the
+// per-spec changelog, the legacy one, closing sections, drops, waivers, CRLF
+// and a strict handoff.
+const STRUCTURE_CASES: [&str; 10] = [
+    "all-done-with-drop",
+    "archived-entry-cleanup",
+    "closed-spec",
+    "closed-with-waiver",
+    "crlf",
+    "done-active-task",
+    "dropped-entry",
+    "legacy-and-per-spec",
+    "per-spec",
+    "status-in-context",
+];
+
+// The 19 integrity checks of docs/PROTOCOL.md.
+const CHECK_IDS: [&str; 19] = [
     "handoff-names-no-pending-todo",
     "backlog-id-mismatch",
     "spec-path-mismatch",
@@ -38,6 +52,12 @@ const CHECK_IDS: [&str; 13] = [
     "needs-cycle",
     "needs-incomplete-on-done",
     "criteria-without-evidence",
+    "handoff-status-invalid",
+    "duplicate-id",
+    "changelog-spec-mismatch",
+    "needs-dropped-entry",
+    "dropped-without-reason",
+    "waived-without-drop",
 ];
 
 fn fixtures_dir() -> PathBuf {
@@ -48,20 +68,28 @@ fn read_or_empty(path: &Path) -> String {
     fs::read_to_string(path).unwrap_or_default()
 }
 
-// Same mapping as `workspace::read_workspace`: a missing record reads
-// as empty text and each spec is keyed `.specs/<name>`.
-fn load_workspace(workspace: &Path) -> RelayFiles {
-    let orchestration = workspace.join(".orchestration");
-    let mut specs = BTreeMap::new();
-    if let Ok(dir) = fs::read_dir(workspace.join(".specs")) {
+fn read_markdown_dir(dir: &Path, prefix: &str) -> BTreeMap<String, String> {
+    let mut files = BTreeMap::new();
+    if let Ok(dir) = fs::read_dir(dir) {
         for entry in dir.flatten() {
             let name = entry.file_name().to_string_lossy().into_owned();
             if name.ends_with(".md") {
-                specs.insert(format!(".specs/{name}"), read_or_empty(&entry.path()));
+                files.insert(format!("{prefix}/{name}"), read_or_empty(&entry.path()));
             }
         }
     }
+    files
+}
+
+// Same mapping as `workspace::read_workspace`: a missing record reads
+// as empty text, each spec is keyed `.specs/<name>` and each per-spec
+// changelog `changelog/<name>`.
+fn load_workspace(workspace: &Path) -> RelayFiles {
+    let orchestration = workspace.join(".orchestration");
+    let specs = read_markdown_dir(&workspace.join(".specs"), ".specs");
+    let changelogs = read_markdown_dir(&orchestration.join("changelog"), "changelog");
     RelayFiles {
+        changelogs,
         backlog: read_or_empty(&orchestration.join("BACKLOG.md")),
         todo: read_or_empty(&orchestration.join("TODO.md")),
         handoff: read_or_empty(&orchestration.join("HANDOFF.md")),
@@ -95,11 +123,14 @@ fn entry_json(e: &ChecklistEntry) -> Value {
     if let Some(spec) = &e.spec {
         value["spec"] = json!(spec);
     }
+    if let Some(reason) = &e.dropped {
+        value["dropped"] = json!(reason);
+    }
     value
 }
 
 fn violation_json(v: &Violation) -> Value {
-    json!({ "check": v.check, "detail": v.detail, "records": v.records })
+    json!({ "check": v.check, "params": v.params, "records": v.records })
 }
 
 // Written by hand on purpose: a second reading of the `RelayState` shape, with no
@@ -140,6 +171,7 @@ fn the_suite_has_every_status_case_and_one_case_per_integrity_check() {
         .iter()
         .map(|s| format!("status-{s}"))
         .chain(CHECK_IDS.iter().map(|c| format!("check-{c}")))
+        .chain(STRUCTURE_CASES.iter().map(|c| format!("structure-{c}")))
         .collect();
     expected.sort();
     assert_eq!(case_names(), expected);

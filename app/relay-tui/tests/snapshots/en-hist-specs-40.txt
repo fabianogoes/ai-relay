@@ -1,0 +1,34 @@
+ relay  ~/Developer/relay   ● up to date
+
+╭ Specs ───────────────────────────────╮
+│ ▸ 20261002-001 relay-tui         1/5 │
+│   20260901-001 Contrato do esta… 1/1 │
+│   20260101-001 20260101-001-sem… 0/0 │
+│   No spec                        0/1 │
+│                                      │
+│                                      │
+│                                      │
+│                                      │
+╰──────────────────────────────────────╯
+
+╭──────────────────────────────────────╮
+│ Tab now · c settings · q quit        │
+╰──────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm...g.mm.mm.mmmm
+
+d.FFFFF.dddddddddddddddddddddddddddddddd
+d.U.iiiiiiiiiiii.FFFFFFFFF.........mmm.d
+d...iiiiiiiiiiii.ffffffff.ff.fffff.mmm.d
+d...iiiiiiiiiiii.fffffffffffffffff.mmm.d
+d...ff.ffff........................mmm.d
+d......................................d
+d......................................d
+d......................................d
+d......................................d
+dddddddddddddddddddddddddddddddddddddddd
+
+dddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmm.m.F.mmmmmmmm.m.F.mmmm........d
+dddddddddddddddddddddddddddddddddddddddd

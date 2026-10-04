@@ -1,0 +1,15 @@
+{
+  "kind": "inconsistent",
+  "violations": [
+    {
+      "check": "dropped-without-reason",
+      "records": [
+        "backlog",
+        "changelog"
+      ],
+      "params": {
+        "id": "B-001"
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "kind": "inconsistent",
+  "violations": [
+    {
+      "check": "waived-without-drop",
+      "records": [
+        "changelog"
+      ],
+      "params": {
+        "criterion": "A-002",
+        "spec": ".specs/20260907-001"
+      }
+    }
+  ]
+}

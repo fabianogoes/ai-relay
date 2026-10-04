@@ -3,10 +3,13 @@
   "violations": [
     {
       "check": "needs-incomplete-on-done",
-      "detail": "T-001 está [x] mas precisa de T-002, não concluído.",
       "records": [
         "todo"
-      ]
+      ],
+      "params": {
+        "id": "T-001",
+        "needed_id": "T-002"
+      }
     }
   ]
 }

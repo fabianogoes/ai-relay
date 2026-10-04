@@ -49,7 +49,10 @@ fn code(text: &str) -> String {
 #[test]
 fn the_shipped_code_cannot_write_to_disk_or_launch_a_process() {
     let mut files = Vec::new();
-    sources(&Path::new(env!("CARGO_MANIFEST_DIR")).join("src"), &mut files);
+    sources(
+        &Path::new(env!("CARGO_MANIFEST_DIR")).join("src"),
+        &mut files,
+    );
     assert!(files.len() >= 10, "src/ is missing sources: {files:?}");
     for path in files {
         // The unit tests of a module set up temporary workspaces, which is
@@ -82,7 +85,11 @@ fn the_only_thing_that_reads_the_disk_is_the_workspace_module() {
             let text = fs::read_to_string(&path).unwrap();
             let code = code(text.split("#[cfg(test)]").next().unwrap());
             for needle in ["std::fs", "fs::", "std::path::Path::exists", ".is_dir()"] {
-                assert!(!code.contains(needle), "{} reads the disk with `{needle}`", path.display());
+                assert!(
+                    !code.contains(needle),
+                    "{} reads the disk with `{needle}`",
+                    path.display()
+                );
             }
         }
     }

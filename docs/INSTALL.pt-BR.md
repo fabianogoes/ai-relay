@@ -50,9 +50,7 @@ for skill in relay-setup relay-spec relay-status relay-continue relay-session re
 done
 ```
 
-Os metadados do pacote estão em `.claude-plugin/plugin.json`. Quando o Relay
-tiver um repositório público no GitHub e uma entrada de marketplace, esta seção
-ganhará o comando equivalente de instalação remota.
+Os metadados do pacote estão em `.claude-plugin/plugin.json`.
 
 ## Codex
 

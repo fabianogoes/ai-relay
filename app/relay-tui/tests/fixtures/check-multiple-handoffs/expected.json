@@ -3,10 +3,12 @@
   "violations": [
     {
       "check": "multiple-handoffs",
-      "detail": "Existem 2 registros de handoff.",
       "records": [
         "handoff"
-      ]
+      ],
+      "params": {
+        "count": "2"
+      }
     }
   ]
 }

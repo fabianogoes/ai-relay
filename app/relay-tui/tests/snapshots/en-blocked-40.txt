@@ -1,0 +1,50 @@
+ relay  ~/Developer/relay   ● up to date
+
+╭ Handoff ────────────────── ● Blocked ╮
+│ B-004 · T-003 · opencode · 10 min a… │
+│                                      │
+│ Objective Esqueleto do módulo core   │
+│           em Rust.                   │
+│ Next      Resolvido o bloqueio,      │
+│           rodar a criação do projeto │
+│           Vite.                      │
+│ Block     Bloqueio: node_modules não │
+│           pode ser instalado sem     │
+│           acesso ao registro npm     │
+│           neste ambiente. Condição … │
+╰──────────────────────────────────────╯
+╭ TODO ─────────────────────────── 2/3 ╮
+│ ████████ ████████ ████████           │
+│ +3 items                             │
+╰──────────────────────────────────────╯
+ 1 pending spec
+
+╭──────────────────────────────────────╮
+│ Tab history · c settings · q quit    │
+╰──────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm...g.mm.mm.mmmm
+
+y.FFFFFFF.yyyyyyyyyyyyyyyyyy.Y.YYYYYYY.y
+y.IIIII.m.iiiii.m.mmmmmmmm.m.mm.mmm.mm.y
+y......................................y
+y.mmmmmmmmm.fffffffff.ff.ffffff.ffff...y
+y...........ff.fffff...................y
+y.mmmm......fffffffff.f.fffffffff......y
+y...........fffff.f.fffffff.ff.fffffff.y
+y...........fffff......................y
+y.mmmmm.....fffffffff.ffffffffffff.fff.y
+y...........ffff.fff.fffffffff.fff.....y
+y...........ffffff.ff.ffffffff.fff.....y
+y...........fffff.fffffffff.ffffffff.f.y
+yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
+d.FFFF.ddddddddddddddddddddddddddd.mmm.d
+d.gggggggg.gggggggg.yyyyyyyy...........d
+d.mm.mmmmm.............................d
+dddddddddddddddddddddddddddddddddddddddd
+.m.mmmmmmm.mmmm
+
+dddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmm.m.F.mmmmmmmm.m.F.mmmm....d
+dddddddddddddddddddddddddddddddddddddddd

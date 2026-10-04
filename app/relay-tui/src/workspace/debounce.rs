@@ -89,7 +89,12 @@ mod tests {
         let stop = Arc::new(AtomicBool::new(false));
         let flag = Arc::clone(&stop);
         let thread = thread::spawn(move || debounce(raw_rx, out, quiescence, &flag, on_idle));
-        Rig { raw, events, stop, thread }
+        Rig {
+            raw,
+            events,
+            stop,
+            thread,
+        }
     }
 
     fn next(rig: &Rig, within: Duration) -> Option<WorkspaceEvent> {
@@ -139,10 +144,16 @@ mod tests {
     fn two_bursts_apart_yield_two_pairs() {
         let rig = start(QUIESCENCE, || false);
         rig.raw.send(()).unwrap();
-        assert_eq!((next(&rig, LONG), next(&rig, LONG)), (Some(Dirty), Some(Settled)));
+        assert_eq!(
+            (next(&rig, LONG), next(&rig, LONG)),
+            (Some(Dirty), Some(Settled))
+        );
         thread::sleep(Duration::from_millis(100));
         rig.raw.send(()).unwrap();
-        assert_eq!((next(&rig, LONG), next(&rig, LONG)), (Some(Dirty), Some(Settled)));
+        assert_eq!(
+            (next(&rig, LONG), next(&rig, LONG)),
+            (Some(Dirty), Some(Settled))
+        );
     }
 
     #[test]
@@ -173,7 +184,10 @@ mod tests {
         let flag = Arc::clone(&found);
         let rig = start(QUIESCENCE, move || flag.swap(false, Ordering::Relaxed));
         found.store(true, Ordering::Relaxed);
-        assert_eq!((next(&rig, LONG), next(&rig, LONG)), (Some(Dirty), Some(Settled)));
+        assert_eq!(
+            (next(&rig, LONG), next(&rig, LONG)),
+            (Some(Dirty), Some(Settled))
+        );
         assert_eq!(next(&rig, Duration::from_millis(500)), None);
     }
 }

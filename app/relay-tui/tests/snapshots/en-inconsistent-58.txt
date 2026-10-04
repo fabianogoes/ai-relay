@@ -1,0 +1,50 @@
+ relay  ~/Developer/relay                     ● up to date
+
+╭ ● Inconsistent ───────────────────────────────────── 1 ╮
+│ handoff-names-no-pending-todo                          │
+│ The handoff does not name a pending TODO item:         │
+│ in_progress_id=T-002, todo_id=T-001                    │
+╰────────────────────────────────────────────────────────╯
+
+
+
+
+
+
+
+
+
+
+
+
+  Conflicting records: relay-status and relay-continue.
+
+╭────────────────────────────────────────────────────────╮
+│ Tab history · r reload · c settings · q quit           │
+╰────────────────────────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mm.mm.mmmm
+
+r.R.RRRRRRRRRRRR.rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.m.r
+r.RRRRRRRRRRRRRRRRRRRRRRRRRRRRR..........................r
+r.fff.fffffff.ffff.fff.ffff.f.fffffff.ffff.fffff.........r
+r.fffffffffffffffffffff.fffffffffffff....................r
+rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+
+
+
+
+
+
+
+
+
+
+
+
+..mmmmmmmmmmm.mmmmmmmm.FFFFFFFFFFFF.mmm.FFFFFFFFFFFFFFm
+
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmm.m.F.mmmmmm.m.F.mmmmmmmm.m.F.mmmm...........d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

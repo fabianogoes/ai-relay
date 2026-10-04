@@ -9,7 +9,7 @@ use std::sync::LazyLock;
 
 use regex::Regex;
 
-use super::parse::parse_backlog;
+use super::parse::{RawEntry, parse_backlog, parse_changelog};
 use super::types::RelayFiles;
 
 /// One backlog entry as the Histórico levels show it: the text without its
@@ -21,11 +21,31 @@ pub struct HistoryItem {
     pub text: String,
     pub marker: char,
     pub needs: Vec<String>,
+    /// The reason of a dropped (`[-]`) entry.
+    pub dropped: Option<String>,
+    /// Read from the closing section of the spec's changelog rather than from
+    /// `BACKLOG.md`.
+    pub archived: bool,
 }
 
 impl HistoryItem {
     pub fn is_done(&self) -> bool {
         self.marker == 'x'
+    }
+
+    pub fn is_dropped(&self) -> bool {
+        self.marker == '-'
+    }
+}
+
+fn history_item(entry: RawEntry, archived: bool) -> HistoryItem {
+    HistoryItem {
+        id: entry.id,
+        text: entry.text,
+        marker: entry.marker,
+        needs: entry.needs,
+        dropped: entry.dropped,
+        archived,
     }
 }
 
@@ -36,12 +56,21 @@ pub struct SpecEntry {
     pub path: String,
     pub id: String,
     pub title: String,
+    /// The changelog of the spec has a `## Closed` section.
+    pub closed: bool,
+    /// The archived entries first (closing-section order), then the ones of
+    /// `BACKLOG.md` (textual order).
     pub items: Vec<HistoryItem>,
 }
 
 impl SpecEntry {
     pub fn done(&self) -> usize {
         self.items.iter().filter(|i| i.is_done()).count()
+    }
+
+    /// The items that are still work to do or done: a dropped one is not.
+    pub fn total(&self) -> usize {
+        self.items.iter().filter(|i| !i.is_dropped()).count()
     }
 }
 
@@ -59,7 +88,10 @@ pub struct History {
 impl History {
     /// The records of a backlog item, in the changelog's textual order.
     pub fn tasks_of(&self, backlog_id: &str) -> Vec<&TaskRecord> {
-        self.records.iter().filter(|r| r.backlog.as_deref() == Some(backlog_id)).collect()
+        self.records
+            .iter()
+            .filter(|r| r.backlog.as_deref() == Some(backlog_id))
+            .collect()
     }
 }
 
@@ -73,27 +105,76 @@ pub fn extract_history(files: &RelayFiles) -> History {
             path: path.clone(),
             id: spec_id(path),
             title: spec_title(path, text),
+            closed: false,
             items: Vec::new(),
         })
         .collect();
     // `BTreeMap` iterates ascending; the view wants the most recent first.
     specs.reverse();
 
+    // The entries a closing section archived, with the spec of their file.
+    let mut archived: Vec<(String, RawEntry)> = Vec::new();
+    for (key, text) in &files.changelogs {
+        let Some(spec) = spec_of_changelog(key, &mut specs) else {
+            continue;
+        };
+        let closed = parse_changelog(text).closed;
+        spec.closed = !closed.is_empty();
+        let path = spec.path.clone();
+        for entry in closed {
+            archived.push((path.clone(), entry.clone()));
+            spec.items.push(history_item(entry, true));
+        }
+    }
+
     let mut no_spec = Vec::new();
     for entry in parse_backlog(&files.backlog) {
-        let item = HistoryItem {
-            id: entry.id,
-            text: entry.text,
-            marker: entry.marker,
-            needs: entry.needs,
-        };
-        match entry.spec.as_deref().and_then(|s| specs.iter_mut().find(|e| e.path == s)) {
+        // An entry already in the closing section of its own spec is archived:
+        // the closing section is the authority.
+        let already = archived
+            .iter()
+            .any(|(path, a)| a.id == entry.id && entry.spec.as_deref() == Some(path.as_str()));
+        if already {
+            continue;
+        }
+        let item = history_item(entry.clone(), false);
+        match entry
+            .spec
+            .as_deref()
+            .and_then(|s| specs.iter_mut().find(|e| e.path == s))
+        {
             Some(spec) => spec.items.push(item),
             None => no_spec.push(item),
         }
     }
 
-    History { specs, no_spec, records: extract_task_records(&files.changelog) }
+    // The legacy file first, then each per-spec file in name order. A record
+    // of a per-spec file does not repeat `Spec`: the file is the spec.
+    let mut records = extract_task_records(&files.changelog);
+    for (key, text) in &files.changelogs {
+        let name = key.rsplit('/').next().unwrap_or(key);
+        let id = name.strip_suffix(".md").unwrap_or(name);
+        let spec = files.specs.keys().find(|path| spec_id(path) == id).cloned();
+        for mut record in extract_task_records(text) {
+            if record.spec.is_none() {
+                record.spec = spec.clone();
+            }
+            records.push(record);
+        }
+    }
+    History {
+        specs,
+        no_spec,
+        records,
+    }
+}
+
+/// The spec a per-spec changelog (`changelog/<id>.md`) belongs to, if its file
+/// exists in `.specs/`.
+fn spec_of_changelog<'a>(key: &str, specs: &'a mut [SpecEntry]) -> Option<&'a mut SpecEntry> {
+    let name = key.rsplit('/').next().unwrap_or(key);
+    let id = name.strip_suffix(".md").unwrap_or(name);
+    specs.iter_mut().find(|s| s.id == id)
 }
 
 /// One changelog record with every field the Detalhe level shows. A field the
@@ -170,6 +251,13 @@ pub fn extract_task_records(changelog: &str) -> Vec<TaskRecord> {
 
     for line in changelog.split('\n') {
         let line = line.strip_suffix('\r').unwrap_or(line);
+        // A closing section ends the record before it; its lines are not
+        // fields of that record.
+        if line.starts_with("## Closed") {
+            records.extend(current.take());
+            open = Open::None;
+            continue;
+        }
         if let Some(m) = RECORD_HEADER.captures(line) {
             records.extend(current.take());
             current = Some(TaskRecord {
@@ -257,7 +345,10 @@ mod tests {
         );
         assert_eq!(records.len(), 1);
         let r = &records[0];
-        assert_eq!((r.date.as_str(), r.todo_id.as_str()), ("2026-09-07", "T-001"));
+        assert_eq!(
+            (r.date.as_str(), r.todo_id.as_str()),
+            ("2026-09-07", "T-001")
+        );
         assert_eq!(r.title, "Titulo - com hifen");
         assert_eq!(r.backlog.as_deref(), Some("B-001"));
         assert_eq!(r.spec.as_deref(), Some(".specs/a.md"));
@@ -282,7 +373,8 @@ mod tests {
 
     #[test]
     fn a_missing_field_is_none_not_invented() {
-        let records = extract_task_records("## 2026-09-07 - T-001 - Antigo\n- Backlog: B-001\n- Result: r\n");
+        let records =
+            extract_task_records("## 2026-09-07 - T-001 - Antigo\n- Backlog: B-001\n- Result: r\n");
         let r = &records[0];
         assert_eq!(r.criteria, None);
         assert_eq!(r.decisions, None);
@@ -312,16 +404,23 @@ mod tests {
 
     #[test]
     fn spec_ids_come_from_the_file_name() {
-        assert_eq!(spec_id(".specs/20261002-002-relay-tui-x.md"), "20261002-002");
+        assert_eq!(
+            spec_id(".specs/20261002-002-relay-tui-x.md"),
+            "20261002-002"
+        );
         assert_eq!(spec_id(".specs/20261002-002.md"), "20261002-002");
         assert_eq!(spec_id(".specs/notas.md"), "notas");
     }
 
     fn files(backlog: &str, changelog: &str, specs: &[(&str, &str)]) -> RelayFiles {
         RelayFiles {
+            changelogs: Default::default(),
             backlog: backlog.to_string(),
             changelog: changelog.to_string(),
-            specs: specs.iter().map(|(p, t)| (p.to_string(), t.to_string())).collect(),
+            specs: specs
+                .iter()
+                .map(|(p, t)| (p.to_string(), t.to_string()))
+                .collect(),
             ..Default::default()
         }
     }
@@ -347,7 +446,10 @@ mod tests {
         assert_eq!((h.specs[0].items.len(), h.specs[0].done()), (0, 0));
         assert_eq!(h.specs[0].title, "20260303-001-c.md");
         let b = &h.specs[1];
-        assert_eq!((b.title.as_str(), b.items.len(), b.done()), ("Segunda", 1, 0));
+        assert_eq!(
+            (b.title.as_str(), b.items.len(), b.done()),
+            ("Segunda", 1, 0)
+        );
         assert_eq!(b.items[0].needs, ["B-001"]);
         assert_eq!(b.items[0].text, "Dois");
         let a = &h.specs[2];
@@ -371,6 +473,58 @@ mod tests {
     }
 
     #[test]
+    fn a_closed_spec_lists_its_archived_entries_before_the_backlog_ones() {
+        let spec = ".specs/20260101-001-a.md";
+        let mut f = files(
+            // B-001 is still in the backlog although the closing already has it.
+            &format!("- [x] B-001 - Um (spec: `{spec}`)\n- [ ] B-009 - Aberto (spec: `{spec}`)\n"),
+            "",
+            &[(spec, "# 20260101-001 - A\n")],
+        );
+        f.changelogs.insert(
+            "changelog/20260101-001.md".into(),
+            format!(
+                "# Change log 20260101-001\n\n## 2026-01-01 - T-001 - Feito\n- Backlog: B-001\n\n\
+                 ## Closed 2026-01-02\n- [x] B-001 - Um (spec: `{spec}`)\n\
+                 - [-] B-002 - Dois (spec: `{spec}`) (dropped: sem uso)\n- Waived: A-002 - sem uso\n"
+            ),
+        );
+        let h = extract_history(&f);
+        let s = &h.specs[0];
+        assert!(s.closed);
+        let items: Vec<(&str, char, bool)> = s
+            .items
+            .iter()
+            .map(|i| (i.id.as_str(), i.marker, i.archived))
+            .collect();
+        assert_eq!(
+            items,
+            [
+                ("B-001", 'x', true),
+                ("B-002", '-', true),
+                ("B-009", ' ', false)
+            ]
+        );
+        assert_eq!(s.items[1].dropped.as_deref(), Some("sem uso"));
+        // The dropped entry is not work to do: it is in neither count.
+        assert_eq!((s.done(), s.total()), (1, 2));
+        // The record before the closing section is still a record of the spec.
+        assert_eq!(h.tasks_of("B-001").len(), 1);
+        assert_eq!(h.records[0].spec.as_deref(), Some(spec));
+    }
+
+    #[test]
+    fn a_spec_without_a_closing_section_is_not_closed() {
+        let h = extract_history(&files(
+            "- [ ] B-1 - Um (spec: `.specs/20260101-001-a.md`)\n",
+            "",
+            &[(".specs/20260101-001-a.md", "# a\n")],
+        ));
+        assert!(!h.specs[0].closed);
+        assert_eq!(h.specs[0].total(), 1);
+    }
+
+    #[test]
     fn empty_records_give_an_empty_history() {
         assert_eq!(extract_history(&RelayFiles::default()), History::default());
     }
@@ -378,9 +532,15 @@ mod tests {
     #[test]
     fn spec_titles_follow_the_three_shapes() {
         let p = ".specs/20261002-002-x.md";
-        assert_eq!(spec_title(p, "# 20261002-002 - relay-tui: navegacao\n\n## Problem\n"), "relay-tui: navegacao");
+        assert_eq!(
+            spec_title(p, "# 20261002-002 - relay-tui: navegacao\n\n## Problem\n"),
+            "relay-tui: navegacao"
+        );
         // No `AAAAMMDD-NNN - ` prefix: the whole text.
-        assert_eq!(spec_title(p, "intro\n# Um titulo livre  \n"), "Um titulo livre");
+        assert_eq!(
+            spec_title(p, "intro\n# Um titulo livre  \n"),
+            "Um titulo livre"
+        );
         // A `##` line is not a title; with no `# ` line, the file name.
         assert_eq!(spec_title(p, "## Problem\ntexto\n"), "20261002-002-x.md");
         assert_eq!(spec_title(".specs/vazia.md", ""), "vazia.md");

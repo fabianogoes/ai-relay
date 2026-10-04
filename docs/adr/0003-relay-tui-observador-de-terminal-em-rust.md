@@ -21,11 +21,16 @@ com leveza como piso.
 
 ### 1. `relay-tui` é um binário Rust, somente leitura
 
-Vive em `app/relay-tui/` (projeto Cargo), com `ratatui`, `crossterm` e `notify`.
-Observa um workspace (`--workspace <path>` ou o diretório corrente), nunca
+Vive em `app/relay-tui/` (projeto Cargo), com `ratatui`, `crossterm`, `notify`
+e `signal-hook`. Observa um workspace (`--workspace <path>` ou o diretório corrente), nunca
 escreve nos cinco registros e não lança processo. As teclas só mudam o que a
 tela mostra (ADR-0004). A ADR-0002 já aceita toolchain própria dentro de `app/`;
 quem só quer as skills continua sem build.
+
+`signal-hook` entrega `SIGTERM`, `SIGINT` e `SIGHUP` a uma thread normal, que
+encerra o loop da interface. A rotina de saída desliga a captura do mouse e
+restaura o terminal; o processo retorna `128 + sinal`. Nenhuma operação de
+terminal roda dentro do handler de sinal.
 
 ### 2. Rust, e não Go nem TypeScript compilado
 
@@ -42,8 +47,9 @@ que se reescreve com menos risco, por ser pura e testada.
 
 ### 3. O core é puro e entrega um estado que a view só desenha
 
-O módulo `core` faz parse dos cinco registros, roda as 13 verificações de
-integridade do `docs/PROTOCOL.md` e deriva o `RelayState`. As regras do contrato:
+O módulo `core` faz parse dos cinco registros (o changelog é o legado
+`CHANGELOG.md` ou os `changelog/<spec>.md`, ADR-0006), roda as 19 verificações
+de integridade do `docs/PROTOCOL.md` e deriva o `RelayState`. As regras do contrato:
 
 - **Conteúdo entra, estado sai.** `derive_state` recebe o texto dos registros,
   nunca um caminho; o `core` não lê disco nem ambiente. Só o módulo `workspace`
@@ -62,8 +68,12 @@ integridade do `docs/PROTOCOL.md` e deriva o `RelayState`. As regras do contrato
   `Updated` em RFC 3339; "há 4 min" é formatado na view, com o relógio injetado.
 - **Tom e tela ficam fora do estado.** O estado carrega `status`, não cor nem
   rótulo; o `app/relay-tui/DESIGN.md` decide como cada status aparece.
-- **Uma violação diz qual verificação falhou.** `Violation { check, detail,
-  records }`, com `check` estável, na ordem do `docs/PROTOCOL.md`:
+- **Uma violação leva dados, não texto localizado.** `Violation { check,
+  params, records }` contém o identificador estável da verificação, parâmetros
+  nomeados com os valores necessários para apresentá-la, e os registros
+  envolvidos. Não contém mensagem nem frase em um idioma; a view formata a
+  mensagem conforme o idioma da tela. Os fixtures comparam essa estrutura,
+  mantendo `check` estável e na ordem do `docs/PROTOCOL.md`:
 
 | `check` | Verificação |
 | --- | --- |
@@ -79,7 +89,13 @@ integridade do `docs/PROTOCOL.md` e deriva o `RelayState`. As regras do contrato
 | `needs-unknown-id` | `needs` referencia ID ausente do mesmo registro |
 | `needs-cycle` | Relação de `needs` contém ciclo |
 | `needs-incomplete-on-done` | Entrada `[x]` cujo `needs` não está todo `[x]` |
-| `criteria-without-evidence` | Toda entrada de backlog de uma spec está `[x]` e um critério de aceite dela não é nomeado por nenhum registro de changelog |
+| `handoff-status-invalid` | `Status` do handoff diferente de `in_progress` e `blocked` (ou ausente) |
+| `duplicate-id` | Um `B-NNN` aparece mais de uma vez entre o backlog e as seções de fechamento (fora a janela de arquivamento), ou um `T-NNN` mais de uma vez no TODO |
+| `changelog-spec-mismatch` | Registro de um `changelog/<spec>.md` nomeia uma entrada de backlog de outra spec |
+| `needs-dropped-entry` | Entrada pendente do backlog cujo `needs` aponta uma entrada descartada (`[-]`) |
+| `dropped-without-reason` | Entrada `[-]` sem `(dropped: <motivo>)` |
+| `waived-without-drop` | Linha `Waived` numa seção de fechamento sem nenhuma entrada `[-]` |
+| `criteria-without-evidence` | Toda entrada de backlog de uma spec está `[x]` ou `[-]` e um critério de aceite dela não é nomeado por nenhum registro de changelog nem dispensado por `Waived` |
 
 Renomear um `check` muda os fixtures e é decisão desta ADR.
 
@@ -127,12 +143,12 @@ reincluir `windows-latest` na matriz de `best-effort` do CI e
 do commit `6c8f484` o ramo `*-windows-*` do `scripts/package.sh` (`relay-tui.exe`
 e `.zip` via `7z`); reincluir a linha do README e o aviso do SmartScreen; e
 tratar a falha seguinte do `cargo test` (o PTY do teste ponta a ponta também
-nunca rodou lá). O CRLF dos registros (limite conhecido do README) é o problema
-mais provável de ser exigido antes.
+nunca rodou lá). Os registros em CRLF já derivam o mesmo estado que em LF, então
+esse não é mais um obstáculo.
 
 **Exceção à conformidade 3 da ADR-0002.** Um workflow só é lido pelo GitHub em
 `.github/workflows/`, fora de `app/`, e precisa nomear `app/relay-tui` para
-construir. São exatamente dois arquivos, ferramenta do repositório: o de CI só
+construir. Os do `relay-tui` são exatamente dois arquivos, ferramenta do repositório: o de CI só
 dispara com mudanças em `app/relay-tui/**` e o de release só com tags
 `relay-tui-v*`. Removido `app/`, nenhum dos dois dispara, de modo que
 `rm -rf app/` continua devolvendo o repositório a um estado funcional.
@@ -196,8 +212,6 @@ neutralidade).
 - Binários sem assinatura exigem um passo manual de quem baixa, no macOS.
 - O `core` em Rust é o único leitor: um erro nele não tem uma segunda leitura
   que o denuncie. Os fixtures e o `docs/PROTOCOL.md` são a referência.
-- Linhas de registro terminadas em CRLF são ignoradas (limite conhecido no
-  README do crate); corrigir exige mudar o `core` e os fixtures juntos.
 
 ## Compliance
 
@@ -210,7 +224,11 @@ neutralidade).
 4. A tag de release publica os binários de macOS arm64 e x64 e o CI roda
    `cargo test` no macOS: é o requisito. Linux é melhor esforço e uma falha nele
    não impede o release nem o CI.
-5. `.github/workflows/` tem só os dois arquivos do `relay-tui`, com os filtros
-   de caminho e de tag da decisão 6.
+5. Dos arquivos de `.github/workflows/`, os do `relay-tui` são só dois (o de CI e
+   o de release), com os filtros de caminho e de tag da decisão 6. O CI do
+   pacote é outro workflow, fora desta ADR ([ADR-0007](0007-ci-do-pacote.md)).
 6. O canal de perguntas só passa a existir depois de uma emenda do
    `docs/PROTOCOL.md` e do spike do Claude Code.
+7. `SIGTERM`, `SIGINT` e `SIGHUP` encerram o loop da interface, e a saída
+   normal restaura modo raw, tela alternativa, cursor e captura do mouse antes
+   de retornar `128 + sinal` (`tests/e2e_pty.rs`).

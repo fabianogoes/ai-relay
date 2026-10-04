@@ -6,7 +6,7 @@
 │                                                        │
 │ ✓ T-001 Materializar os sete fixtures                  │
 │ ✓ T-002 Escrever tokens.css                            │
-│ ○ T-003 Scaffold da relay-ui                           │
+│ ○ T-003 Esqueleto do módulo core                       │
 ╰────────────────────────────────────────────────────────╯
 ╭ Specs pendentes ──────────────────────────────────── 1 ╮
 │ Sem spec                                           0/1 │
@@ -17,10 +17,10 @@
 
 
 
-  Comece T-003 (Scaffold da relay-ui) com relay-session.
+  Comece T-003 (Esqueleto do módulo…) com relay-session.
 
 ╭────────────────────────────────────────────────────────╮
-│ Tab histórico · r recarregar · q sair                  │
+│ Tab histórico · r recarregar · c config. · q sair      │
 ╰────────────────────────────────────────────────────────╯
 
 --- colors ---
@@ -32,7 +32,7 @@ d.gggggggg.gggggggg.uuuuuuuu.............................d
 d........................................................d
 d.G.iiiii.mmmmmmmmmmmm.mm.mmmm.mmmmmmmm..................d
 d.G.iiiii.mmmmmmmm.mmmmmmmmmm............................d
-d.u.iiiii.ffffffff.ff.ffffffff...........................d
+d.u.iiiii.fffffffff.ff.ffffff.ffff.......................d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 d.FFFFF.FFFFFFFFF.dddddddddddddddddddddddddddddddddddd.m.d
 d.fff.ffff...........................................mmm.d
@@ -43,8 +43,8 @@ dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 
 
 
-..mmmmmm.iiiii.mmmmmmmmm.mm.mmmmmmmmm.mmm.FFFFFFFFFFFFFm
+..mmmmmm.iiiii.mmmmmmmmmm.mm.mmmmmmmm.mmm.FFFFFFFFFFFFFm
 
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmmmmm.m.F.mmmm......d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

@@ -1,0 +1,50 @@
+ relay  ~/Developer/relay   ● up to date
+
+ ● Ready  No active handoff
+╭ TODO ─────────────────────────── 2/3 ╮
+│ ████████ ████████ ████████           │
+│                                      │
+│ ✓ T-001 Materializar os sete fixtur… │
+│ ✓ T-002 Escrever tokens.css          │
+│ ○ T-003 Esqueleto do módulo core     │
+╰──────────────────────────────────────╯
+╭ Pending specs ──────────────────── 1 ╮
+│ No spec                          0/1 │
+╰──────────────────────────────────────╯
+
+
+
+
+
+
+  Start T-003 with relay-session.
+
+╭──────────────────────────────────────╮
+│ Tab history · c settings · q quit    │
+╰──────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm...g.mm.mm.mmmm
+
+.U.UUUUU..mm.mmmmmm.mmmmmmm
+d.FFFF.ddddddddddddddddddddddddddd.mmm.d
+d.gggggggg.gggggggg.uuuuuuuu...........d
+d......................................d
+d.G.iiiii.mmmmmmmmmmmm.mm.mmmm.mmmmmmm.d
+d.G.iiiii.mmmmmmmm.mmmmmmmmmm..........d
+d.u.iiiii.fffffffff.ff.ffffff.ffff.....d
+dddddddddddddddddddddddddddddddddddddddd
+d.FFFFFFF.FFFFF.dddddddddddddddddddd.m.d
+d.ff.ffff..........................mmm.d
+dddddddddddddddddddddddddddddddddddddddd
+
+
+
+
+
+
+..mmmmm.iiiii.mmmm.FFFFFFFFFFFFFm
+
+dddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmm.m.F.mmmmmmmm.m.F.mmmm....d
+dddddddddddddddddddddddddddddddddddddddd

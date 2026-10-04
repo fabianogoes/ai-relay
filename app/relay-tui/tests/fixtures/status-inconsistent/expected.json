@@ -3,7 +3,10 @@
   "violations": [
     {
       "check": "handoff-names-no-pending-todo",
-      "detail": "O handoff aponta T-001, que está [x]; T-002 está [•].",
+      "params": {
+        "todo_id": "T-001",
+        "in_progress_id": "T-002"
+      },
       "records": [
         "handoff",
         "todo"

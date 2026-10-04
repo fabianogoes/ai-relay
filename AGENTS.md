@@ -37,6 +37,21 @@ Write one when a decision affects structure, an architecture characteristic, a
 dependency, an interface, or a construction technique. Record the reasoning,
 not only the choice.
 
+- `docs/adr/0008-configuracoes-locais-da-relay-tui.md` — Accepted — `c` opens
+  a local Settings screen from Agora or Histórico; the selected language
+  overrides startup resolution for this process, preserves navigation and
+  reloads, and never writes workspace configuration. Mouse capture pauses on
+  Settings and resumes when returning to Histórico.
+- `docs/adr/0007-ci-do-pacote.md` — Accepted — the package has its own workflow,
+  `package-ci.yml`, apart from the `relay-tui` ones: the `.agents/tests/` suites
+  on macOS and `shellcheck -S warning` on Ubuntu, triggered by `skills/**`,
+  `.agents/tests/**` and `docs/PROTOCOL.md`; the `relay-tui` workflows stay
+  limited to their two files.
+- `docs/adr/0006-changelog-por-spec-e-fechamento-como-arquivamento.md` —
+  Accepted — the changelog is one file per spec in
+  `.orchestration/changelog/`, closing a spec archives its backlog entries into
+  that changelog, entries are dropped with `[-]` and a reason (never deleted), a
+  legacy `CHANGELOG.md` stays readable and is migrated by `relay-setup`.
 - `docs/adr/0005-skill-de-pacote-fora-do-protocolo.md` — Accepted —
   `relay-tui-split`, a package skill that opens a terminal split running the
   `relay-tui` and touches no record: it lives in `skills/` but outside the

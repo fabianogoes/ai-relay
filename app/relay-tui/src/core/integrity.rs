@@ -1,4 +1,4 @@
-//! The 13 integrity checks of `docs/PROTOCOL.md`: in protocol order, at most
+//! The 19 integrity checks of `docs/PROTOCOL.md`: in protocol order, at most
 //! one violation per check, and the exact detail text, which
 //! `tests/fixtures/` compares.
 
@@ -7,16 +7,35 @@ use std::sync::LazyLock;
 
 use regex::Regex;
 
-use super::parse::{ChangelogRecord, RawEntry, RawHandoff, parse_spec_criteria};
+use super::parse::{ChangelogRecord, HandoffStatus, RawEntry, RawHandoff, parse_spec_criteria};
 use super::types::Violation;
+
+/// An entry of a `## Closed` section, with the spec of the file it is in.
+pub(crate) struct ClosedEntry {
+    pub spec: String,
+    pub entry: RawEntry,
+}
+
+/// A `Waived` line of a closing section; `has_drop` is whether that section
+/// closes at least one `[-]` entry.
+pub(crate) struct Waiver {
+    pub spec: String,
+    pub criterion: String,
+    pub has_drop: bool,
+}
 
 pub(crate) struct IntegrityInput<'a> {
     pub handoff: Option<&'a RawHandoff>,
     pub handoff_count: usize,
     pub active_backlog_id: Option<&'a str>,
     pub todo: &'a [RawEntry],
+    /// The backlog without the entries already archived by a closing section.
     pub backlog: &'a [RawEntry],
+    /// The whole `BACKLOG.md`, archived entries included.
+    pub backlog_all: &'a [RawEntry],
     pub changelog: &'a [ChangelogRecord],
+    pub closed: &'a [ClosedEntry],
+    pub waivers: &'a [Waiver],
     pub specs: &'a BTreeMap<String, String>,
 }
 
@@ -31,10 +50,13 @@ static SPEC_PREFIX: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"[0-9]{8}-[0-
 
 const KNOWN_MARKERS: [char; 4] = [' ', '•', '!', 'x'];
 
-fn violation(check: &str, detail: String, records: &[&str]) -> Violation {
+fn violation(check: &str, params: &[(&str, &str)], records: &[&str]) -> Violation {
     Violation {
         check: check.to_string(),
-        detail,
+        params: params
+            .iter()
+            .map(|(k, v)| ((*k).to_string(), (*v).to_string()))
+            .collect(),
         records: records.iter().map(|r| r.to_string()).collect(),
     }
 }
@@ -69,17 +91,16 @@ fn check_handoff_names_no_pending_todo(i: &IntegrityInput) -> Option<Violation> 
             let in_progress = i.todo.iter().find(|e| e.marker == '•');
             Some(violation(
                 "handoff-names-no-pending-todo",
-                format!(
-                    "O handoff aponta {}, que está [x]; {} está [•].",
-                    handoff.todo_id,
-                    in_progress.map_or("?", |e| e.id.as_str())
-                ),
+                &[
+                    ("todo_id", &handoff.todo_id),
+                    ("in_progress_id", in_progress.map_or("?", |e| e.id.as_str())),
+                ],
                 &["handoff", "todo"],
             ))
         }
         None => Some(violation(
             "handoff-names-no-pending-todo",
-            format!("O handoff aponta {}, que não existe no TODO.", handoff.todo_id),
+            &[("todo_id", &handoff.todo_id)],
             &["handoff", "todo"],
         )),
     }
@@ -89,24 +110,23 @@ fn check_backlog_id_mismatch(i: &IntegrityInput) -> Option<Violation> {
     if i.handoff.is_none() && i.active_backlog_id.is_none() {
         return None;
     }
-    if let Some(active) = i.active_backlog_id {
-        if !i.backlog.iter().any(|e| e.id == active) {
-            return Some(violation(
-                "backlog-id-mismatch",
-                format!("O backlog ativo {active} não existe no backlog."),
-                &["handoff", "todo", "backlog"],
-            ));
-        }
+    if let Some(active) = i.active_backlog_id
+        && !i.backlog.iter().any(|e| e.id == active)
+    {
+        return Some(violation(
+            "backlog-id-mismatch",
+            &[("backlog_id", active)],
+            &["handoff", "todo", "backlog"],
+        ));
     }
     let handoff = i.handoff?;
     if Some(handoff.backlog_id.as_str()) != i.active_backlog_id {
         return Some(violation(
             "backlog-id-mismatch",
-            format!(
-                "O handoff diz {}, o TODO diz {}.",
-                handoff.backlog_id,
-                i.active_backlog_id.unwrap_or("nenhum")
-            ),
+            &[
+                ("handoff_backlog_id", &handoff.backlog_id),
+                ("todo_backlog_id", i.active_backlog_id.unwrap_or("nenhum")),
+            ],
             &["handoff", "todo", "backlog"],
         ));
     }
@@ -115,31 +135,35 @@ fn check_backlog_id_mismatch(i: &IntegrityInput) -> Option<Violation> {
 
 fn check_spec_path_mismatch(i: &IntegrityInput) -> Option<Violation> {
     let handoff = i.handoff?;
-    let Some(entry) = i.backlog.iter().find(|e| Some(e.id.as_str()) == i.active_backlog_id) else {
+    let Some(entry) = i
+        .backlog
+        .iter()
+        .find(|e| Some(e.id.as_str()) == i.active_backlog_id)
+    else {
         return Some(violation(
             "spec-path-mismatch",
-            format!(
-                "A tarefa ativa {} não tem entrada de backlog confrontável.",
-                i.active_backlog_id.unwrap_or("?")
-            ),
+            &[("backlog_id", i.active_backlog_id.unwrap_or("?"))],
             &["handoff", "backlog"],
         ));
     };
     if handoff.spec.is_empty() {
-        return Some(violation("spec-path-mismatch", "O handoff não tem Spec.".into(), &["handoff"]));
+        return Some(violation("spec-path-mismatch", &[], &["handoff"]));
     }
     let entry_spec = entry.spec.as_deref().unwrap_or("");
     if entry_spec.is_empty() {
         return Some(violation(
             "spec-path-mismatch",
-            format!("A entrada {} não tem spec.", entry.id),
+            &[("backlog_id", &entry.id)],
             &["backlog"],
         ));
     }
     if entry_spec != handoff.spec {
         return Some(violation(
             "spec-path-mismatch",
-            format!("O handoff diz {}, a tarefa diz {}.", handoff.spec, entry_spec),
+            &[
+                ("handoff_spec", &handoff.spec),
+                ("backlog_spec", entry_spec),
+            ],
             &["handoff", "backlog"],
         ));
     }
@@ -151,7 +175,7 @@ fn check_handoff_harness(i: &IntegrityInput) -> Option<Violation> {
     if handoff.harness.is_empty() || !HARNESS.is_match(&handoff.harness) {
         return Some(violation(
             "handoff-harness-invalid",
-            format!("Harness inválido: \"{}\".", handoff.harness),
+            &[("harness", &handoff.harness)],
             &["handoff"],
         ));
     }
@@ -163,7 +187,7 @@ fn check_handoff_updated(i: &IntegrityInput) -> Option<Violation> {
     if handoff.updated.is_empty() || !rfc3339_is_parseable(&handoff.updated) {
         return Some(violation(
             "handoff-updated-invalid",
-            format!("Updated inválido: \"{}\".", handoff.updated),
+            &[("updated", &handoff.updated)],
             &["handoff"],
         ));
     }
@@ -174,21 +198,95 @@ fn check_multiple_handoffs(i: &IntegrityInput) -> Option<Violation> {
     (i.handoff_count > 1).then(|| {
         violation(
             "multiple-handoffs",
-            format!("Existem {} registros de handoff.", i.handoff_count),
+            &[("count", &i.handoff_count.to_string())],
             &["handoff"],
         )
     })
 }
 
+fn check_handoff_status_invalid(i: &IntegrityInput) -> Option<Violation> {
+    let HandoffStatus::Invalid(status) = &i.handoff?.status else {
+        return None;
+    };
+    Some(violation(
+        "handoff-status-invalid",
+        &[("status", status)],
+        &["handoff"],
+    ))
+}
+
+fn check_duplicate_id(i: &IntegrityInput) -> Option<Violation> {
+    // A `B-NNN` is one entry of the backlog or of one closing section; the
+    // same ID in `BACKLOG.md` and in the closing of its own spec is the
+    // archiving window, not a repetition.
+    let mut seen: Vec<(&str, Option<&str>, bool)> = Vec::new();
+    for e in i.backlog_all {
+        seen.push((e.id.as_str(), e.spec.as_deref(), false));
+    }
+    for c in i.closed {
+        seen.push((c.entry.id.as_str(), Some(c.spec.as_str()), true));
+    }
+    for (n, (id, spec, closed)) in seen.iter().enumerate() {
+        let repeated = seen[..n]
+            .iter()
+            .any(|(other_id, other_spec, other_closed)| {
+                other_id == id && !(closed != other_closed && other_spec == spec)
+            });
+        if repeated {
+            return Some(violation(
+                "duplicate-id",
+                &[("id", id)],
+                &["backlog", "changelog"],
+            ));
+        }
+    }
+    for (n, entry) in i.todo.iter().enumerate() {
+        if i.todo[..n].iter().any(|other| other.id == entry.id) {
+            return Some(violation("duplicate-id", &[("id", &entry.id)], &["todo"]));
+        }
+    }
+    None
+}
+
+fn check_changelog_spec_mismatch(i: &IntegrityInput) -> Option<Violation> {
+    for record in i.changelog {
+        let Some(file_spec) = record.file_spec.as_deref() else {
+            continue;
+        };
+        let entry_spec = i
+            .backlog_all
+            .iter()
+            .chain(i.closed.iter().map(|c| &c.entry))
+            .find(|e| e.id == record.backlog_id)
+            .and_then(|e| e.spec.as_deref());
+        if let Some(entry_spec) = entry_spec
+            && spec_prefix(entry_spec) != spec_prefix(file_spec)
+        {
+            return Some(violation(
+                "changelog-spec-mismatch",
+                &[
+                    ("todo_id", &record.todo_id),
+                    ("changelog_spec", file_spec),
+                    ("backlog_id", &record.backlog_id),
+                    ("backlog_spec", entry_spec),
+                ],
+                &["changelog", "backlog"],
+            ));
+        }
+    }
+    None
+}
+
 fn check_todo_cleared_before_changelog(i: &IntegrityInput) -> Option<Violation> {
     for entry in i.todo.iter().filter(|e| e.marker == 'x') {
-        let has = i.changelog.iter().any(|r| {
-            Some(r.backlog_id.as_str()) == i.active_backlog_id && r.todo_id == entry.id
-        });
+        let has = i
+            .changelog
+            .iter()
+            .any(|r| Some(r.backlog_id.as_str()) == i.active_backlog_id && r.todo_id == entry.id);
         if !has {
             return Some(violation(
                 "todo-cleared-before-changelog",
-                format!("A subtarefa {} está [x] sem registro no changelog.", entry.id),
+                &[("todo_id", &entry.id)],
                 &["handoff", "changelog"],
             ));
         }
@@ -202,7 +300,7 @@ fn check_backlog_done_with_pending_todo(i: &IntegrityInput) -> Option<Violation>
     if entry.is_some_and(|e| e.marker == 'x') && i.todo.iter().any(|e| e.marker != 'x') {
         return Some(violation(
             "backlog-done-with-pending-todo",
-            format!("Backlog {active} está done com TODO pendente."),
+            &[("backlog_id", active)],
             &["backlog", "todo"],
         ));
     }
@@ -210,14 +308,20 @@ fn check_backlog_done_with_pending_todo(i: &IntegrityInput) -> Option<Violation>
 }
 
 fn check_unknown_marker(i: &IntegrityInput) -> Option<Violation> {
+    // `[-]` only exists in the backlog: a subtask is never dropped.
     i.todo
         .iter()
-        .chain(i.backlog)
-        .find(|e| !KNOWN_MARKERS.contains(&e.marker))
+        .filter(|e| e.marker == '-' || !KNOWN_MARKERS.contains(&e.marker))
+        .chain(
+            i.backlog
+                .iter()
+                .filter(|e| e.marker != '-' && !KNOWN_MARKERS.contains(&e.marker)),
+        )
+        .next()
         .map(|e| {
             violation(
                 "unknown-marker",
-                format!("Marcador desconhecido \"[{}]\" em {}.", e.marker, e.id),
+                &[("marker", &e.marker.to_string()), ("id", &e.id)],
                 &["todo", "backlog"],
             )
         })
@@ -229,12 +333,15 @@ fn records<'a>(i: &'a IntegrityInput) -> [(&'static str, &'a [RawEntry]); 2] {
 
 fn check_needs_unknown_id(i: &IntegrityInput) -> Option<Violation> {
     for (name, entries) in records(i) {
-        let ids: HashSet<&str> = entries.iter().map(|e| e.id.as_str()).collect();
+        let mut ids: HashSet<&str> = entries.iter().map(|e| e.id.as_str()).collect();
+        if name == "backlog" {
+            ids.extend(i.closed.iter().map(|c| c.entry.id.as_str()));
+        }
         for entry in entries {
             if let Some(need) = entry.needs.iter().find(|n| !ids.contains(n.as_str())) {
                 return Some(violation(
                     "needs-unknown-id",
-                    format!("{} referencia {}, ausente em {}.", entry.id, need, name),
+                    &[("id", &entry.id), ("needed_id", need), ("record", name)],
                     &[name],
                 ));
             }
@@ -292,14 +399,14 @@ fn check_needs_cycle(i: &IntegrityInput) -> Option<Violation> {
         let (order, by_id) = index_by_id(entries);
         let mut color: HashMap<&str, u8> = HashMap::new();
         for id in order {
-            if color.get(id).copied().unwrap_or(0) == 0 {
-                if let Some(cycle) = visit(id, &[], &by_id, &mut color) {
-                    return Some(violation(
-                        "needs-cycle",
-                        format!("Ciclo em {}: {}.", name, cycle.join(" -> ")),
-                        &[name],
-                    ));
-                }
+            if color.get(id).copied().unwrap_or(0) == 0
+                && let Some(cycle) = visit(id, &[], &by_id, &mut color)
+            {
+                return Some(violation(
+                    "needs-cycle",
+                    &[("record", name), ("cycle", &cycle.join(" -> "))],
+                    &[name],
+                ));
             }
         }
     }
@@ -311,10 +418,14 @@ fn check_needs_incomplete_on_done(i: &IntegrityInput) -> Option<Violation> {
         let (_, by_id) = index_by_id(entries);
         for entry in entries.iter().filter(|e| e.marker == 'x') {
             for need in &entry.needs {
-                if by_id.get(need.as_str()).is_none_or(|dep| dep.marker != 'x') {
+                let archived_done = name == "backlog"
+                    && i.closed
+                        .iter()
+                        .any(|c| c.entry.id == *need && c.entry.marker == 'x');
+                if !archived_done && by_id.get(need.as_str()).is_none_or(|dep| dep.marker != 'x') {
                     return Some(violation(
                         "needs-incomplete-on-done",
-                        format!("{} está [x] mas precisa de {}, não concluído.", entry.id, need),
+                        &[("id", &entry.id), ("needed_id", need)],
                         &[name],
                     ));
                 }
@@ -322,6 +433,53 @@ fn check_needs_incomplete_on_done(i: &IntegrityInput) -> Option<Violation> {
         }
     }
     None
+}
+
+fn check_needs_dropped_entry(i: &IntegrityInput) -> Option<Violation> {
+    for entry in i
+        .backlog
+        .iter()
+        .filter(|e| e.marker != 'x' && e.marker != '-')
+    {
+        for need in &entry.needs {
+            let dropped = i.backlog.iter().any(|e| e.id == *need && e.marker == '-')
+                || i.closed
+                    .iter()
+                    .any(|c| c.entry.id == *need && c.entry.marker == '-');
+            if dropped {
+                return Some(violation(
+                    "needs-dropped-entry",
+                    &[("id", &entry.id), ("needed_id", need)],
+                    &["backlog"],
+                ));
+            }
+        }
+    }
+    None
+}
+
+fn check_dropped_without_reason(i: &IntegrityInput) -> Option<Violation> {
+    i.backlog
+        .iter()
+        .chain(i.closed.iter().map(|c| &c.entry))
+        .find(|e| e.marker == '-' && e.dropped.as_deref().is_none_or(|r| r.trim().is_empty()))
+        .map(|e| {
+            violation(
+                "dropped-without-reason",
+                &[("id", &e.id)],
+                &["backlog", "changelog"],
+            )
+        })
+}
+
+fn check_waived_without_drop(i: &IntegrityInput) -> Option<Violation> {
+    i.waivers.iter().find(|w| !w.has_drop).map(|w| {
+        violation(
+            "waived-without-drop",
+            &[("criterion", &w.criterion), ("spec", &w.spec)],
+            &["changelog"],
+        )
+    })
 }
 
 fn spec_prefix(path: &str) -> &str {
@@ -340,7 +498,7 @@ fn check_criteria_without_evidence(i: &IntegrityInput) -> Option<Violation> {
         }
     }
     for (spec_path, entries) in by_spec {
-        if !entries.iter().all(|e| e.marker == 'x') {
+        if !entries.iter().all(|e| e.marker == 'x' || e.marker == '-') {
             continue;
         }
         let Some(content) = i.specs.get(spec_path).filter(|c| !c.is_empty()) else {
@@ -354,17 +512,22 @@ fn check_criteria_without_evidence(i: &IntegrityInput) -> Option<Violation> {
         let missing: Vec<&String> = criteria
             .iter()
             .filter(|c| {
-                !i.changelog.iter().any(|r| {
-                    (r.spec == spec_path && r.criteria.contains(c))
-                        || (!prefix.is_empty() && r.criteria.contains(&format!("{prefix}/{c}")))
-                })
+                let waived = i
+                    .waivers
+                    .iter()
+                    .any(|w| w.has_drop && w.spec == spec_path && w.criterion == **c);
+                !waived
+                    && !i.changelog.iter().any(|r| {
+                        (r.spec == spec_path && r.criteria.contains(c))
+                            || (!prefix.is_empty() && r.criteria.contains(&format!("{prefix}/{c}")))
+                    })
             })
             .collect();
         if !missing.is_empty() {
             let list: Vec<&str> = missing.iter().map(|c| c.as_str()).collect();
             return Some(violation(
                 "criteria-without-evidence",
-                format!("Spec {}: critérios sem evidência: {}.", spec_path, list.join(", ")),
+                &[("spec", spec_path), ("criteria", &list.join(", "))],
                 &["backlog", "changelog", "spec"],
             ));
         }
@@ -374,19 +537,25 @@ fn check_criteria_without_evidence(i: &IntegrityInput) -> Option<Violation> {
 
 type Check = fn(&IntegrityInput) -> Option<Violation>;
 
-const CHECKS: [Check; 13] = [
+const CHECKS: [Check; 19] = [
     check_handoff_names_no_pending_todo,
     check_backlog_id_mismatch,
     check_spec_path_mismatch,
     check_handoff_harness,
     check_handoff_updated,
     check_multiple_handoffs,
+    check_handoff_status_invalid,
+    check_duplicate_id,
+    check_changelog_spec_mismatch,
     check_todo_cleared_before_changelog,
     check_backlog_done_with_pending_todo,
     check_unknown_marker,
     check_needs_unknown_id,
     check_needs_cycle,
     check_needs_incomplete_on_done,
+    check_needs_dropped_entry,
+    check_dropped_without_reason,
+    check_waived_without_drop,
     check_criteria_without_evidence,
 ];
 
@@ -446,7 +615,10 @@ mod tests {
 
     #[test]
     fn the_spec_prefix_is_the_first_date_and_sequence_in_the_path() {
-        assert_eq!(spec_prefix(".specs/20260907-001-ui.md"), "20260907-001");
+        assert_eq!(
+            spec_prefix(".specs/20260907-001-contrato.md"),
+            "20260907-001"
+        );
         assert_eq!(spec_prefix(".specs/sem-prefixo.md"), "");
     }
 }

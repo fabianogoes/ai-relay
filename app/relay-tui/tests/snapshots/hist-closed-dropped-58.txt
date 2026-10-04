@@ -1,0 +1,26 @@
+ relay  ~/Developer/relay                     ● atualizado
+
+╭ Tarefas · B-053 ───────────────────────────────────────╮
+│ Descartado: o relay-tui so le; a escrita fica nas      │
+│ skills e o assunto sai desta spec                      │
+│                                                        │
+│                                                        │
+╰────────────────────────────────────────────────────────╯
+
+╭────────────────────────────────────────────────────────╮
+│ Esc voltar · Tab agora · c config. · q sair            │
+╰────────────────────────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
+
+d.FFFFFFF.F.IIIII.dddddddddddddddddddddddddddddddddddddddd
+d.mmmmmmmmmmm.m.mmmmmmmmm.mm.mmm.m.mmmmmmm.mmmm.mmm......d
+d.mmmmmm.m.m.mmmmmmm.mmm.mmmmm.mmmm......................d
+d........................................................d
+d........................................................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmm.m.FFF.mmmmm.m.F.mmmmmmm.m.F.mmmm............d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

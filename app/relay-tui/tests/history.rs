@@ -1,32 +1,57 @@
-//! `extract_history` against the real records of this repository (spec
-//! 20261002-002, A-002): its specs, backlog entries and dozens of changelog
-//! records, with repeated `T-NNN`.
+//! `extract_history` against a checked-in snapshot of this repository's records
+//! (spec 20261003-002, A-008): specs, backlog entries and changelog records.
 
 use std::collections::HashSet;
 use std::path::Path;
 
-use relay_tui::core::{History, extract_history};
+use relay_tui::core::{History, RelayFiles, extract_history};
 use relay_tui::workspace::read_workspace;
 
+fn repository_files() -> RelayFiles {
+    let root =
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/data/repository-history/workspace");
+    read_workspace(&root)
+}
+
 fn real_history() -> History {
-    let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
-    extract_history(&read_workspace(&root))
+    extract_history(&repository_files())
+}
+
+#[test]
+fn history_reads_a_frozen_repository_snapshot() {
+    let files = repository_files();
+    assert_eq!(files.todo, "# Active task\n\nNo active task.\n");
 }
 
 #[test]
 fn every_spec_file_is_listed_newest_first_with_a_title() {
     let h = real_history();
-    assert!(h.specs.len() >= 6, "expected the repository's specs, got {}", h.specs.len());
+    assert!(
+        h.specs.len() >= 6,
+        "expected the repository's specs, got {}",
+        h.specs.len()
+    );
     let paths: Vec<&str> = h.specs.iter().map(|s| s.path.as_str()).collect();
     let mut sorted = paths.clone();
     sorted.sort_by(|a, b| b.cmp(a));
     assert_eq!(paths, sorted, "specs must be in descending file-name order");
     for spec in &h.specs {
-        assert!(!spec.title.is_empty() && !spec.id.is_empty(), "{}", spec.path);
+        assert!(
+            !spec.title.is_empty() && !spec.id.is_empty(),
+            "{}",
+            spec.path
+        );
         assert!(!spec.title.starts_with('#'), "{}", spec.path);
     }
-    let first = h.specs.iter().find(|s| s.id == "20260907-002").expect("spec 20260907-002");
-    assert!(!first.title.contains("20260907-002 -"), "the id is split from the title");
+    let first = h
+        .specs
+        .iter()
+        .find(|s| s.id == "20260907-002")
+        .expect("spec 20260907-002");
+    assert!(
+        !first.title.contains("20260907-002 -"),
+        "the id is split from the title"
+    );
 }
 
 #[test]
@@ -40,7 +65,11 @@ fn backlog_items_are_grouped_under_the_spec_they_point_at() {
     let ids: Vec<&str> = navigation.items.iter().map(|i| i.id.as_str()).collect();
     assert!(ids.contains(&"B-040") && ids.contains(&"B-041"), "{ids:?}");
     let b040 = navigation.items.iter().find(|i| i.id == "B-040").unwrap();
-    assert!(b040.text.contains("ADR-0004"), "annotations are stripped: {}", b040.text);
+    assert!(
+        b040.text.contains("ADR-0004"),
+        "annotations are stripped: {}",
+        b040.text
+    );
     assert!(!b040.text.contains("spec:") && !b040.text.contains("needs:"));
     // The oldest spec's items are all done and counted, never a percentage.
     let old = h.specs.iter().find(|s| s.id == "20260907-002").unwrap();
@@ -64,8 +93,15 @@ fn tasks_of_a_finished_item_carry_every_field() {
     let last = tasks[2];
     assert!(last.title.contains("Histórico"), "{}", last.title);
     assert_eq!(last.date, "2026-10-03");
-    assert_eq!(last.spec.as_deref(), Some(".specs/20261002-002-relay-tui-navegacao-pelo-historico.md"));
-    assert!(last.result.as_deref().is_some_and(|r| r.contains("AGENTS.md")));
+    assert_eq!(
+        last.spec.as_deref(),
+        Some(".specs/20261002-002-relay-tui-navegacao-pelo-historico.md")
+    );
+    assert!(
+        last.result
+            .as_deref()
+            .is_some_and(|r| r.contains("AGENTS.md"))
+    );
     assert!(last.evidence.is_some() && last.decisions.is_some());
     assert_eq!(last.criteria.as_deref(), Some("A-001"));
 }

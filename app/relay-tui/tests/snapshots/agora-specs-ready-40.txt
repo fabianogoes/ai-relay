@@ -36,7 +36,7 @@
   Comece T-002 com relay-session.
 
 ╭──────────────────────────────────────╮
-│ Tab histórico · q sair               │
+│ Tab histórico · c config. · q sair   │
 ╰──────────────────────────────────────╯
 
 --- colors ---
@@ -78,5 +78,5 @@ dddddddddddddddddddddddddddddddddddddddd
 ..mmmmmm.iiiii.mmm.FFFFFFFFFFFFFm
 
 dddddddddddddddddddddddddddddddddddddddd
-d.FFF.mmmmmmmmm.m.F.mmmm...............d
+d.FFF.mmmmmmmmm.m.F.mmmmmmm.m.F.mmmm...d
 dddddddddddddddddddddddddddddddddddddddd

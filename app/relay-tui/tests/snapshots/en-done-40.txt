@@ -1,0 +1,50 @@
+ relay  ~/Developer/relay   ● up to date
+
+╭ ● Done ──────────────────────────────╮
+│ ✓ 4 of 4 in backlog items completed. │
+╰──────────────────────────────────────╯
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  Everything is complete. For a new i…
+
+╭──────────────────────────────────────╮
+│ Tab history · c settings · q quit    │
+╰──────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm...g.mm.mm.mmmm
+
+g.G.GGGG.ggggggggggggggggggggggggggggggg
+g.G.f.ff.f.ff.fffffff.fffff.ffffffffff.g
+gggggggggggggggggggggggggggggggggggggggg
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+..mmmmmmmmmm.mm.mmmmmmmmm.mmm.m.mmm.mm
+
+dddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmm.m.F.mmmmmmmm.m.F.mmmm....d
+dddddddddddddddddddddddddddddddddddddddd

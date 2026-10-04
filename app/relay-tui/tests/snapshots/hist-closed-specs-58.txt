@@ -1,0 +1,26 @@
+ relay  ~/Developer/relay                     ● atualizado
+
+╭ Specs ─────────────────────────────────────────────────╮
+│ ▸ 20261003-001 Changelog por spec        fechada · 2/2 │
+│   20261002-001 relay-tui                           1/2 │
+│   20260901-001 Contrato do estado derivado         0/0 │
+│                                                        │
+╰────────────────────────────────────────────────────────╯
+
+╭────────────────────────────────────────────────────────╮
+│ Esc voltar · Tab agora · c config. · q sair            │
+╰────────────────────────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
+
+d.FFFFF.dddddddddddddddddddddddddddddddddddddddddddddddddd
+d.U.iiiiiiiiiiii.FFFFFFFFF.FFF.FFFF........mmmmmmm.m.mmm.d
+d...iiiiiiiiiiii.fffffffff...........................mmm.d
+d...iiiiiiiiiiii.ffffffff.ff.ffffff.ffffffff.........mmm.d
+d........................................................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmm.m.FFF.mmmmm.m.F.mmmmmmm.m.F.mmmm............d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

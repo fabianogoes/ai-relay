@@ -1,6 +1,7 @@
 //! Text helpers for a grid of terminal columns: wrapping, truncating and the
 //! relative time of a handoff. Pure: the clock is a parameter.
 
+use crate::language::Language;
 use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 
 pub fn width(text: &str) -> usize {
@@ -124,7 +125,8 @@ pub fn parse_rfc3339(value: &str) -> Option<i64> {
                 b'-' => -1,
                 _ => return None,
             };
-            sign * (tail.get(1..3)?.parse::<i64>().ok()? * 3600 + tail.get(4..6)?.parse::<i64>().ok()? * 60)
+            sign * (tail.get(1..3)?.parse::<i64>().ok()? * 3600
+                + tail.get(4..6)?.parse::<i64>().ok()? * 60)
         }
         _ => return None,
     };
@@ -135,15 +137,42 @@ pub fn parse_rfc3339(value: &str) -> Option<i64> {
 /// How long ago `updated` was, in Portuguese; an unparseable value is returned
 /// as it came. A timestamp in the future (a skewed clock) reads as `agora`.
 pub fn relative_time(updated: &str, now_unix: i64) -> String {
+    relative_time_in(updated, now_unix, Language::PtBr)
+}
+
+pub fn relative_time_in(updated: &str, now_unix: i64, language: Language) -> String {
     let Some(then) = parse_rfc3339(updated) else {
         return updated.to_string();
     };
     let seconds = now_unix - then;
     match seconds {
-        s if s < 60 => "agora".to_string(),
-        s if s < 3600 => format!("há {} min", s / 60),
-        s if s < 86_400 => format!("há {} h", s / 3600),
-        s => format!("há {} d", s / 86_400),
+        s if s < 60 => if language == Language::En {
+            "now"
+        } else {
+            "agora"
+        }
+        .to_string(),
+        s if s < 3600 => {
+            if language == Language::En {
+                format!("{} min ago", s / 60)
+            } else {
+                format!("há {} min", s / 60)
+            }
+        }
+        s if s < 86_400 => {
+            if language == Language::En {
+                format!("{} h ago", s / 3600)
+            } else {
+                format!("há {} h", s / 3600)
+            }
+        }
+        s => {
+            if language == Language::En {
+                format!("{} d ago", s / 86_400)
+            } else {
+                format!("há {} d", s / 86_400)
+            }
+        }
     }
 }
 
@@ -171,7 +200,10 @@ mod tests {
 
     #[test]
     fn wrap_breaks_on_spaces_and_collapses_whitespace() {
-        assert_eq!(wrap("um  dois\ntres quatro", 9), ["um dois", "tres", "quatro"]);
+        assert_eq!(
+            wrap("um  dois\ntres quatro", 9),
+            ["um dois", "tres", "quatro"]
+        );
         assert_eq!(wrap("", 10), Vec::<String>::new());
         assert_eq!(wrap("cabe", 10), ["cabe"]);
     }
@@ -184,12 +216,18 @@ mod tests {
 
     #[test]
     fn wrap_capped_ends_the_last_line_with_an_ellipsis() {
-        assert_eq!(wrap_capped("um dois tres quatro cinco", 9, 2), ["um dois", "tres …"]);
+        assert_eq!(
+            wrap_capped("um dois tres quatro cinco", 9, 2),
+            ["um dois", "tres …"]
+        );
         assert_eq!(wrap_capped("um dois", 20, 2), ["um dois"]);
         // A full last line still shows that the text went on.
         let lines = wrap_capped("aaaa bbbb cccc", 4, 2);
         assert_eq!(lines.len(), 2);
-        assert!(lines[1].ends_with('…') && width(&lines[1]) <= 4, "{lines:?}");
+        assert!(
+            lines[1].ends_with('…') && width(&lines[1]) <= 4,
+            "{lines:?}"
+        );
     }
 
     #[test]

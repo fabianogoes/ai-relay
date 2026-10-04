@@ -3,11 +3,13 @@
   "violations": [
     {
       "check": "todo-cleared-before-changelog",
-      "detail": "A subtarefa T-001 está [x] sem registro no changelog.",
       "records": [
         "handoff",
         "changelog"
-      ]
+      ],
+      "params": {
+        "todo_id": "T-001"
+      }
     }
   ]
 }

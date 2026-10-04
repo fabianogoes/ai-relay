@@ -7,24 +7,21 @@ description: Use when a Relay-managed repository needs its current operational s
 
 Execute this skill; do not quote it. Read-only inspection only.
 
-Read `AGENTS.md`, then `.orchestration/HANDOFF.md`, `TODO.md`, `BACKLOG.md`,
-and referenced `.specs/` files. Interpret checklist markers as `[ ]` pending,
-`[•]` in progress, `[!]` blocked, and `[x]` complete. An entry is available
-when it is `[ ]` and every ID in its `needs` is `[x]`. Then derive one result:
-`in_progress`, `blocked`, `ready`, `done`, `backlog`, `idle`, or diagnostic
-`inconsistent`.
+Read `references/contract.md` first: it is the protocol's own text for the
+statuses, the record templates and the integrity checks. Then read `AGENTS.md`,
+`.orchestration/HANDOFF.md`, `TODO.md`, `BACKLOG.md`, the `.specs/` files they
+reference and the changelog of the active spec. Interpret markers as `[ ]`
+pending, `[•]` in progress, `[!]` blocked, `[x]` complete and `[-]` dropped
+(backlog only). An entry is available when it is `[ ]` and every ID in its
+`needs` is `[x]`. Then derive one result: `in_progress`, `blocked`, `ready`,
+`done`, `backlog`, `idle`, or diagnostic `inconsistent`.
 
-Treat a `needs` reference to an ID absent from the same record, a cycle among
-`needs`, an `[x]` entry whose needs are incomplete, an active backlog ID absent
-from the backlog or disagreed among handoff, TODO, and backlog, an active task
-without a confrontable backlog entry or with a spec differing from the
-handoff, or a spec whose backlog entries are all `[x]` while one of its `A-NNN`
-acceptance criteria is named by no changelog record, as `inconsistent`.
-
-For every nonempty handoff, require `Harness` to match
-`[a-z0-9][a-z0-9._-]*`. Require `Updated` to use the RFC 3339 form
-`YYYY-MM-DDTHH:MM:SSZ` or `YYYY-MM-DDTHH:MM:SS±HH:MM`. Missing or malformed
-provenance makes the result `inconsistent`.
+Apply **every** condition under "Integrity checks" in the contract, not a
+subset, and report the result `inconsistent` when any fails, naming each failed
+check. Read a record the way "Reading records" says: handoff metadata are the
+lines before the first `##`, and CRLF reads as LF. Require the handoff
+`Harness` and `Updated` provenance the Handoff template describes; missing or
+malformed provenance makes the result `inconsistent`.
 
 Report the active IDs, next action or blocker, and every failed cross-reference
 check. For a nonempty handoff, also report its origin harness and update

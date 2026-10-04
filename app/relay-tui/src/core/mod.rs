@@ -13,6 +13,4 @@ pub use history::{
     History, HistoryItem, SpecEntry, TaskRecord, extract_history, extract_task_records, spec_id,
     spec_title,
 };
-pub use types::{
-    ChecklistEntry, Handoff, OkState, RelayFiles, RelayState, Violation, WorkStatus,
-};
+pub use types::{ChecklistEntry, Handoff, OkState, RelayFiles, RelayState, Violation, WorkStatus};
