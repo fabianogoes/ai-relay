@@ -42,6 +42,39 @@ xattr -d com.apple.quarantine ~/.local/bin/relay-tui
 
 Every file has a `.sha256` next to it: `shasum -a 256 -c <file>.sha256`.
 
+## Update
+
+Before setting up another project, check `relay-tui --version` and compare it
+with the latest version on [Releases](https://github.com/fabianogoes/ai-relay/releases).
+Keep the installed binary when it is already current. If it is missing or older,
+download the latest archive for your platform, verify its checksum, and replace
+the installed binary:
+
+```sh
+# Select the latest release and your platform.
+latest_url="$(curl -fsSL -o /dev/null -w '%{url_effective}' https://github.com/fabianogoes/ai-relay/releases/latest)"
+version="${latest_url##*/relay-tui-v}"
+target=aarch64-apple-darwin
+archive="relay-tui-${version}-${target}.tar.gz"
+release="https://github.com/fabianogoes/ai-relay/releases/download/relay-tui-v${version}"
+curl -fLO "${release}/${archive}"
+curl -fLO "${release}/${archive}.sha256"
+if command -v shasum >/dev/null 2>&1; then
+  shasum -a 256 -c "${archive}.sha256"
+else
+  sha256sum -c "${archive}.sha256"
+fi
+tar -xzf "${archive}"
+mkdir -p "$HOME/.local/bin"
+install -m 755 "relay-tui-${version}-${target}/relay-tui" "$HOME/.local/bin/relay-tui"
+relay-tui --version
+```
+
+Use `aarch64-apple-darwin` for Apple Silicon, `x86_64-apple-darwin` for Intel
+macOS, or the matching Linux target from the table above. If `relay-tui` points
+to a source checkout instead of a downloaded binary, update that checkout and
+rebuild it with `cargo build --release --locked` rather than replacing the link.
+
 ## Open it in a split
 
 Ask the agent to do it. In Claude Code the `relay-tui-split` skill is the command

@@ -106,6 +106,33 @@ See [.opencode/INSTALL.md](../.opencode/INSTALL.md) for the adapter notes. The
 OpenCode installation remains a native Agent Skills discovery link; no custom
 runtime is installed.
 
+## Set up another project on this machine
+
+Install the Relay skills in your harness once, using the section above. If the
+skills are already available, do not install the package again for every
+repository. From the root of each new Git repository, invoke `relay-setup` in
+the harness:
+
+| Harness | Invocation |
+| --- | --- |
+| Claude Code | `/relay-setup` |
+| Codex or OpenCode | `Use relay-setup` |
+
+`relay-setup` configures the repository where it runs. It creates missing Relay
+files and adds the managed section to `AGENTS.md` without replacing existing
+instructions or records. If no workspace language is set, it asks once and
+saves the choice. Running it again is safe: it preserves existing content and
+creates nothing that is already present. Run `relay-status` from the same
+repository to check the result.
+
+The `relay-tui` binary is installed for the machine, not copied into each
+project. Run `relay-tui --version` and compare it with the latest version on
+[Releases](https://github.com/fabianogoes/ai-relay/releases). If it is current,
+no update is needed; if it is missing or older, follow [the TUI update steps in
+TUI.md](TUI.md#update). Then invoke `relay-tui-split` from the new repository
+to open the panel on that workspace. Review and commit the generated project
+configuration that should be shared with the repository.
+
 ## Updating
 
 Relay uses one shared `skills/` directory. Refresh the checkout or installed
