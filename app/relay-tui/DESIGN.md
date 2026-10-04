@@ -86,6 +86,67 @@ Duas regras que a medição impôs:
 o estado que trava o resto da tela. Tom e rótulo textual são obrigatórios
 (princípio 3).
 
+## Idioma
+
+A tela, a ajuda e os erros usam a mesma resolução: `--lang en|pt-BR`, depois
+`- Language:` válido em `.orchestration/SETTINGS.md`, depois `LC_ALL`,
+`LC_MESSAGES`, `LANG`, e por fim inglês. Locale cujo valor começa com `pt`
+seleciona pt-BR; qualquer outro locale seleciona inglês. Um idioma inválido ou
+ausente em SETTINGS é ignorado. O idioma efetivo é recalculado quando o
+workspace é recarregado. A tela Configurações permite trocar o idioma efetivo
+durante esta execução; essa escolha de sessão prevalece até o processo sair,
+inclusive sobre `--lang`, e sobrevive ao recarregamento do workspace. Ela não
+escreve em SETTINGS nem nos cinco registros. Conteúdo dos registros (objetivo,
+próximo passo, nomes e títulos) permanece como foi escrito.
+
+| Chave de tela | pt-BR | English |
+| --- | --- | --- |
+| `in_progress` | Em andamento | In progress |
+| `blocked` | Bloqueado | Blocked |
+| `inconsistent` | Inconsistente | Inconsistent |
+| `ready` | Pronto | Ready |
+| `backlog` | A escolher | Backlog |
+| `done` | Concluído | Done |
+| `idle` | Sem trabalho | Idle |
+| `fresh` | atualizado | up to date |
+| `updating` | atualizando | updating |
+| `handoff` | Handoff | Handoff |
+| `todo` | TODO | TODO |
+| `current_spec` | Spec atual | Current spec |
+| `pending_specs` | Specs pendentes | Pending specs |
+| `objective` | Objetivo | Objective |
+| `next` | Próximo | Next |
+| `block` | Bloqueio | Block |
+| `active` | em curso | in progress |
+| `up_next` | a seguir | up next |
+| `available` | disponível | available |
+| `waiting` | aguardando | waiting |
+| `blocked_item` | bloqueado | blocked |
+| `no_handoff` | Sem handoff ativo | No active handoff |
+| `no_workspace` | Não é um workspace Relay | Not a Relay workspace |
+| `no_work` | Nenhum backlog, TODO ou handoff neste workspace. | No backlog, TODO, or handoff in this workspace. |
+| `quit` | sair | quit |
+| `reload` | recarregar | reload |
+| `move` | mover | move |
+| `scroll` | rolar | scroll |
+| `open` | abrir | open |
+| `back` | voltar | back |
+| `history` | histórico | history |
+| `now` | agora | now |
+| `settings` | config. | settings |
+| `settings_title` | Configurações | Settings |
+| `language` | Idioma | Language |
+| `language_en` | English | English |
+| `language_pt_br` | Português (Brasil) | Portuguese (Brazil) |
+| `current` | atual | current |
+| `select` | selecionar | select |
+| `apply` | aplicar | apply |
+
+Todos os textos fixos da view, inclusive sugestões, perguntas de saída,
+violações, tempos relativos e nomes dos níveis do Histórico, têm entrada nos
+catálogos do código para os dois idiomas. IDs, nomes de harness, caminhos e
+texto dos registros não são traduzidos.
+
 ## Estrutura
 
 - **Cartões** com borda arredondada (`╭ ╮ ╰ ╯`) e o título na própria borda:
@@ -104,9 +165,9 @@ o estado que trava o resto da tela. Tom e rótulo textual são obrigatórios
   linha de contagem; abaixo de
   cerca de 40 colunas aparecem só o cabeçalho e o status.
 - **Teclas:** em Agora, `q` e `Ctrl-C` saem na hora e `Esc` pergunta antes (ver
-  "Confirmar a saída"); `Tab` abre a visão Histórico
-  e `r` recarrega (ADR-0004; ver "Visão Histórico"). O rodapé mostra só as teclas
-  válidas na tela atual.
+  "Confirmar a saída"); `Tab` abre a visão Histórico, `r` recarrega e `c` abre
+  Configurações em Agora ou Histórico. Ao voltar, a visão, o nível e a seleção
+  anteriores são preservados. O rodapé mostra só as teclas válidas na tela atual.
 
 ## View
 
@@ -140,11 +201,31 @@ couber, a versão compacta abaixo. O que passa do teto termina em `…`.
 5. **Próximo passo**, uma linha logo acima do rodapé (ver "Próximo passo"
    abaixo).
 6. **Rodapé**, um cartão de três linhas (borda `dim`) com `Tab histórico · r
-   recarregar · q sair`, as teclas em negrito `fg` e o resto em `meta`, separado do
+   recarregar · c config. · q sair`, as teclas em negrito `fg` e o resto em `meta`, separado do
    corpo por uma linha em branco. Abaixo de 10 linhas de altura (sem a linha em
    branco do topo também) volta a ser uma linha só, como antes. Quando não cabe na largura útil dos cartões
-   (a largura menos quatro), saem indicações inteiras, `r recarregar` primeiro e
-   depois `Tab`; `q sair` fica sempre. Em 40 colunas, `Tab histórico · q sair`.
+   (a largura menos quatro), saem indicações inteiras, `r recarregar` primeiro;
+   `c config.` permanece junto às teclas principais antes de `q sair`. Em 40 colunas, Agora mostra
+   `Tab histórico · c config. · q sair`.
+
+## Configurações
+
+`c` abre Configurações a partir de Agora ou de qualquer nível de Histórico. A
+tela é estado local da TUI: ao voltar com `Esc`, restaura a visão, o nível e a
+seleção anteriores. Não muda o estado do protocolo nem grava arquivos.
+
+O cartão tem o título `Configurações` ou `Settings` e um único campo, `Idioma` /
+`Language`, com as opções `Português (Brasil)` / `Portuguese (Brazil)` e
+`English`. `↑` e `↓` movem a seleção provisória; uma seta `▸` e negrito `fg`
+marcam a opção selecionada. A opção de idioma efetiva traz `· atual` /
+`· current`. `Enter` aplica a opção e volta à tela anterior; `Esc` cancela a
+seleção provisória e volta; `q` e `Ctrl-C` encerram a TUI. O idioma aplicado
+muda imediatamente todos os rótulos e permanece ativo nesta execução, mesmo
+quando o workspace é recarregado.
+
+O rodapé de Configurações mostra `↑↓ selecionar · Enter aplicar · Esc voltar ·
+q sair`, conforme couber; indicações inteiras podem sumir em terminais estreitos,
+mas as teclas continuam válidas.
 
 **Próximo passo.** Uma linha, e não um cartão: um cartão competiria com o
 Handoff, que é o objeto central da tela (princípio 1). Ela é função só do estado
@@ -209,7 +290,7 @@ e sem recalcular nada (o `available` e o marcador vêm do core):
   o cartão diz `a seguir`, sem afirmar prioridade. Dentro, os itens ainda não
   feitos da spec, na ordem textual, com o marcador à esquerda e a palavra à direita
   (`em curso`, `disponível`, `aguardando · após B-NNN` em `yellow`, `bloqueado`);
-  os feitos entram só na contagem. Sem item que ancore a spec (backlog sem item
+  os feitos entram só na contagem e os descartados nem nela. Sem item que ancore a spec (backlog sem item
   disponível, ou item ativo sem spec válida) o cartão não aparece.
 - **Specs pendentes**: uma linha por spec, além da atual, que tem ao menos um item
   não feito, na ordem em que aparecem pela primeira vez no `BACKLOG.md`: id,
@@ -255,10 +336,26 @@ em `…`. Contagens são `feitos/total`, nunca porcentagem.
 
 | Nível | Ordem | Linha |
 | --- | --- | --- |
-| Specs | arquivos de `.specs/`, do mais recente ao mais antigo (nome decrescente) | id `AAAAMMDD-NNN` em `id`, título e `feitos/total` dos itens (`0/0` sem itens); uma última linha **Sem spec** reúne os itens cuja `spec:` falta ou não é um arquivo de `.specs/` |
-| Itens de backlog | ordem textual do `BACKLOG.md` | id, texto (sem as anotações `spec:`/`needs:`) e o estado, com o mesmo marcador e palavra do cartão Backlog de Agora |
+| Specs | arquivos de `.specs/`, do mais recente ao mais antigo (nome decrescente) | id `AAAAMMDD-NNN` em `id`, título e `feitos/total` dos itens (`0/0` sem itens), com `fechada ·` antes da contagem numa spec fechada; uma última linha **Sem spec** reúne os itens cuja `spec:` falta ou não é um arquivo de `.specs/` |
+| Itens de backlog | primeiro as entradas arquivadas no fechamento da spec, na ordem da seção `Closed`, depois as do `BACKLOG.md` na ordem textual | id, texto (sem as anotações `spec:`/`needs:`/`dropped:`) e o estado, com o mesmo marcador e palavra do cartão Backlog de Agora; uma entrada arquivada `[x]` é `✓ feito` e uma `[-]` é `× descartado` |
 | Tarefas | registros do changelog cujo `Backlog` é o item, na ordem textual; um `T-NNN` repetido (correção append-only) é uma linha própria | id, título e data do registro; se o item é o do TODO atual, os itens do TODO ainda sem registro vêm depois, com o marcador do TODO e a palavra `sem registro` |
 | Detalhe | — | título inteiro e os campos do registro (Backlog, Spec, Result, Evidence, Criteria, Decisions), com as linhas de continuação juntadas ao campo; campo ausente é omitido, nunca inventado; tarefa sem registro mostra id, texto, marcador e `Sem registro no changelog ainda.` |
+
+**Specs fechadas e itens descartados.** Fechar uma spec tira as entradas dela do
+`BACKLOG.md` e as arquiva no changelog (ADR-0006); o Histórico é onde elas
+continuam visíveis. Uma spec é **fechada** quando o changelog dela tem uma seção
+`## Closed`: a linha leva `fechada ·` em `meta` antes do `feitos/total`, e o
+nível de itens lista as entradas arquivadas. A contagem `feitos/total` soma as
+entradas do `BACKLOG.md` e as arquivadas, e **não conta as descartadas**: um item
+descartado deixou de ser trabalho a fazer (uma spec com tudo feito ou descartado
+mostra `3/3`). Um item descartado tem o marcador `×` e a palavra `descartado` em
+`meta`, e o texto também em `meta`, como o feito. O motivo vem ao abrir o item:
+no nível de tarefas, onde um item descartado normalmente não tem registro, o aviso
+vazio é `Descartado: <motivo>`, em `meta` e quebrado pela largura, nunca cortado;
+se o item tem registros, a lista deles aparece como em qualquer item. **Agora não
+mostra descartados** nem arquivados: o cartão Spec atual, Specs pendentes e as
+contagens só olham o trabalho aberto, e uma spec sem item pendente não é
+pendente.
 
 O título de uma spec é o texto após `AAAAMMDD-NNN - ` no primeiro `# ` do
 arquivo; sem esse formato, o texto inteiro do `# `; sem `# `, o nome do arquivo.
@@ -295,15 +392,16 @@ que existe.
 
 **Rodapé**, em `meta`, só com as teclas válidas na tela:
 
-- Agora: `Tab histórico · r recarregar · q sair`.
+- Agora: `Tab histórico · r recarregar · c config. · q sair`.
 - Histórico, nas listas: `↑↓ mover · Enter abrir · Esc voltar · Tab agora · r
-  recarregar · q sair`.
-- Histórico, no detalhe: `↑↓ rolar · Esc voltar · Tab agora · r recarregar · q
-  sair`.
+  recarregar · c config. · q sair`.
+- Histórico, no detalhe: `↑↓ rolar · Esc voltar · Tab agora · r recarregar · c
+  config. · q sair`.
+- Configurações: `↑↓ selecionar · Enter aplicar · Esc voltar · q sair`.
 
 Quando não cabe, saem indicações inteiras, nunca meia, da menos para a mais
 importante: `r recarregar`, `↑↓`, `Enter abrir`, `Esc voltar`, `Tab`; `q sair`
-fica sempre. Em 40 colunas, Agora mostra `Tab histórico · q sair`.
+fica sempre. Em 40 colunas, Agora mostra `Tab histórico · c config. · q sair`.
 
 ## Confirmar a saída
 

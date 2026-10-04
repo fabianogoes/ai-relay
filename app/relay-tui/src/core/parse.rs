@@ -4,8 +4,8 @@
 //! to:
 //!
 //! * `\d` is `[0-9]` and `\b` is the ASCII word boundary.
-//! * `.` is `[^\n\r\x{2028}\x{2029}]`, so a CRLF line never matches a pattern
-//!   ending in `(.*)$`.
+//! * `.` is `[^\n\r\x{2028}\x{2029}]`, and every parser reads `\r\n` as
+//!   `\n` first, so a CRLF record derives the same state as an LF one.
 //! * A checklist marker is one UTF-16 code unit, so a character outside the
 //!   BMP never forms a marker.
 
@@ -21,12 +21,17 @@ pub(crate) struct RawEntry {
     pub marker: char,
     pub needs: Vec<String>,
     pub spec: Option<String>,
+    /// `Some` when the entry carries `(dropped: <reason>)`; the reason may be
+    /// empty, which the `dropped-without-reason` check reports.
+    pub dropped: Option<String>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) enum HandoffStatus {
     InProgress,
     Blocked,
+    /// Anything else, with the text found (empty when the line is missing).
+    Invalid(String),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -50,6 +55,18 @@ pub(crate) struct ChangelogRecord {
     pub backlog_id: String,
     pub spec: String,
     pub criteria: Vec<String>,
+    /// The spec of the per-spec file that holds the record; `None` in the
+    /// legacy file, where the record names its own `Spec`.
+    pub file_spec: Option<String>,
+}
+
+/// What one changelog text holds: its records, and the entries and waivers of
+/// its `## Closed` sections.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub(crate) struct ParsedChangelog {
+    pub records: Vec<ChangelogRecord>,
+    pub closed: Vec<RawEntry>,
+    pub waived: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -65,11 +82,18 @@ pub(crate) struct ParsedHandoff {
 }
 
 static CHECKLIST_LINE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"^\s*[-*]\s*\[([^\]\x{10000}-\x{10FFFF}])\]\s+(\S+)\s*-\s*([^\n\r\x{2028}\x{2029}]*)$")
-        .unwrap()
+    Regex::new(
+        r"^\s*[-*]\s*\[([^\]\x{10000}-\x{10FFFF}])\]\s+(\S+)\s*-\s*([^\n\r\x{2028}\x{2029}]*)$",
+    )
+    .unwrap()
 });
 static SPEC_ANNOT: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\(spec:\s*([^)]*)\)").unwrap());
-static NEEDS_ANNOT: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\(needs:\s*([^)]*)\)").unwrap());
+static NEEDS_ANNOT: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"\(needs:\s*([^)]*)\)").unwrap());
+static DROPPED_ANNOT: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"\(dropped:\s*([^)]*)\)").unwrap());
+static CLOSED_HEADER: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"^##\s+Closed(?:\s|$)").unwrap());
 static TODO_HEADER: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"(?m)^#\s*Active task(?:\s*:\s*(\S+))?\s*$").unwrap());
 static KEY_VALUE: LazyLock<Regex> =
@@ -97,6 +121,11 @@ fn take_annot(text: &str, re: &Regex) -> (String, String) {
     (value, rest.trim().to_string())
 }
 
+/// Every parser reads CRLF as LF.
+fn lf(text: &str) -> String {
+    text.replace("\r\n", "\n")
+}
+
 fn split_list(value: &str) -> Vec<String> {
     value
         .split(',')
@@ -108,12 +137,16 @@ fn split_list(value: &str) -> Vec<String> {
 
 fn parse_checklist_lines(text: &str) -> Vec<RawEntry> {
     let mut entries = Vec::new();
-    for line in text.split('\n') {
+    for line in lf(text).split('\n') {
         let Some(m) = CHECKLIST_LINE.captures(line) else {
             continue;
         };
         let (spec_value, rest) = take_annot(&m[3], &SPEC_ANNOT);
         let (needs_value, rest) = take_annot(&rest, &NEEDS_ANNOT);
+        let dropped = DROPPED_ANNOT
+            .is_match(&rest)
+            .then(|| take_annot(&rest, &DROPPED_ANNOT).0);
+        let (_, rest) = take_annot(&rest, &DROPPED_ANNOT);
         entries.push(RawEntry {
             id: m[2].to_string(),
             text: rest.trim().to_string(),
@@ -128,6 +161,7 @@ fn parse_checklist_lines(text: &str) -> Vec<RawEntry> {
             } else {
                 Some(spec_value.replace('`', ""))
             },
+            dropped,
         });
     }
     entries
@@ -138,56 +172,85 @@ pub(crate) fn parse_backlog(text: &str) -> Vec<RawEntry> {
 }
 
 pub(crate) fn parse_todo(text: &str) -> ParsedTodo {
+    let text = lf(text);
     let active_backlog_id = TODO_HEADER
-        .captures(text)
+        .captures(&text)
         .and_then(|c| c.get(1))
         .map(|g| g.as_str().to_string());
-    ParsedTodo { active_backlog_id, entries: parse_checklist_lines(text) }
+    ParsedTodo {
+        active_backlog_id,
+        entries: parse_checklist_lines(&text),
+    }
+}
+
+/// The empty handoff is exactly the empty form of the template (or no text):
+/// mentioning "No active handoff" somewhere else does not empty a handoff.
+fn is_empty_handoff(text: &str) -> bool {
+    let lines: Vec<&str> = text
+        .lines()
+        .map(str::trim)
+        .filter(|l| !l.is_empty())
+        .collect();
+    lines.is_empty() || lines == ["# Handoff", "No active handoff."]
 }
 
 pub(crate) fn parse_handoff(text: &str) -> ParsedHandoff {
-    if text.trim().is_empty() || text.contains("No active handoff") {
-        return ParsedHandoff { count: 0, handoff: None };
+    let text = lf(text);
+    if is_empty_handoff(&text) {
+        return ParsedHandoff {
+            count: 0,
+            handoff: None,
+        };
     }
 
+    // The metadata are the `- Key: value` lines before the first `##`; what
+    // follows is free text.
     let mut kv: HashMap<String, String> = HashMap::new();
     let mut sections: HashMap<String, String> = HashMap::new();
     let mut count = 0;
     let mut current: Option<String> = None;
 
     for line in text.split('\n') {
-        if let Some(m) = KEY_VALUE.captures(line) {
-            let key = m[1].to_ascii_lowercase();
-            if key == "status" {
-                count += 1;
-            }
-            kv.insert(key, m[2].trim().to_string());
-            current = None;
-            continue;
-        }
         if let Some(m) = SECTION.captures(line) {
             let name = m[1].trim().to_lowercase();
             sections.insert(name.clone(), String::new());
             current = Some(name);
             continue;
         }
-        if let Some(name) = &current {
-            let body = sections.get_mut(name).unwrap();
-            if !body.is_empty() {
-                body.push('\n');
+        match &current {
+            Some(name) => {
+                let body = sections.get_mut(name).unwrap();
+                if !body.is_empty() {
+                    body.push('\n');
+                }
+                body.push_str(line);
             }
-            body.push_str(line);
+            None => {
+                if let Some(m) = KEY_VALUE.captures(line) {
+                    let key = m[1].to_ascii_lowercase();
+                    if key == "status" {
+                        count += 1;
+                    }
+                    kv.insert(key, m[2].trim().to_string());
+                }
+            }
         }
     }
 
-    let field = |map: &HashMap<String, String>, key: &str| map.get(key).cloned().unwrap_or_default();
-    let section = |key: &str| sections.get(key).map(|s| s.trim().to_string()).unwrap_or_default();
+    let field =
+        |map: &HashMap<String, String>, key: &str| map.get(key).cloned().unwrap_or_default();
+    let section = |key: &str| {
+        sections
+            .get(key)
+            .map(|s| s.trim().to_string())
+            .unwrap_or_default()
+    };
 
     let handoff = RawHandoff {
-        status: if kv.get("status").map(String::as_str) == Some("blocked") {
-            HandoffStatus::Blocked
-        } else {
-            HandoffStatus::InProgress
+        status: match field(&kv, "status").as_str() {
+            "in_progress" => HandoffStatus::InProgress,
+            "blocked" => HandoffStatus::Blocked,
+            other => HandoffStatus::Invalid(other.to_string()),
         },
         backlog_id: field(&kv, "backlog"),
         todo_id: field(&kv, "todo"),
@@ -198,20 +261,44 @@ pub(crate) fn parse_handoff(text: &str) -> ParsedHandoff {
         next_step: section("next step"),
         context: section("context"),
     };
-    ParsedHandoff { count, handoff: Some(handoff) }
+    ParsedHandoff {
+        count,
+        handoff: Some(handoff),
+    }
 }
 
-pub(crate) fn parse_changelog(text: &str) -> Vec<ChangelogRecord> {
-    let mut records = Vec::new();
+pub(crate) fn parse_changelog(text: &str) -> ParsedChangelog {
+    let mut parsed = ParsedChangelog::default();
     let mut current: Option<ChangelogRecord> = None;
-    for line in text.split('\n') {
+    let mut in_closed = false;
+    for line in lf(text).split('\n') {
+        if CLOSED_HEADER.is_match(line) {
+            parsed.records.extend(current.take());
+            in_closed = true;
+            continue;
+        }
+        if in_closed {
+            if SECTION.is_match(line) {
+                in_closed = false;
+            } else {
+                parsed.closed.extend(parse_checklist_lines(line));
+                if let Some(m) = KEY_VALUE.captures(line)
+                    && m[1].eq_ignore_ascii_case("waived")
+                    && let Some(id) = m[2].split_whitespace().next()
+                {
+                    parsed.waived.push(id.to_string());
+                }
+                continue;
+            }
+        }
         if let Some(m) = CHANGELOG_HEADER.captures(line) {
-            records.extend(current.take());
+            parsed.records.extend(current.take());
             current = Some(ChangelogRecord {
                 todo_id: m[2].to_string(),
                 backlog_id: String::new(),
                 spec: String::new(),
                 criteria: Vec::new(),
+                file_spec: None,
             });
             continue;
         }
@@ -228,14 +315,14 @@ pub(crate) fn parse_changelog(text: &str) -> Vec<ChangelogRecord> {
             }
         }
     }
-    records.extend(current);
-    records
+    parsed.records.extend(current);
+    parsed
 }
 
 pub(crate) fn parse_spec_criteria(text: &str) -> Vec<String> {
     let mut criteria = Vec::new();
     let mut in_section = false;
-    for line in text.split('\n') {
+    for line in lf(text).split('\n') {
         if CRITERIA_SECTION.is_match(line) {
             in_section = true;
             continue;
@@ -263,7 +350,7 @@ mod tests {
 
     // The expected values include the inputs the parser silently skips.
     #[test]
-    fn checklist_lines_follow_the_reference_parser() {
+    fn checklist_lines_follow_the_documented_rules() {
         let text = "- [ ] B-001 - Um (spec: `.specs/a.md`) (needs: B-002, B-003)\n\
                     * [x] B-002 -   Dois  \n\
                     - [?] B-003 - Tres\n\
@@ -275,48 +362,71 @@ mod tests {
                     - [ ] B-009 - (spec: `) crase";
         let entries = parse_backlog(text);
         let ids: Vec<&str> = entries.iter().map(|e| e.id.as_str()).collect();
-        // B-004 (marker outside the BMP) and B-005 (CRLF) never match.
-        assert_eq!(ids, ["B-001", "B-002", "B-003", "B-006", "B-007", "B-008", "B-009"]);
+        // B-004 (marker outside the BMP) never matches; B-005 (CRLF) does.
+        assert_eq!(
+            ids,
+            [
+                "B-001", "B-002", "B-003", "B-005", "B-006", "B-007", "B-008", "B-009"
+            ]
+        );
         assert_eq!(entries[0].text, "Um");
         assert_eq!(entries[0].needs, s(&["B-002", "B-003"]));
         assert_eq!(entries[0].spec.as_deref(), Some(".specs/a.md"));
         assert_eq!((entries[1].marker, entries[1].text.as_str()), ('x', "Dois"));
         assert_eq!(entries[2].marker, '?');
-        assert_eq!((entries[3].marker, entries[3].needs.len()), ('•', 0));
-        assert_eq!((entries[4].marker, entries[4].text.as_str()), ('!', "semespaco"));
-        assert_eq!(entries[5].spec, None);
-        assert_eq!(entries[6].spec.as_deref(), Some(""));
+        assert_eq!((entries[3].marker, entries[3].text.as_str()), (' ', "crlf"));
+        assert_eq!((entries[4].marker, entries[4].needs.len()), ('•', 0));
+        assert_eq!(
+            (entries[5].marker, entries[5].text.as_str()),
+            ('!', "semespaco")
+        );
+        assert_eq!(entries[6].spec, None);
+        assert_eq!(entries[7].spec.as_deref(), Some(""));
     }
 
     #[test]
     fn todo_header_gives_the_active_backlog_id() {
         assert_eq!(
-            parse_todo("# Active task: B-004\n\n- [ ] T-001 - x").active_backlog_id.as_deref(),
+            parse_todo("# Active task: B-004\n\n- [ ] T-001 - x")
+                .active_backlog_id
+                .as_deref(),
             Some("B-004")
         );
         let empty = parse_todo("# Active task\n\nNo active task.\n");
         assert_eq!((empty.active_backlog_id, empty.entries.len()), (None, 0));
         assert_eq!(
-            parse_todo("#Active task :   B-9   \n").active_backlog_id.as_deref(),
+            parse_todo("#Active task :   B-9   \n")
+                .active_backlog_id
+                .as_deref(),
             Some("B-9")
         );
     }
 
     #[test]
-    fn handoff_follows_the_reference_parser() {
+    fn handoff_follows_the_documented_rules() {
         let parsed = parse_handoff(
             "# Handoff\n\n- Status: blocked\n- Backlog: B-1\n- TODO: T-2\n- Spec: .specs/x.md\n\
              - Harness: codex\n- Updated: 2026-01-01T00:00:00Z\n\n## Objective\n\nlinha1\n\nlinha2\n\
              ## Next step\nvai\n## Context\n- Status: dentro\nfim\n",
         );
         let h = parsed.handoff.unwrap();
-        // The second `Status` line counts and overrides the first; it also ends
-        // the Context section, so `fim` is not collected.
-        assert_eq!(parsed.count, 2);
-        assert_eq!(h.status, HandoffStatus::InProgress);
-        assert_eq!((h.backlog_id.as_str(), h.todo_id.as_str(), h.harness.as_str()), ("B-1", "T-2", "codex"));
+        // A `- Status:` line in a section is free text: it does not count and
+        // does not override the metadata, and `fim` stays in Context.
+        assert_eq!(parsed.count, 1);
+        assert_eq!(h.status, HandoffStatus::Blocked);
+        assert_eq!(
+            (
+                h.backlog_id.as_str(),
+                h.todo_id.as_str(),
+                h.harness.as_str()
+            ),
+            ("B-1", "T-2", "codex")
+        );
         assert_eq!(h.objective, "linha1\n\nlinha2");
-        assert_eq!((h.next_step.as_str(), h.context.as_str()), ("vai", ""));
+        assert_eq!(
+            (h.next_step.as_str(), h.context.as_str()),
+            ("vai", "- Status: dentro\nfim")
+        );
     }
 
     #[test]
@@ -328,21 +438,80 @@ mod tests {
     }
 
     #[test]
+    fn a_handoff_is_empty_only_in_its_exact_empty_form() {
+        let mentioned =
+            "# Handoff\n\n- Status: blocked\n- Backlog: B-1\n\n## Context\nNo active handoff.\n";
+        assert_eq!(parse_handoff(mentioned).count, 1);
+        assert_eq!(
+            parse_handoff("# Handoff\r\n\r\nNo active handoff.\r\n").handoff,
+            None
+        );
+    }
+
+    #[test]
+    fn handoff_status_accepts_only_in_progress_and_blocked() {
+        let status = |v: &str| {
+            parse_handoff(&format!("# Handoff\n\n- Status: {v}\n"))
+                .handoff
+                .unwrap()
+                .status
+        };
+        assert_eq!(status("in_progress"), HandoffStatus::InProgress);
+        assert_eq!(status("blocked"), HandoffStatus::Blocked);
+        assert_eq!(
+            status("in-progress"),
+            HandoffStatus::Invalid("in-progress".into())
+        );
+        let missing = parse_handoff("# Handoff\n\n- Backlog: B-1\n")
+            .handoff
+            .unwrap();
+        assert_eq!(missing.status, HandoffStatus::Invalid(String::new()));
+    }
+
+    #[test]
+    fn closing_sections_give_entries_and_waivers() {
+        let parsed = parse_changelog(
+            "# Change log 20261003-001\n\n## 2026-10-03 - T-001 - Feito\n- Backlog: B-001\n- Criteria: A-001\n\n\
+             ## Closed 2026-10-04\n- [x] B-001 - Um (spec: `.specs/a.md`)\n\
+             - [-] B-002 - Dois (spec: `.specs/a.md`) (dropped: sem uso)\n- Waived: A-002 - sem uso\n",
+        );
+        assert_eq!(parsed.records.len(), 1);
+        assert_eq!(parsed.records[0].criteria, s(&["A-001"]));
+        let ids: Vec<(&str, char)> = parsed
+            .closed
+            .iter()
+            .map(|e| (e.id.as_str(), e.marker))
+            .collect();
+        assert_eq!(ids, [("B-001", 'x'), ("B-002", '-')]);
+        assert_eq!(parsed.closed[1].dropped.as_deref(), Some("sem uso"));
+        assert_eq!(parsed.closed[1].text, "Dois");
+        assert_eq!(parsed.waived, s(&["A-002"]));
+    }
+
+    #[test]
     fn changelog_keeps_the_fields_the_checks_read() {
         let records = parse_changelog(
             "# Change log\n\n## 2026-09-07 - T-001 - Titulo aqui\n- Backlog: B-001\n- Spec: .specs/a.md\n\
              - Evidence: a\n  continua\n- Criteria: A-001, 20260907-001/A-002,,\n- Decisions: none\n\n\
              ## 2026-09-08 - T-002 - Outro\n- Backlog: B-002\n- Criteria: none\n",
         );
+        let records = records.records;
         assert_eq!(records.len(), 2);
         assert_eq!(records[0].todo_id, "T-001");
         assert_eq!(records[0].backlog_id, "B-001");
         assert_eq!(records[0].spec, ".specs/a.md");
         assert_eq!(records[0].criteria, s(&["A-001", "20260907-001/A-002"]));
-        assert_eq!((records[1].spec.as_str(), records[1].criteria.clone()), ("", s(&["none"])));
+        assert_eq!(
+            (records[1].spec.as_str(), records[1].criteria.clone()),
+            ("", s(&["none"]))
+        );
         // A key line before any header, and a `##` line that is not a header,
         // never open a record.
-        assert!(parse_changelog("- Backlog: B-9\n## solto\n- Backlog: B-8\n").is_empty());
+        assert!(
+            parse_changelog("- Backlog: B-9\n## solto\n- Backlog: B-8\n")
+                .records
+                .is_empty()
+        );
     }
 
     #[test]
@@ -350,6 +519,9 @@ mod tests {
         let text = "# T\n\n## Acceptance criteria\n- A-001 - um\n  - A-002 - dois\n- A-003x - nao\n\
                     - A-004\n- a-005 - minuscula\n## Backlog candidates\n- A-009 - fora\n";
         assert_eq!(parse_spec_criteria(text), s(&["A-001", "A-002", "A-004"]));
-        assert_eq!(parse_spec_criteria("## ACCEPTANCE CRITERIA  \n- A-1 - x\n"), s(&["A-1"]));
+        assert_eq!(
+            parse_spec_criteria("## ACCEPTANCE CRITERIA  \n- A-1 - x\n"),
+            s(&["A-1"])
+        );
     }
 }

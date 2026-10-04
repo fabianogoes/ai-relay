@@ -2,16 +2,16 @@
 
 ╭ ● Inconsistente ──────────────────────────────────── 3 ╮
 │ handoff-names-no-pending-todo                          │
-│ O handoff aponta T-001, que está [x]; T-002 está [•].  │
+│ in_progress_id=T-002, todo_id=T-001                    │
 │ handoff · todo                                         │
 │                                                        │
 │ needs-cycle                                            │
-│ Ciclo em todo: T-001 -> T-002 -> T-001.                │
+│ cycle=T-001 -> T-002 -> T-001, record=todo             │
 │ todo                                                   │
 │                                                        │
 │ criteria-without-evidence                              │
-│ Spec .specs/20260907-001-ui-primeiro-marco-visual.md:  │
-│ critérios sem evidência: A-001, A-002.                 │
+│ criteria=A-001, A-002,                                 │
+│ spec=.specs/20260907-001-contrato-estado-derivado.md   │
 │ backlog · changelog · spec                             │
 ╰────────────────────────────────────────────────────────╯
 
@@ -20,7 +20,7 @@
   Registros em conflito: relay-status e relay-continue.
 
 ╭────────────────────────────────────────────────────────╮
-│ Tab histórico · r recarregar · q sair                  │
+│ Tab histórico · r recarregar · c config. · q sair      │
 ╰────────────────────────────────────────────────────────╯
 
 --- colors ---
@@ -28,16 +28,16 @@
 
 r.R.RRRRRRRRRRRRR.rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.m.r
 r.RRRRRRRRRRRRRRRRRRRRRRRRRRRRR..........................r
-r.f.fffffff.ffffff.ffffff.fff.ffff.ffff.fffff.ffff.ffff..r
+r.fffffffffffffffffffff.fffffffffffff....................r
 r.mmmmmmm.m.mmmm.........................................r
 r........................................................r
 r.RRRRRRRRRRR............................................r
-r.fffff.ff.fffff.fffff.ff.fffff.ff.ffffff................r
+r.fffffffffff.ff.fffff.ff.ffffff.fffffffffff.............r
 r.mmmm...................................................r
 r........................................................r
 r.RRRRRRRRRRRRRRRRRRRRRRRRR..............................r
-r.ffff.ffffffffffffffffffffffffffffffffffffffffffffffff..r
-r.fffffffff.fff.ffffffffff.ffffff.ffffff.................r
+r.fffffffffffffff.ffffff.................................r
+r.ffffffffffffffffffffffffffffffffffffffffffffffffffff...r
 r.mmmmmmm.m.mmmmmmmmm.m.mmmm.............................r
 rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
 
@@ -46,5 +46,5 @@ rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
 ..mmmmmmmmm.mm.mmmmmmmmm.FFFFFFFFFFFF.m.FFFFFFFFFFFFFFm
 
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmmmmm.m.F.mmmm......d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

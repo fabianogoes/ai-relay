@@ -3,7 +3,7 @@
 │ ▸ 20261002-001 relay-tui                           1/5 │
 │   20260901-001 Contrato do estado derivado entre … 1/1 │
 ╰────────────────────────────────────────────────────────╯
- Enter abrir · Esc voltar · Tab agora · q sair
+ Esc voltar · Tab agora · c config. · q sair
 
 --- colors ---
 #######.mmmmmmmmmmmmmmmmm.....................g.mmmmmmmmmm
@@ -11,4 +11,4 @@ d.FFFFF.ddddddddddddddddddddddddddddddddddddd.m.m.mmmmmm.d
 d.U.iiiiiiiiiiii.FFFFFFFFF...........................mmm.d
 d...iiiiiiiiiiii.ffffffff.ff.ffffff.ffffffff.fffff.f.mmm.d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-.FFFFF.mmmmm.m.FFF.mmmmmm.m.FFF.mmmmm.m.F.mmmm
+.FFF.mmmmmm.m.FFF.mmmmm.m.F.mmmmmmm.m.F.mmmm

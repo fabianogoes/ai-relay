@@ -5,10 +5,10 @@
   "handoff": {
     "backlogId": "B-004",
     "todoId": "T-003",
-    "spec": ".specs/20260907-001-ui-primeiro-marco-visual.md",
+    "spec": ".specs/20260907-001-contrato-estado-derivado.md",
     "harness": "opencode",
     "updated": "2026-09-07T11:00:00-03:00",
-    "objective": "Scaffold da relay-ui com Vue 3.",
+    "objective": "Esqueleto do módulo core em Rust.",
     "nextStep": "Resolvido o bloqueio, rodar a criação do projeto Vite.",
     "context": "Bloqueio: node_modules não pode ser instalado sem acesso ao registro npm neste ambiente. Condição de retomada: acesso ao registro npm restabelecido."
   },
@@ -29,7 +29,7 @@
     },
     {
       "id": "T-003",
-      "text": "Scaffold da relay-ui",
+      "text": "Esqueleto do módulo core",
       "marker": "!",
       "needs": [
         "T-001",
@@ -45,7 +45,7 @@
       "marker": " ",
       "needs": [],
       "available": true,
-      "spec": ".specs/20260907-001-ui-primeiro-marco-visual.md"
+      "spec": ".specs/20260907-001-contrato-estado-derivado.md"
     }
   ],
   "completed": 2,

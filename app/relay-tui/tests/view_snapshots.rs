@@ -16,8 +16,8 @@ use relay_tui::core::{
     ChecklistEntry, Handoff, OkState, RelayState, Violation, WorkStatus, derive_state,
 };
 use relay_tui::theme;
-use relay_tui::view::{Freshness, Screen, View};
 use relay_tui::view::text::parse_rfc3339;
+use relay_tui::view::{Freshness, Screen, SettingsScreen, View};
 use relay_tui::workspace::read_workspace;
 
 fn root() -> &'static Path {
@@ -25,7 +25,9 @@ fn root() -> &'static Path {
 }
 
 fn fixture(name: &str) -> RelayState {
-    derive_state(&read_workspace(&root().join("tests/fixtures").join(name).join("workspace")))
+    derive_state(&read_workspace(
+        &root().join("tests/fixtures").join(name).join("workspace"),
+    ))
 }
 
 /// 2026-09-07T14:10:00Z: 10 minutes after the `blocked` handoff and a little
@@ -47,7 +49,11 @@ fn color_letter(color: Color, bold: bool) -> char {
         c if c == theme::BAR_EMPTY => 'e',
         _ => '?',
     };
-    if bold { letter.to_ascii_uppercase() } else { letter }
+    if bold {
+        letter.to_ascii_uppercase()
+    } else {
+        letter
+    }
 }
 
 fn snapshot_of(buf: &Buffer, area: Rect) -> String {
@@ -86,8 +92,46 @@ fn check(name: &str, view: &View, width: u16, height: u16) {
         fs::write(&path, &actual).unwrap();
         return;
     }
-    let expected = fs::read_to_string(&path)
-        .unwrap_or_else(|_| panic!("missing snapshot {}; run with UPDATE_SNAPSHOTS=1", path.display()));
+    let expected = fs::read_to_string(&path).unwrap_or_else(|_| {
+        panic!(
+            "missing snapshot {}; run with UPDATE_SNAPSHOTS=1",
+            path.display()
+        )
+    });
+    assert!(
+        actual == expected,
+        "snapshot {name} differs\n--- expected\n{expected}\n--- actual\n{actual}"
+    );
+}
+
+fn check_settings(
+    name: &str,
+    language: relay_tui::language::Language,
+    selected: relay_tui::language::Language,
+    width: u16,
+    height: u16,
+) {
+    let area = Rect::new(0, 0, width, height);
+    let mut buf = Buffer::empty(area);
+    (&SettingsScreen {
+        workspace: "~/Developer/relay",
+        freshness: Freshness::Fresh,
+        language,
+        selected,
+    })
+        .render(area, &mut buf);
+    let actual = snapshot_of(&buf, area);
+    let path = root().join("tests/snapshots").join(format!("{name}.txt"));
+    if std::env::var_os("UPDATE_SNAPSHOTS").is_some() {
+        fs::write(&path, &actual).unwrap();
+        return;
+    }
+    let expected = fs::read_to_string(&path).unwrap_or_else(|_| {
+        panic!(
+            "missing snapshot {}; run with UPDATE_SNAPSHOTS=1",
+            path.display()
+        )
+    });
     assert!(
         actual == expected,
         "snapshot {name} differs\n--- expected\n{expected}\n--- actual\n{actual}"
@@ -95,16 +139,68 @@ fn check(name: &str, view: &View, width: u16, height: u16) {
 }
 
 fn view<'a>(state: &'a RelayState, freshness: Freshness) -> View<'a> {
-    View { history: relay_tui::view::no_history(), screen: Screen::State(state), workspace: "~/Developer/relay", freshness, now_unix: now() }
+    view_in(state, freshness, relay_tui::language::Language::PtBr)
 }
 
-const STATUS_CASES: [&str; 7] = ["idle", "backlog", "ready", "in_progress", "blocked", "done", "inconsistent"];
+fn view_in<'a>(
+    state: &'a RelayState,
+    freshness: Freshness,
+    language: relay_tui::language::Language,
+) -> View<'a> {
+    View {
+        history: relay_tui::view::no_history(),
+        screen: Screen::State(state),
+        workspace: "~/Developer/relay",
+        freshness,
+        now_unix: now(),
+        language,
+    }
+}
+
+#[test]
+fn every_status_in_english_at_58_and_40_columns() {
+    for case in STATUS_CASES {
+        let state = fixture(&format!("status-{case}"));
+        for width in [58, 40] {
+            check(
+                &format!("en-{case}-{width}"),
+                &view_in(&state, Freshness::Fresh, relay_tui::language::Language::En),
+                width,
+                24,
+            );
+        }
+    }
+}
+
+#[test]
+fn settings_has_localized_screens_at_reference_widths() {
+    use relay_tui::language::Language::{En, PtBr};
+    for width in [58, 40] {
+        check_settings(&format!("settings-pt-BR-{width}"), PtBr, PtBr, width, 16);
+        check_settings(&format!("settings-en-{width}"), En, En, width, 16);
+    }
+}
+
+const STATUS_CASES: [&str; 7] = [
+    "idle",
+    "backlog",
+    "ready",
+    "in_progress",
+    "blocked",
+    "done",
+    "inconsistent",
+];
 
 #[test]
 fn every_status_at_58_columns() {
     for case in STATUS_CASES {
         let state = fixture(&format!("status-{case}"));
-        check(&format!("{case}-58"), &view(&state, Freshness::Fresh), 58, 24);
+        check(
+            &format!("{case}-58"),
+            &view(&state, Freshness::Fresh),
+            58,
+            24,
+        );
     }
 }
 
@@ -112,23 +208,35 @@ fn every_status_at_58_columns() {
 fn every_status_at_40_columns() {
     for case in STATUS_CASES {
         let state = fixture(&format!("status-{case}"));
-        check(&format!("{case}-40"), &view(&state, Freshness::Fresh), 40, 24);
+        check(
+            &format!("{case}-40"),
+            &view(&state, Freshness::Fresh),
+            40,
+            24,
+        );
     }
 }
 
 #[test]
 fn a_change_in_flight_says_so_in_words() {
     let state = fixture("status-in_progress");
-    check("in_progress-58-updating", &view(&state, Freshness::Updating), 58, 24);
+    check(
+        "in_progress-58-updating",
+        &view(&state, Freshness::Updating),
+        58,
+        24,
+    );
 }
 
 #[test]
 fn a_directory_without_orchestration() {
-    let view = View { history: relay_tui::view::no_history(),
+    let view = View {
+        history: relay_tui::view::no_history(),
         screen: Screen::NotARelayWorkspace,
         workspace: "~/Developer/sem-relay",
         freshness: Freshness::Fresh,
         now_unix: now(),
+        language: relay_tui::language::Language::PtBr,
     };
     check("not-relay-58", &view, 58, 12);
 }
@@ -143,18 +251,31 @@ fn entry(id: &str, text: &str, marker: char, needs: &[&str], available: bool) ->
         needs: needs.iter().map(|s| s.to_string()).collect(),
         available,
         spec: None,
+        dropped: None,
     }
 }
 
 fn long_todo() -> RelayState {
     let todo = vec![
         entry("T-001", "Formato do caso de conformidade", 'x', &[], false),
-        entry("T-002", "Extrair as entradas dos fixtures para workspaces em disco", 'x', &[], false),
+        entry(
+            "T-002",
+            "Extrair as entradas dos fixtures para workspaces em disco",
+            'x',
+            &[],
+            false,
+        ),
         entry("T-003", "Runner TS lê a suíte", 'x', &["T-001"], false),
         entry("T-004", "Runner Rust lê a suíte", '•', &["T-003"], false),
         entry("T-005", "CI quebra em divergência", ' ', &["T-004"], false),
         entry("T-006", "Documentar o formato", ' ', &[], true),
-        entry("T-007", "Casos extras para os ramos não cobertos", ' ', &["T-004", "T-006"], false),
+        entry(
+            "T-007",
+            "Casos extras para os ramos não cobertos",
+            ' ',
+            &["T-004", "T-006"],
+            false,
+        ),
         entry("T-008", "Revisão final", '!', &[], false),
         entry("T-009", "Publicar", ' ', &["T-007"], false),
         entry("T-010", "Anunciar", ' ', &["T-009"], false),
@@ -203,17 +324,32 @@ fn several_violations_are_listed_and_cut_by_height() {
     let violations = vec![
         Violation {
             check: "handoff-names-no-pending-todo".into(),
-            detail: "O handoff aponta T-001, que está [x]; T-002 está [•].".into(),
+            params: [
+                ("todo_id".into(), "T-001".into()),
+                ("in_progress_id".into(), "T-002".into()),
+            ]
+            .into(),
             records: vec!["handoff".into(), "todo".into()],
         },
         Violation {
             check: "needs-cycle".into(),
-            detail: "Ciclo em todo: T-001 -> T-002 -> T-001.".into(),
+            params: [
+                ("record".into(), "todo".into()),
+                ("cycle".into(), "T-001 -> T-002 -> T-001".into()),
+            ]
+            .into(),
             records: vec!["todo".into()],
         },
         Violation {
             check: "criteria-without-evidence".into(),
-            detail: "Spec .specs/20260907-001-ui-primeiro-marco-visual.md: critérios sem evidência: A-001, A-002.".into(),
+            params: [
+                (
+                    "spec".into(),
+                    ".specs/20260907-001-contrato-estado-derivado.md".into(),
+                ),
+                ("criteria".into(), "A-001, A-002".into()),
+            ]
+            .into(),
             records: vec!["backlog".into(), "changelog".into(), "spec".into()],
         },
     ];
@@ -238,13 +374,23 @@ fn a_tall_or_wide_terminal_shows_the_handoff_nearly_whole() {
     let long = long_todo();
     check("long-todo-58-h40", &view(&long, Freshness::Fresh), 58, 40);
     let blocked = fixture("status-blocked");
-    check("blocked-120-h30", &view(&blocked, Freshness::Fresh), 120, 30);
+    check(
+        "blocked-120-h30",
+        &view(&blocked, Freshness::Fresh),
+        120,
+        30,
+    );
 }
 
 #[test]
 fn the_next_step_line_yields_with_the_height() {
     let state = fixture("status-in_progress");
     for height in [12, 17, 18, 20] {
-        check(&format!("in_progress-58-h{height}"), &view(&state, Freshness::Fresh), 58, height);
+        check(
+            &format!("in_progress-58-h{height}"),
+            &view(&state, Freshness::Fresh),
+            58,
+            height,
+        );
     }
 }

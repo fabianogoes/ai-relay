@@ -10,10 +10,14 @@ on:
     branches: [main]
     paths:
       - 'app/relay-tui/**'
+      - '.orchestration/**'
+      - '.specs/**'
       - '.github/workflows/relay-tui-ci.yml'
   pull_request:
     paths:
       - 'app/relay-tui/**'
+      - '.orchestration/**'
+      - '.specs/**'
       - '.github/workflows/relay-tui-ci.yml'
 
 jobs:
@@ -23,9 +27,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
         with:
           workspaces: app/relay-tui
+      - name: Format
+        working-directory: app/relay-tui
+        run: cargo fmt --check
+      - name: Lint
+        working-directory: app/relay-tui
+        run: cargo clippy --all-targets --locked -- -D warnings
       - name: Rust core and view
         working-directory: app/relay-tui
         run: cargo test --locked

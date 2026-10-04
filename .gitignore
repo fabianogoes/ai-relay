@@ -11,15 +11,9 @@
 .env.*
 !.env.example
 
-# Python
-__pycache__/
-.pytest_cache/
-.coverage
-
 # Future build outputs
 build/
 dist/
-node_modules/
 
 # Brainstorming companion mockups (local only)
 .superpowers/

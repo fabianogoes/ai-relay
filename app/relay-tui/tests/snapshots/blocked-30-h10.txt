@@ -6,7 +6,7 @@
 
 
 ╭────────────────────────────╮
-│ Tab histórico · q sair     │
+│ c config. · q sair         │
 ╰────────────────────────────╯
 
 --- colors ---
@@ -18,5 +18,5 @@
 
 
 dddddddddddddddddddddddddddddd
-d.FFF.mmmmmmmmm.m.F.mmmm.....d
+d.F.mmmmmmm.m.F.mmmm.........d
 dddddddddddddddddddddddddddddd

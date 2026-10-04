@@ -1,0 +1,34 @@
+ relay  ~/Developer/relay                     ● up to date
+
+╭ Settings ──────────────────────────────────────────────╮
+│ Language                                               │
+│   Portuguese (Brazil)                                  │
+│ ▸ English · current                                    │
+│                                                        │
+│                                                        │
+│                                                        │
+│                                                        │
+│                                                        │
+╰────────────────────────────────────────────────────────╯
+
+╭────────────────────────────────────────────────────────╮
+│ ↑↓ select · Enter apply · Esc back · q quit            │
+╰────────────────────────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mm.mm.mmmm
+
+d.FFFFFFFF.ddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFFFFFFF...............................................d
+d...ffffffffff.ffffffff..................................d
+d.U.UUUUUUU.m.mmmmmmm....................................d
+d........................................................d
+d........................................................d
+d........................................................d
+d........................................................d
+d........................................................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FF.mmmmmm.m.FFFFF.mmmmm.m.FFF.mmmm.m.F.mmmm............d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

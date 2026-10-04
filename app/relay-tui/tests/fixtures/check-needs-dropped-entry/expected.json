@@ -1,0 +1,15 @@
+{
+  "kind": "inconsistent",
+  "violations": [
+    {
+      "check": "needs-dropped-entry",
+      "records": [
+        "backlog"
+      ],
+      "params": {
+        "id": "B-002",
+        "needed_id": "B-001"
+      }
+    }
+  ]
+}

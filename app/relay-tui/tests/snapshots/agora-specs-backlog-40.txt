@@ -26,7 +26,7 @@
   Próximo item disponível: B-011. Com…
 
 ╭──────────────────────────────────────╮
-│ Tab histórico · q sair               │
+│ Tab histórico · c config. · q sair   │
 ╰──────────────────────────────────────╯
 
 --- colors ---
@@ -58,5 +58,5 @@ dddddddddddddddddddddddddddddddddddddddd
 ..mmmmmmm.mmmm.mmmmmmmmmmm.iiiiim.mmmm
 
 dddddddddddddddddddddddddddddddddddddddd
-d.FFF.mmmmmmmmm.m.F.mmmm...............d
+d.FFF.mmmmmmmmm.m.F.mmmmmmm.m.F.mmmm...d
 dddddddddddddddddddddddddddddddddddddddd

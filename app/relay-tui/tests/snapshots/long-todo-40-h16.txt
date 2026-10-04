@@ -12,7 +12,7 @@
  1 spec pendente
 
 ╭──────────────────────────────────────╮
-│ Tab histórico · q sair               │
+│ Tab histórico · c config. · q sair   │
 ╰──────────────────────────────────────╯
 
 --- colors ---
@@ -30,5 +30,5 @@ dddddddddddddddddddddddddddddddddddddddd
 .m.mmmm.mmmmmmmm
 
 dddddddddddddddddddddddddddddddddddddddd
-d.FFF.mmmmmmmmm.m.F.mmmm...............d
+d.FFF.mmmmmmmmm.m.F.mmmmmmm.m.F.mmmm...d
 dddddddddddddddddddddddddddddddddddddddd

@@ -3,10 +3,14 @@
   "violations": [
     {
       "check": "needs-unknown-id",
-      "detail": "T-003 referencia T-999, ausente em todo.",
       "records": [
         "todo"
-      ]
+      ],
+      "params": {
+        "id": "T-003",
+        "needed_id": "T-999",
+        "record": "todo"
+      }
     }
   ]
 }

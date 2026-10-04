@@ -41,6 +41,8 @@ pub enum Input {
     Toggle,
     /// `r`.
     Reload,
+    /// `c`: open the application-local settings screen.
+    Settings,
     /// `q` or `Ctrl-C`.
     Quit,
     /// `y`: confirms leaving, when asked.
@@ -70,7 +72,10 @@ pub enum RowKey {
     Spec(String),
     NoSpec,
     Item(String),
-    Record { todo_id: String, nth: usize },
+    Record {
+        todo_id: String,
+        nth: usize,
+    },
     /// A TODO item that has no changelog record yet.
     Pending(String),
 }
@@ -196,18 +201,27 @@ impl Nav {
                     .specs
                     .iter()
                     .enumerate()
-                    .map(|(i, s)| Row { key: RowKey::Spec(s.path.clone()), at: RowRef::Spec(i) })
+                    .map(|(i, s)| Row {
+                        key: RowKey::Spec(s.path.clone()),
+                        at: RowRef::Spec(i),
+                    })
                     .collect();
                 if !ctx.history.no_spec.is_empty() {
-                    rows.push(Row { key: RowKey::NoSpec, at: RowRef::NoSpec });
+                    rows.push(Row {
+                        key: RowKey::NoSpec,
+                        at: RowRef::NoSpec,
+                    });
                 }
                 rows
             }
             1 => {
                 let items = match &sel[0].key {
-                    Some(RowKey::Spec(path)) => {
-                        ctx.history.specs.iter().find(|s| &s.path == path).map(|s| &s.items)
-                    }
+                    Some(RowKey::Spec(path)) => ctx
+                        .history
+                        .specs
+                        .iter()
+                        .find(|s| &s.path == path)
+                        .map(|s| &s.items),
                     Some(RowKey::NoSpec) => Some(&ctx.history.no_spec),
                     _ => None,
                 };
@@ -215,7 +229,10 @@ impl Nav {
                     .into_iter()
                     .flatten()
                     .enumerate()
-                    .map(|(i, item)| Row { key: RowKey::Item(item.id.clone()), at: RowRef::Item(i) })
+                    .map(|(i, item)| Row {
+                        key: RowKey::Item(item.id.clone()),
+                        at: RowRef::Item(i),
+                    })
                     .collect()
             }
             _ => {
@@ -231,15 +248,24 @@ impl Nav {
                     let nth = seen.iter().filter(|t| **t == record.todo_id).count();
                     seen.push(&record.todo_id);
                     rows.push(Row {
-                        key: RowKey::Record { todo_id: record.todo_id.clone(), nth },
+                        key: RowKey::Record {
+                            todo_id: record.todo_id.clone(),
+                            nth,
+                        },
                         at: RowRef::Record(i),
                     });
                 }
                 // The TODO items of the current task that have no record yet.
-                if let Some(ok) = ctx.ok.filter(|ok| ok.active_backlog_id.as_deref() == Some(id)) {
+                if let Some(ok) = ctx
+                    .ok
+                    .filter(|ok| ok.active_backlog_id.as_deref() == Some(id))
+                {
                     for (i, entry) in ok.todo.iter().enumerate() {
                         if !seen.contains(&entry.id.as_str()) {
-                            rows.push(Row { key: RowKey::Pending(entry.id.clone()), at: RowRef::Pending(i) });
+                            rows.push(Row {
+                                key: RowKey::Pending(entry.id.clone()),
+                                at: RowRef::Pending(i),
+                            });
                         }
                     }
                 }
@@ -263,7 +289,7 @@ impl Nav {
         match input {
             Input::Quit => return Effect::Quit,
             Input::Reload => return Effect::Reload,
-            Input::Confirm | Input::Other => {}
+            Input::Confirm | Input::Other | Input::Settings => {}
             Input::Toggle => {
                 self.pane = match self.pane {
                     Pane::Now => Pane::History,
@@ -313,7 +339,10 @@ impl Nav {
         self.scroll = 0;
         if next != Level::Detail {
             let first = self.rows(ctx, next).into_iter().next();
-            self.sel[depth(next)] = Sel { key: first.map(|r| r.key), index: 0 };
+            self.sel[depth(next)] = Sel {
+                key: first.map(|r| r.key),
+                index: 0,
+            };
         }
     }
 
@@ -331,7 +360,10 @@ impl Nav {
         }
         let at = &mut self.sel[depth(self.level)];
         let to = (at.index as isize + delta).clamp(0, rows.len() as isize - 1) as usize;
-        *at = Sel { key: Some(rows[to].key.clone()), index: to };
+        *at = Sel {
+            key: Some(rows[to].key.clone()),
+            index: to,
+        };
     }
 
     /// A click on a row selects it and opens the next level. Outside the rows
@@ -344,7 +376,10 @@ impl Nav {
         let Some(hit) = rows.get(row) else {
             return;
         };
-        self.sel[depth(self.level)] = Sel { key: Some(hit.key.clone()), index: row };
+        self.sel[depth(self.level)] = Sel {
+            key: Some(hit.key.clone()),
+            index: row,
+        };
         self.open(ctx);
     }
 
@@ -360,7 +395,10 @@ impl Nav {
             let level = [Level::Specs, Level::Items, Level::Tasks][d];
             let rows = self.rows(ctx, level);
             let at = &mut self.sel[d];
-            let found = at.key.as_ref().and_then(|k| rows.iter().position(|r| &r.key == k));
+            let found = at
+                .key
+                .as_ref()
+                .and_then(|k| rows.iter().position(|r| &r.key == k));
             let moved = match found {
                 Some(i) => {
                     at.index = i;
@@ -374,7 +412,10 @@ impl Nav {
                 None => {
                     let moved = at.key.is_some();
                     let i = at.index.min(rows.len() - 1);
-                    *at = Sel { key: Some(rows[i].key.clone()), index: i };
+                    *at = Sel {
+                        key: Some(rows[i].key.clone()),
+                        index: i,
+                    };
                     moved
                 }
             };

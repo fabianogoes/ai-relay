@@ -1,0 +1,18 @@
+{
+  "kind": "inconsistent",
+  "violations": [
+    {
+      "check": "changelog-spec-mismatch",
+      "records": [
+        "changelog",
+        "backlog"
+      ],
+      "params": {
+        "todo_id": "T-001",
+        "changelog_spec": ".specs/20260907-001",
+        "backlog_id": "B-002",
+        "backlog_spec": ".specs/20260908-001-segunda-spec.md"
+      }
+    }
+  ]
+}

@@ -20,7 +20,7 @@
   Tudo concluído. Para uma nova ideia…
 
 ╭──────────────────────────────────────╮
-│ Tab histórico · q sair               │
+│ Tab histórico · c config. · q sair   │
 ╰──────────────────────────────────────╯
 
 --- colors ---
@@ -46,5 +46,5 @@ gggggggggggggggggggggggggggggggggggggggg
 ..mmmm.mmmmmmmmmm.mmmm.mmm.mmmm.mmmmmm
 
 dddddddddddddddddddddddddddddddddddddddd
-d.FFF.mmmmmmmmm.m.F.mmmm...............d
+d.FFF.mmmmmmmmm.m.F.mmmmmmm.m.F.mmmm...d
 dddddddddddddddddddddddddddddddddddddddd

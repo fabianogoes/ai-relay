@@ -1,0 +1,28 @@
+{
+  "activeBacklogId": null,
+  "backlog": [
+    {
+      "available": false,
+      "id": "B-001",
+      "marker": "x",
+      "needs": [],
+      "spec": ".specs/20260907-001-contrato-estado-derivado.md",
+      "text": "Um"
+    },
+    {
+      "available": false,
+      "dropped": "sem uso",
+      "id": "B-002",
+      "marker": "-",
+      "needs": [],
+      "spec": ".specs/20260907-001-contrato-estado-derivado.md",
+      "text": "Dois"
+    }
+  ],
+  "completed": 0,
+  "handoff": null,
+  "kind": "ok",
+  "status": "done",
+  "todo": [],
+  "total": 0
+}

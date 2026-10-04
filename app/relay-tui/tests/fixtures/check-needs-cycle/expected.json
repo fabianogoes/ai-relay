@@ -3,10 +3,13 @@
   "violations": [
     {
       "check": "needs-cycle",
-      "detail": "Ciclo em todo: T-001 -> T-002 -> T-001.",
       "records": [
         "todo"
-      ]
+      ],
+      "params": {
+        "record": "todo",
+        "cycle": "T-001 -> T-002 -> T-001"
+      }
     }
   ]
 }

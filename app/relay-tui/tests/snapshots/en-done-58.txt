@@ -1,0 +1,50 @@
+ relay  ~/Developer/relay                     ● up to date
+
+╭ ● Done ────────────────────────────────────────────────╮
+│ ✓ 4 of 4 in backlog items completed.                   │
+╰────────────────────────────────────────────────────────╯
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  Everything is complete. For a new idea: relay-spec.
+
+╭────────────────────────────────────────────────────────╮
+│ Tab history · r reload · c settings · q quit           │
+╰────────────────────────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mm.mm.mmmm
+
+g.G.GGGG.ggggggggggggggggggggggggggggggggggggggggggggggggg
+g.G.f.ff.f.ff.fffffff.fffff.ffffffffff...................g
+gggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+..mmmmmmmmmm.mm.mmmmmmmmm.mmm.m.mmm.mmmmm.FFFFFFFFFFm
+
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmmmmm.m.F.mmmmmm.m.F.mmmmmmmm.m.F.mmmm...........d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

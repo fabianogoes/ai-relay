@@ -1,0 +1,18 @@
+# Handoff
+
+- Status: in_progress
+- Backlog: B-001
+- TODO: T-002
+- Spec: .specs/20260907-001-contrato-estado-derivado.md
+- Harness: claude-code
+- Updated: 2026-09-07T06:49:14Z
+
+## Objective
+Ver.
+
+## Next step
+Ir.
+
+## Context
+- Status: blocked
+No active handoff.

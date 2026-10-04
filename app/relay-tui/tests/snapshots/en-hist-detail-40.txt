@@ -1,0 +1,34 @@
+ relay  ~/Developer/relay   ● up to date
+
+╭ Task · T-002 ──────────── ↓ 17 below ╮
+│ T-002 · Um fixture por status        │
+│ 2026-09-02                           │
+│                                      │
+│ Backlog                              │
+│ B-001                                │
+│                                      │
+│ Spec                                 │
+│ .specs/20260901-001-contrato-do-core │
+╰──────────────────────────────────────╯
+
+╭──────────────────────────────────────╮
+│ Tab now · c settings · q quit        │
+╰──────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm...g.mm.mm.mmmm
+
+d.FFFF.F.IIIII.dddddddddddd.m.mm.mmmmm.d
+d.FFFFF.F.FF.FFFFFFF.FFF.FFFFFF........d
+d.mmmmmmmmmm...........................d
+d......................................d
+d.MMMMMMM..............................d
+d.iiiii................................d
+d......................................d
+d.MMMM.................................d
+d.ffffffffffffffffffffffffffffffffffff.d
+dddddddddddddddddddddddddddddddddddddddd
+
+dddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmm.m.F.mmmmmmmm.m.F.mmmm........d
+dddddddddddddddddddddddddddddddddddddddd

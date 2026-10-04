@@ -7,7 +7,7 @@ harness de um lado, o painel do outro. Handoff, TODO e backlog mudam na tela
 conforme os arquivos mudam, sem recarregar nada. Ele nunca escreve nos
 registros: quem escreve são as skills, dentro de um harness.
 
-É um único binário, sem Node e sem clonar o repositório.
+É um único binário e não precisa clonar o repositório.
 
 ## Instalar
 
@@ -26,10 +26,10 @@ No macOS, `uname -m` diz qual é o seu (`arm64` ou `x86_64`). Baixando com
 `curl`, o macOS não bloqueia o arquivo:
 
 ```sh
-curl -fLO https://github.com/fabianogoes/ai-relay/releases/download/relay-tui-v<versão>/relay-tui-<versão>-aarch64-apple-darwin.tar.gz
-tar -xzf relay-tui-<versão>-aarch64-apple-darwin.tar.gz
+curl -fLO https://github.com/fabianogoes/ai-relay/releases/download/relay-tui-v<version>/relay-tui-<version>-aarch64-apple-darwin.tar.gz
+tar -xzf relay-tui-<version>-aarch64-apple-darwin.tar.gz
 mkdir -p ~/.local/bin
-mv relay-tui-<versão>-aarch64-apple-darwin/relay-tui ~/.local/bin/
+mv relay-tui-<version>-aarch64-apple-darwin/relay-tui ~/.local/bin/
 ```
 
 Garanta que `~/.local/bin` está no seu `PATH`, e confira com `relay-tui --version`.
@@ -102,7 +102,7 @@ deste guia e não instala nada), `2` terminal não reconhecido ou o split falhou
 | **Terminal.app** | Não tem split. Use o Warp, o iTerm2 ou o tmux (`brew install tmux`). |
 
 ```sh
-cd ~/Developer/meu-repositorio
+cd ~/Developer/my-repository
 relay-tui
 ```
 
@@ -111,8 +111,8 @@ Deixe o harness no outro painel e trabalhe como sempre: o painel acompanha.
 ## Usar
 
 ```sh
-relay-tui                              # observa o diretório atual
-relay-tui --workspace ~/Developer/repo # observa outro repositório
+relay-tui                              # watches the current directory
+relay-tui --workspace ~/Developer/repo # watches another repository
 relay-tui --version
 relay-tui --help
 ```
@@ -125,6 +125,13 @@ quando o watcher não entrega eventos, num volume de rede por exemplo). `q` e
 cancela. Em Histórico `Esc` volta. Trocar de visão, mover a seleção e recarregar
 não escrevem nada: o painel continua só de leitura.
 
+Pressione `c` em Agora ou Histórico para abrir **Configurações**. Use `↑` e `↓`
+para escolher **Português (Brasil)** ou **English**, `Enter` para aplicar e
+`Esc` para voltar com a visão e a seleção anteriores preservadas. A mudança
+vale durante esta execução do painel, inclusive se `--lang` foi usado ao
+iniciar; ela não é gravada no workspace, e recarregar o workspace mantém o
+idioma escolhido.
+
 ### Histórico
 
 Quatro níveis, cada um aprofundando o anterior: as **specs** (da mais recente à
@@ -134,6 +141,13 @@ Result, Evidence, Criteria e Decisions. Cada linha de lista ocupa uma linha e
 termina em `…` quando não cabe; o detalhe quebra o texto e nunca corta. A lista
 rola para manter a seleção visível e diz quantas linhas há acima e abaixo.
 
+Uma spec cujo changelog tem uma seção `## Closed` está **fechada** (`fechada ·`
+antes da contagem): as entradas dela saíram do `BACKLOG.md` e o Histórico é onde
+continuam visíveis, listadas primeiro entre os itens da spec. Uma entrada
+descartada com `[-]` aparece como `× descartado`, na cor discreta, e fica fora da
+contagem `feitos/total` porque deixou de ser trabalho a fazer; abrir a entrada
+diz o motivo (`Descartado: <motivo>`). Agora nunca mostra entradas descartadas.
+
 | Tecla | Efeito |
 | --- | --- |
 | `↑` `↓`, `j` `k`, roda do mouse | movem a seleção (no detalhe, rolam) |
@@ -142,6 +156,7 @@ rola para manter a seleção visível e diz quantas linhas há acima e abaixo.
 | `Esc` ou `Backspace` | voltam um nível; no de specs, voltam a Agora. Em Histórico `Esc` volta em vez de sair |
 | `Tab`, `t` | alternam Agora e Histórico, no mesmo nível e na mesma seleção |
 | `r` | relê o workspace |
+| `c` | abre Configurações para mudar o idioma nesta execução |
 | `q`, `Ctrl-C` | saem |
 
 O mouse só é capturado enquanto Histórico está aberto, para Agora continuar
@@ -150,6 +165,10 @@ ao sair e num erro interno. Com ela ligada, muitos terminais pedem uma tecla
 (`Shift`, ou `Option` no iTerm2) para selecionar texto. Todo gesto do mouse tem
 uma tecla equivalente. Abaixo de 40 colunas Histórico mostra só um aviso, e as
 teclas continuam valendo.
+
+Os sinais externos `SIGTERM`, `SIGINT` e `SIGHUP` também restauram o modo raw,
+a tela alternativa e a captura do mouse antes de encerrar com o status
+`128 + sinal` (`143`, `130` e `129`, respectivamente).
 
 ### O que a tela mostra
 
@@ -180,6 +199,14 @@ A cor segue o status (verde em andamento ou concluído, azul pronto ou
 disponível, amarelo bloqueado, vermelho inconsistente), mas todo estado também
 aparece por extenso, nunca só pela cor.
 
+Os textos fixos da interface estão disponíveis em inglês e português do Brasil.
+Escolha com `relay-tui --lang en` ou `relay-tui --lang pt-BR`. Sem essa opção,
+vale primeiro um `Language` válido em `.orchestration/SETTINGS.md`; depois são
+consultados `LC_ALL`, `LC_MESSAGES` e `LANG`, nessa ordem (`pt*` seleciona
+português do Brasil). O inglês é o padrão final. A ajuda e os erros do CLI usam
+o mesmo idioma. O conteúdo dos registros do workspace, incluindo objetivo e
+próximo passo, aparece como foi escrito.
+
 Se faltar altura, a linha de próximo passo some primeiro, depois o Handoff se
 compacta e o TODO corta em `+N itens`. Abaixo de 40 colunas só o
 cabeçalho e o status aparecem. Um diretório sem `.orchestration/` mostra "Não é
@@ -190,10 +217,6 @@ O fundo não é pintado: vem do terminal. As cores presumem um terminal escuro.
 
 ## Limites conhecidos
 
-- Linhas de registro terminadas em CRLF (comuns no Windows com `autocrlf`) são
-  ignoradas.
-- Um `SIGTERM` vindo de fora do teclado não restaura o terminal; `q`, `Esc`,
-  `Ctrl-C` e um erro interno restauram.
 - Só tema escuro.
 
 ## A partir do código
@@ -203,5 +226,5 @@ Sem baixar nada, com o Rust instalado (`rustup`):
 ```sh
 cd app/relay-tui
 cargo build --release
-./target/release/relay-tui --workspace /caminho/do/repo
+./target/release/relay-tui --workspace /path/to/repo
 ```

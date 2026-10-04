@@ -1,0 +1,45 @@
+{
+  "activeBacklogId": "B-001",
+  "backlog": [
+    {
+      "available": true,
+      "id": "B-001",
+      "marker": " ",
+      "needs": [],
+      "spec": ".specs/20260907-001-contrato-estado-derivado.md",
+      "text": "Um"
+    }
+  ],
+  "completed": 1,
+  "handoff": {
+    "backlogId": "B-001",
+    "context": "- Status: blocked\nNo active handoff.",
+    "harness": "claude-code",
+    "nextStep": "Ir.",
+    "objective": "Ver.",
+    "spec": ".specs/20260907-001-contrato-estado-derivado.md",
+    "todoId": "T-002",
+    "updated": "2026-09-07T06:49:14Z"
+  },
+  "kind": "ok",
+  "status": "in_progress",
+  "todo": [
+    {
+      "available": false,
+      "id": "T-001",
+      "marker": "x",
+      "needs": [],
+      "text": "Um"
+    },
+    {
+      "available": false,
+      "id": "T-002",
+      "marker": "•",
+      "needs": [
+        "T-001"
+      ],
+      "text": "Dois"
+    }
+  ],
+  "total": 2
+}

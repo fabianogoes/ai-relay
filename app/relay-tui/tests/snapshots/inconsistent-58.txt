@@ -2,7 +2,7 @@
 
 ╭ ● Inconsistente ──────────────────────────────────── 1 ╮
 │ handoff-names-no-pending-todo                          │
-│ O handoff aponta T-001, que está [x]; T-002 está [•].  │
+│ in_progress_id=T-002, todo_id=T-001                    │
 │ handoff · todo                                         │
 ╰────────────────────────────────────────────────────────╯
 
@@ -20,7 +20,7 @@
   Registros em conflito: relay-status e relay-continue.
 
 ╭────────────────────────────────────────────────────────╮
-│ Tab histórico · r recarregar · q sair                  │
+│ Tab histórico · r recarregar · c config. · q sair      │
 ╰────────────────────────────────────────────────────────╯
 
 --- colors ---
@@ -28,7 +28,7 @@
 
 r.R.RRRRRRRRRRRRR.rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr.m.r
 r.RRRRRRRRRRRRRRRRRRRRRRRRRRRRR..........................r
-r.f.fffffff.ffffff.ffffff.fff.ffff.ffff.fffff.ffff.ffff..r
+r.fffffffffffffffffffff.fffffffffffff....................r
 r.mmmmmmm.m.mmmm.........................................r
 rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
 
@@ -46,5 +46,5 @@ rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
 ..mmmmmmmmm.mm.mmmmmmmmm.FFFFFFFFFFFF.m.FFFFFFFFFFFFFFm
 
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmmmmm.m.F.mmmm......d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

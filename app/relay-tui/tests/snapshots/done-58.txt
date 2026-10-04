@@ -20,7 +20,7 @@
   Tudo concluído. Para uma nova ideia: relay-spec.
 
 ╭────────────────────────────────────────────────────────╮
-│ Tab histórico · r recarregar · q sair                  │
+│ Tab histórico · r recarregar · c config. · q sair      │
 ╰────────────────────────────────────────────────────────╯
 
 --- colors ---
@@ -46,5 +46,5 @@ gggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
 ..mmmm.mmmmmmmmmm.mmmm.mmm.mmmm.mmmmmm.FFFFFFFFFFm
 
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmmmmm.m.F.mmmm......d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

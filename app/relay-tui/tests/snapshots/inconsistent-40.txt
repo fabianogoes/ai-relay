@@ -2,10 +2,10 @@
 
 ╭ ● Inconsistente ────────────────── 1 ╮
 │ handoff-names-no-pending-todo        │
-│ O handoff aponta T-001, que está     │
-│ [x]; T-002 está [•].                 │
+│ in_progress_id=T-002, todo_id=T-001  │
 │ handoff · todo                       │
 ╰──────────────────────────────────────╯
+
 
 
 
@@ -20,7 +20,7 @@
   Os registros se contradizem: relay-…
 
 ╭──────────────────────────────────────╮
-│ Tab histórico · q sair               │
+│ Tab histórico · c config. · q sair   │
 ╰──────────────────────────────────────╯
 
 --- colors ---
@@ -28,10 +28,10 @@
 
 r.R.RRRRRRRRRRRRR.rrrrrrrrrrrrrrrrrr.m.r
 r.RRRRRRRRRRRRRRRRRRRRRRRRRRRRR........r
-r.f.fffffff.ffffff.ffffff.fff.ffff.....r
-r.ffff.fffff.ffff.ffff.................r
+r.fffffffffffffffffffff.fffffffffffff..r
 r.mmmmmmm.m.mmmm.......................r
 rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+
 
 
 
@@ -46,5 +46,5 @@ rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
 ..mm.mmmmmmmmm.mm.mmmmmmmmmmmm.FFFFFFF
 
 dddddddddddddddddddddddddddddddddddddddd
-d.FFF.mmmmmmmmm.m.F.mmmm...............d
+d.FFF.mmmmmmmmm.m.F.mmmmmmm.m.F.mmmm...d
 dddddddddddddddddddddddddddddddddddddddd

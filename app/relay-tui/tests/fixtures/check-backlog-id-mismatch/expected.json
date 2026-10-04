@@ -3,12 +3,15 @@
   "violations": [
     {
       "check": "backlog-id-mismatch",
-      "detail": "O handoff diz B-001, o TODO diz B-002.",
       "records": [
         "handoff",
         "todo",
         "backlog"
-      ]
+      ],
+      "params": {
+        "handoff_backlog_id": "B-001",
+        "todo_backlog_id": "B-002"
+      }
     }
   ]
 }

@@ -1,0 +1,34 @@
+ relay  ~/Developer/relay                     ● up to date
+
+╭ Items · 20261002-001 ──────────────────────────────────╮
+│ ▸ B-010 Core em Rust passa a suite de conformi… ✓ done │
+│   B-011 View em cartoes cobre todos os … ● in progress │
+│   B-012 Binario observa um workspace real    ◌ waiting │
+│   B-013 Release e documentacao de uso      ○ available │
+│   B-014 Assinatura dos binarios no macOS     ! blocked │
+│                                                        │
+│                                                        │
+│                                                        │
+╰────────────────────────────────────────────────────────╯
+
+╭────────────────────────────────────────────────────────╮
+│ Esc back · Tab now · c settings · q quit               │
+╰────────────────────────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm.....................g.mm.mm.mmmm
+
+d.FFFFF.F.IIIIIIIIIIII.ddddddddddddddddddddddddddddddddddd
+d.U.iiiii.FFFF.FF.FFFF.FFFFF.F.FFFFF.FF.FFFFFFFFF.G.ffff.d
+d...iiiii.ffff.ff.fffffff.fffff.fffff.ff.f.G.ff.ffffffff.d
+d...iiiii.fffffff.fffffff.ff.fffffffff.ffff....M.fffffff.d
+d...iiiii.fffffff.f.ffffffffffff.ff.fff......U.fffffffff.d
+d...iiiii.ffffffffff.fff.ffffffff.ff.fffff.....Y.fffffff.d
+d........................................................d
+d........................................................d
+d........................................................d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmmm.m.FFF.mmm.m.F.mmmmmmmm.m.F.mmmm...............d
+dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

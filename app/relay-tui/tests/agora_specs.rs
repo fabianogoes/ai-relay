@@ -22,10 +22,22 @@ const SPEC_D: &str = ".specs/20261002-003-skill-que-abre-em-split.md";
 
 fn specs() -> std::collections::BTreeMap<String, String> {
     [
-        (SPEC_A, "# 20260901-001 - Contrato do estado derivado entre o core e a interface\n"),
-        (SPEC_B, "# 20261002-001 - relay-tui: observador de terminal em Rust\n"),
-        (SPEC_C, "# 20261002-002 - relay-tui: navegacao pelo historico do trabalho\n"),
-        (SPEC_D, "# 20261002-003 - Skill que abre o relay-tui em um split\n"),
+        (
+            SPEC_A,
+            "# 20260901-001 - Contrato do estado derivado entre o core e a interface\n",
+        ),
+        (
+            SPEC_B,
+            "# 20261002-001 - relay-tui: observador de terminal em Rust\n",
+        ),
+        (
+            SPEC_C,
+            "# 20261002-002 - relay-tui: navegacao pelo historico do trabalho\n",
+        ),
+        (
+            SPEC_D,
+            "# 20261002-003 - Skill que abre o relay-tui em um split\n",
+        ),
     ]
     .into_iter()
     .map(|(p, t)| (p.to_string(), t.to_string()))
@@ -78,11 +90,18 @@ fn files(mode: Mode) -> RelayFiles {
         Mode::InProgress | Mode::Blocked => {
             "# Active task: B-041\n\n- [x] T-001 - Extrair titulos\n- [•] T-002 - Agrupar por spec\n- [ ] T-003 - Testar\n"
         }
-        Mode::Ready => "# Active task: B-041\n\n- [x] T-001 - Extrair titulos\n- [ ] T-002 - Agrupar por spec\n- [ ] T-003 - Testar\n",
+        Mode::Ready => {
+            "# Active task: B-041\n\n- [x] T-001 - Extrair titulos\n- [ ] T-002 - Agrupar por spec\n- [ ] T-003 - Testar\n"
+        }
         _ => "",
     };
-    let status = if mode == Mode::Blocked { "blocked" } else { "in_progress" };
+    let status = if mode == Mode::Blocked {
+        "blocked"
+    } else {
+        "in_progress"
+    };
     RelayFiles {
+        changelogs: Default::default(),
         backlog,
         todo: todo.to_string(),
         handoff: if matches!(mode, Mode::InProgress | Mode::Blocked) {
@@ -94,12 +113,13 @@ fn files(mode: Mode) -> RelayFiles {
             String::new()
         },
         changelog: if working {
-            format!("# Change log\n\n## 2026-10-02 - T-001 - Extrair titulos\n- Backlog: B-041\n- Spec: {SPEC_C}\n- Result: r\n- Criteria: none\n")
+            format!(
+                "# Change log\n\n## 2026-10-02 - T-001 - Extrair titulos\n- Backlog: B-041\n- Spec: {SPEC_C}\n- Result: r\n- Criteria: none\n"
+            )
         } else {
             String::new()
         },
         specs: specs(),
-        ..Default::default()
     }
 }
 
@@ -110,7 +130,10 @@ struct World {
 
 fn world_mode(mode: Mode) -> World {
     let f = files(mode);
-    World { state: derive_state(&f), history: extract_history(&f) }
+    World {
+        state: derive_state(&f),
+        history: extract_history(&f),
+    }
 }
 
 fn world(active: bool) -> World {
@@ -124,12 +147,19 @@ fn draw(w: &World, width: u16, height: u16) -> Vec<String> {
         workspace: "~/Developer/relay",
         freshness: Freshness::Fresh,
         now_unix: parse_rfc3339("2026-10-02T12:05:00Z").unwrap(),
+        language: relay_tui::language::Language::PtBr,
     };
     let area = Rect::new(0, 0, width, height);
     let mut buf = Buffer::empty(area);
     (&view).render(area, &mut buf);
     (0..height)
-        .map(|y| (0..width).map(|x| buf[(x, y)].symbol()).collect::<String>().trim_end().to_string())
+        .map(|y| {
+            (0..width)
+                .map(|x| buf[(x, y)].symbol())
+                .collect::<String>()
+                .trim_end()
+                .to_string()
+        })
         .collect()
 }
 
@@ -158,11 +188,23 @@ fn the_pending_specs_follow_the_backlog_with_their_counts_and_the_sem_spec_line_
     let lines = draw(&w, 58, 40);
     let t = text(&lines);
     assert!(t.contains("╭ Specs pendentes"), "{t}");
-    let b = lines.iter().position(|l| l.contains("20261002-001")).expect("spec B listed");
-    let d = lines.iter().position(|l| l.contains("20261002-003")).expect("spec D listed");
-    let none = lines.iter().position(|l| l.contains("Sem spec")).expect("Sem spec listed");
+    let b = lines
+        .iter()
+        .position(|l| l.contains("20261002-001"))
+        .expect("spec B listed");
+    let d = lines
+        .iter()
+        .position(|l| l.contains("20261002-003"))
+        .expect("spec D listed");
+    let none = lines
+        .iter()
+        .position(|l| l.contains("Sem spec"))
+        .expect("Sem spec listed");
     assert!(b < d && d < none, "{t}");
-    assert!(lines[b].contains("1/3") && lines[d].contains("0/1") && lines[none].contains("0/1"), "{t}");
+    assert!(
+        lines[b].contains("1/3") && lines[d].contains("0/1") && lines[none].contains("0/1"),
+        "{t}"
+    );
     // A spec with everything done is not pending, and the current is not repeated.
     assert!(!t.contains("20260901-001"), "{t}");
     assert_eq!(t.matches("20261002-002").count(), 1, "{t}");
@@ -173,7 +215,9 @@ fn the_pending_specs_follow_the_backlog_with_their_counts_and_the_sem_spec_line_
 #[test]
 fn without_an_active_item_the_card_says_a_seguir_and_names_no_priority() {
     let w = world(false);
-    assert!(matches!(&w.state, RelayState::Ok(ok) if ok.status == relay_tui::core::WorkStatus::Backlog));
+    assert!(
+        matches!(&w.state, RelayState::Ok(ok) if ok.status == relay_tui::core::WorkStatus::Backlog)
+    );
     let t = text(&draw(&w, 58, 40));
     assert!(t.contains("● A escolher"), "{t}");
     // B-011 is the first available entry, in spec B.
@@ -202,7 +246,9 @@ fn stage(lines: &[String]) -> Option<u8> {
     if t.contains("╭ Specs pendentes") {
         Some(0)
     } else if t.contains("╭ 20261002-002") && t.contains("specs pendentes") {
-        let cut = lines.iter().any(|l| l.starts_with("│ +") && l.contains("iten"));
+        let cut = lines
+            .iter()
+            .any(|l| l.starts_with("│ +") && l.contains("iten"));
         Some(if cut { 2 } else { 1 })
     } else if lines.iter().any(|l| l.trim_start().starts_with("Backlog ")) {
         Some(3)
@@ -215,15 +261,22 @@ fn todo_is_cut(lines: &[String]) -> bool {
     let Some(top) = lines.iter().position(|l| l.starts_with("╭ TODO")) else {
         return true;
     };
-    let end = lines[top..].iter().position(|l| l.starts_with('╰')).map_or(lines.len(), |e| top + e);
-    lines[top..end].iter().any(|l| l.starts_with("│ +") && l.contains("iten"))
+    let end = lines[top..]
+        .iter()
+        .position(|l| l.starts_with('╰'))
+        .map_or(lines.len(), |e| top + e);
+    lines[top..end]
+        .iter()
+        .any(|l| l.starts_with("│ +") && l.contains("iten"))
 }
 
 fn handoff_is_compact(lines: &[String]) -> bool {
     let Some(top) = lines.iter().position(|l| l.starts_with("╭ Handoff")) else {
         return false;
     };
-    !lines[top + 2].trim_matches(|c| c == '│' || c == ' ').is_empty()
+    !lines[top + 2]
+        .trim_matches(|c| c == '│' || c == ' ')
+        .is_empty()
 }
 
 #[test]
@@ -235,10 +288,17 @@ fn the_backlog_area_gives_way_in_the_order_of_the_design_system() {
         let lines = draw(&w, 58, height);
         let Some(now) = stage(&lines) else {
             // Past the count line the area is gone and the TODO is being cut.
-            assert!(todo_is_cut(&lines) || handoff_is_compact(&lines), "height {height}:\n{}", text(&lines));
+            assert!(
+                todo_is_cut(&lines) || handoff_is_compact(&lines),
+                "height {height}:\n{}",
+                text(&lines)
+            );
             continue;
         };
-        assert!(now >= last, "stage went back from {last} to {now} at height {height}");
+        assert!(
+            now >= last,
+            "stage went back from {last} to {now} at height {height}"
+        );
         last = now;
         if !seen.contains(&now) {
             seen.push(now);
@@ -246,8 +306,14 @@ fn the_backlog_area_gives_way_in_the_order_of_the_design_system() {
         // The Handoff is compacted and the TODO cut only after the area is down
         // to the count line.
         if now < 3 {
-            assert!(!todo_is_cut(&lines), "the TODO was cut at height {height} in stage {now}");
-            assert!(!handoff_is_compact(&lines), "the Handoff was compact at height {height} in stage {now}");
+            assert!(
+                !todo_is_cut(&lines),
+                "the TODO was cut at height {height} in stage {now}"
+            );
+            assert!(
+                !handoff_is_compact(&lines),
+                "the Handoff was compact at height {height} in stage {now}"
+            );
         }
     }
     assert_eq!(seen, [0, 1, 2, 3], "every step of the order must appear");
@@ -260,7 +326,10 @@ fn a_cut_current_spec_still_shows_an_item_and_says_how_many_are_hidden() {
         let lines = draw(&w, 58, height);
         if stage(&lines) == Some(2) {
             let t = text(&lines);
-            assert!(t.contains("● B-041") && t.contains("+2 itens"), "height {height}:\n{t}");
+            assert!(
+                t.contains("● B-041") && t.contains("+2 itens"),
+                "height {height}:\n{t}"
+            );
             return;
         }
     }
@@ -285,7 +354,11 @@ fn color_letter(color: Color, bold: bool) -> char {
         c if c == theme::BAR_EMPTY => 'e',
         _ => '?',
     };
-    if bold { letter.to_ascii_uppercase() } else { letter }
+    if bold {
+        letter.to_ascii_uppercase()
+    } else {
+        letter
+    }
 }
 
 fn snapshot(w: &World, name: &str, width: u16, height: u16) {
@@ -295,6 +368,7 @@ fn snapshot(w: &World, name: &str, width: u16, height: u16) {
         workspace: "~/Developer/relay",
         freshness: Freshness::Fresh,
         now_unix: parse_rfc3339("2026-10-02T12:05:00Z").unwrap(),
+        language: relay_tui::language::Language::PtBr,
     };
     let area = Rect::new(0, 0, width, height);
     let mut buf = Buffer::empty(area);
@@ -321,14 +395,23 @@ fn snapshot(w: &World, name: &str, width: u16, height: u16) {
         colors.push('\n');
     }
     let actual = format!("{out}\n--- colors ---\n{colors}");
-    let path: PathBuf = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/snapshots").join(format!("{name}.txt"));
+    let path: PathBuf = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/snapshots")
+        .join(format!("{name}.txt"));
     if std::env::var_os("UPDATE_SNAPSHOTS").is_some() {
         fs::write(&path, &actual).unwrap();
         return;
     }
-    let expected = fs::read_to_string(&path)
-        .unwrap_or_else(|_| panic!("missing snapshot {}; run with UPDATE_SNAPSHOTS=1", path.display()));
-    assert!(actual == expected, "snapshot {name} differs\n--- expected\n{expected}\n--- actual\n{actual}");
+    let expected = fs::read_to_string(&path).unwrap_or_else(|_| {
+        panic!(
+            "missing snapshot {}; run with UPDATE_SNAPSHOTS=1",
+            path.display()
+        )
+    });
+    assert!(
+        actual == expected,
+        "snapshot {name} differs\n--- expected\n{expected}\n--- actual\n{actual}"
+    );
 }
 
 #[test]
@@ -349,7 +432,10 @@ fn the_backlog_state_says_a_seguir_and_without_an_available_entry_has_no_current
     let none = world_mode(Mode::NoneAvailable);
     snapshot(&none, "agora-specs-backlog-none-58", 58, 30);
     let t = text(&draw(&none, 58, 30));
-    assert!(t.contains("╭ Specs pendentes") && !t.contains("a seguir"), "{t}");
+    assert!(
+        t.contains("╭ Specs pendentes") && !t.contains("a seguir"),
+        "{t}"
+    );
 }
 
 #[test]
@@ -358,11 +444,77 @@ fn the_height_makes_the_area_give_way_in_order() {
     // Both cards whole, the pending ones as a line, the current spec cut, and
     // the count line of the backlog.
     for height in [34, 27, 25, 23] {
-        snapshot(&w, &format!("agora-specs-in_progress-58-h{height}"), 58, height);
+        snapshot(
+            &w,
+            &format!("agora-specs-in_progress-58-h{height}"),
+            58,
+            height,
+        );
     }
     // In the backlog state, where the same order applies without Handoff or TODO.
     let next = world_mode(Mode::Next);
     for height in [17, 16, 15, 11] {
-        snapshot(&next, &format!("agora-specs-backlog-58-h{height}"), 58, height);
+        snapshot(
+            &next,
+            &format!("agora-specs-backlog-58-h{height}"),
+            58,
+            height,
+        );
     }
+}
+
+// A dropped entry is not work to do (DESIGN.md, "Specs fechadas e itens
+// descartados"): Agora neither lists nor counts it, and a spec with nothing
+// open is not pending.
+fn world_of(backlog: &str) -> World {
+    let f = RelayFiles {
+        backlog: backlog.to_string(),
+        specs: specs(),
+        ..Default::default()
+    };
+    World {
+        state: derive_state(&f),
+        history: extract_history(&f),
+    }
+}
+
+#[test]
+fn agora_does_not_show_or_count_dropped_entries() {
+    let w = world_of(&format!(
+        "# Backlog\n\n\
+         - [x] B-001 - Contrato do estado derivado (spec: `{SPEC_A}`)\n\
+         - [ ] B-011 - Release e documentacao de uso (spec: `{SPEC_B}`)\n\
+         - [-] B-012 - Assinatura dos binarios no macOS (spec: `{SPEC_B}`) (dropped: fora de escopo)\n\
+         - [-] B-045 - Script open-split.sh com deteccao do terminal (spec: `{SPEC_D}`) (dropped: outra spec)\n"
+    ));
+    for width in [58, 40] {
+        let screen = text(&draw(&w, width, 24));
+        assert!(screen.contains("B-011"), "{screen}");
+        for hidden in [
+            "B-012",
+            "B-045",
+            "descartado",
+            "Skill que abre",
+            "fora de escopo",
+        ] {
+            assert!(!screen.contains(hidden), "{hidden} at {width}\n{screen}");
+        }
+    }
+    // The current spec counts the one entry that is work: 0/1, not 0/2.
+    let wide = text(&draw(&w, 58, 24));
+    assert!(wide.contains("0/1") && !wide.contains("0/2"), "{wide}");
+}
+
+#[test]
+fn everything_done_or_dropped_is_done_and_counts_only_the_work() {
+    let w = world_of(&format!(
+        "# Backlog\n\n\
+         - [x] B-001 - Contrato do estado derivado (spec: `{SPEC_A}`)\n\
+         - [-] B-012 - Assinatura dos binarios no macOS (spec: `{SPEC_B}`) (dropped: fora de escopo)\n"
+    ));
+    let screen = text(&draw(&w, 58, 12));
+    assert!(
+        screen.contains("Concluído") && screen.contains("1 de 1 itens"),
+        "{screen}"
+    );
 }

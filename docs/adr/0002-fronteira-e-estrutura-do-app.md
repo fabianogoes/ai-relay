@@ -107,7 +107,7 @@ repositório ou de qualquer outro. Toda mutação passa por uma skill num harnes
    simplesmente cita `app/`, como uma spec ou uma ADR, não é dependência.
    *Exceção da [ADR-0003](0003-relay-tui-observador-de-terminal-em-rust.md)
    decisão 6: os dois workflows do `relay-tui` em `.github/workflows/`, inertes
-   quando `app/` não existe.*
+   quando `app/` não existe. O CI do pacote (ADR-0007) não aponta para `app/`.*
 4. Nada sob `app/` é referenciado por manifesto de distribuição.
 5. Nenhum arquivo sob `app/` escreve em `.specs/` ou `.orchestration/`.
 6. `app/CLAUDE.md` é symlink real para `app/AGENTS.md`, nunca arquivo regular.

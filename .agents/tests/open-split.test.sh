@@ -38,7 +38,7 @@ HOSTPATH=/usr/bin:/bin
 
 PASS=0
 FAIL=0
-SH=sh
+SH="sh"
 
 ok() { PASS=$((PASS + 1)); }
 bad() {
@@ -73,6 +73,8 @@ tab() { printf '\t'; }
 TAB=$(tab)
 
 # `run` with the fakes on the PATH and the script under test.
+# $_vars is a list of NAME=value words and is split on purpose.
+# shellcheck disable=SC2086
 with_fakes() { _vars=$1; shift; run "$BIN:$HOSTPATH" $_vars "$SH" "$SCRIPT" "$@"; }
 
 suite() {
@@ -103,7 +105,7 @@ suite() {
   assert_has "warp: checks that Warp is in front" 'does not start with "dev.warp."' "$OUT"
   assert_has "warp: Cmd+D" 'keystroke "d" using command down' "$OUT"
   assert_has "warp: types the command" "keystroke \"relay-tui --workspace '$D1'\"" "$OUT"
-  assert_has "warp: Enter, after a pause so the new shell takes it" "keystroke return" "$OUT"
+  assert_has "warp: sends Enter as key code 36 after typing the command" "key code 36" "$OUT"
   assert_eq "warp: dry-run executes nothing" "" "$(calls)"
 
   # --- A-001: precedence, the first match wins ---------------------------------

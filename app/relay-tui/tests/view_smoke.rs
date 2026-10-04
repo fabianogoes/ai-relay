@@ -11,7 +11,10 @@ use relay_tui::view::{Freshness, Screen, View};
 use relay_tui::workspace::read_workspace;
 
 fn fixture(name: &str) -> RelayState {
-    let dir: PathBuf = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures").join(name).join("workspace");
+    let dir: PathBuf = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/fixtures")
+        .join(name)
+        .join("workspace");
     derive_state(&read_workspace(&dir))
 }
 
@@ -34,16 +37,31 @@ const SIZES: [(u16, u16); 14] = [
 
 #[test]
 fn every_screen_renders_at_every_size_without_panicking() {
-    let mut cases = vec!["idle", "backlog", "ready", "in_progress", "blocked", "done", "inconsistent"]
-        .into_iter()
-        .map(|c| format!("status-{c}"))
-        .collect::<Vec<_>>();
+    let mut cases = vec![
+        "idle",
+        "backlog",
+        "ready",
+        "in_progress",
+        "blocked",
+        "done",
+        "inconsistent",
+    ]
+    .into_iter()
+    .map(|c| format!("status-{c}"))
+    .collect::<Vec<_>>();
     cases.push("check-needs-cycle".to_string());
     for name in cases {
         let state = fixture(&name);
         for screen in [Screen::State(&state), Screen::NotARelayWorkspace] {
             for freshness in [Freshness::Fresh, Freshness::Updating] {
-                let view = View { history: relay_tui::view::no_history(), screen, workspace: "~/Developer/relay", freshness, now_unix: 1_790_000_000 };
+                let view = View {
+                    history: relay_tui::view::no_history(),
+                    screen,
+                    workspace: "~/Developer/relay",
+                    freshness,
+                    now_unix: 1_790_000_000,
+                    language: relay_tui::language::Language::PtBr,
+                };
                 for (w, h) in SIZES {
                     let area = Rect::new(0, 0, w, h);
                     let mut buf = Buffer::empty(area);
@@ -57,11 +75,13 @@ fn every_screen_renders_at_every_size_without_panicking() {
 #[test]
 fn an_area_that_does_not_start_at_the_origin_is_respected() {
     let state = fixture("status-in_progress");
-    let view = View { history: relay_tui::view::no_history(),
+    let view = View {
+        history: relay_tui::view::no_history(),
         screen: Screen::State(&state),
         workspace: "~/x",
         freshness: Freshness::Fresh,
         now_unix: 1_790_000_000,
+        language: relay_tui::language::Language::PtBr,
     };
     let area = Rect::new(7, 3, 58, 24);
     let mut buf = Buffer::empty(Rect::new(0, 0, 80, 40));
@@ -69,9 +89,13 @@ fn an_area_that_does_not_start_at_the_origin_is_respected() {
     // Nothing outside the area was touched.
     for y in 0..40 {
         for x in 0..80 {
-            let inside = x >= 7 && x < 65 && y >= 3 && y < 27;
+            let inside = (7..65).contains(&x) && (3..27).contains(&y);
             if !inside {
-                assert_eq!(buf[(x, y)].symbol(), " ", "({x},{y}) was drawn outside the area");
+                assert_eq!(
+                    buf[(x, y)].symbol(),
+                    " ",
+                    "({x},{y}) was drawn outside the area"
+                );
             }
         }
     }

@@ -7,7 +7,7 @@ on one side, the panel on the other. Handoff, TODO and backlog change on screen
 as the files change, with no reload. It never writes the records: the skills
 do, inside a harness.
 
-It is a single binary: no Node, and no clone of the repository.
+It is a single binary, and needs no clone of the repository.
 
 ## Install
 
@@ -123,6 +123,12 @@ itself: it asks `Sair?` in the footer, and `Esc`, `Enter` or `y` confirm while a
 other key cancels. In Histórico `Esc` goes back. Switching views, moving the selection and reloading write nothing: the panel
 stays read-only.
 
+Press `c` in Agora or Histórico to open **Settings**. Use `↑` and `↓` to select
+**Portuguese (Brazil)** or **English**, `Enter` to apply, and `Esc` to return
+with the previous view and selection intact. The change applies for this run of
+the panel, including when `--lang` was used at startup; it is not saved to the
+workspace, and a workspace reload keeps the selected language.
+
 ### Histórico
 
 Four levels, each deepening the one before: the **specs** (newest first, with the
@@ -132,6 +138,13 @@ Criteria and Decisions. Each list row takes one line and ends in `…` when it d
 not fit; the detail wraps its text and never cuts it. The list scrolls to keep
 the selection visible and says how many rows there are above and below.
 
+A spec whose changelog has a `## Closed` section is **closed** (`closed ·` before
+its count in Portuguese: `fechada ·`): its entries left `BACKLOG.md` and Histórico
+is where they stay visible, listed first among the spec's items. An entry dropped
+with `[-]` shows as `× descartado`, in the muted color, and is left out of the
+`done/total` count because it is no longer work to do; opening it says why
+(`Descartado: <reason>`). Agora never shows dropped entries.
+
 | Key | Effect |
 | --- | --- |
 | `↑` `↓`, `j` `k`, mouse wheel | move the selection (in the detail, scroll) |
@@ -140,6 +153,7 @@ the selection visible and says how many rows there are above and below.
 | `Esc` or `Backspace` | go back one level; from the specs level, back to Agora. In Histórico `Esc` goes back instead of quitting |
 | `Tab`, `t` | switch between Agora and Histórico, at the same level and selection |
 | `r` | reads the workspace again |
+| `c` | opens Settings to change the language for this run |
 | `q`, `Ctrl-C` | quit |
 
 The mouse is captured only while Histórico is open, so Agora still lets you select
@@ -148,6 +162,10 @@ and on an internal error. While it is on, many terminals ask for a modifier key
 (`Shift`, or `Option` in iTerm2) to select text. Every mouse gesture has a key
 equivalent. Below 40 columns Histórico shows only a notice, and the keys keep
 working.
+
+External `SIGTERM`, `SIGINT` and `SIGHUP` signals also restore raw mode, the
+alternate screen and mouse capture before exiting with status `128 + signal`
+(`143`, `130` and `129`, respectively).
 
 ### What the screen shows
 
@@ -175,7 +193,13 @@ working.
 
 The color follows the status (green in progress or done, blue ready or
 available, yellow blocked, red inconsistent), but every state is also spelled
-out in words, never by color alone. The screen text is in Portuguese.
+out in words, never by color alone. Fixed interface text is available in
+English and Brazilian Portuguese. Choose it with `relay-tui --lang en` or
+`relay-tui --lang pt-BR`. Without that option, a valid `Language` entry in
+`.orchestration/SETTINGS.md` wins, then `LC_ALL`, `LC_MESSAGES`, and `LANG`
+are checked in that order (`pt*` selects Brazilian Portuguese); English is the
+fallback. The help and command-line errors use the same language. Text from
+workspace records, including objective and next step, is shown as written.
 
 When there is not enough height, the next-step line goes first, then the Handoff
 is compacted and the TODO is cut at `+N itens`. Below 40
@@ -188,9 +212,6 @@ dark terminal.
 
 ## Known limits
 
-- Record lines ending in CRLF (common on Windows with `autocrlf`) are ignored.
-- A `SIGTERM` from outside the keyboard does not restore the terminal; `q`,
-  `Esc`, `Ctrl-C` and an internal error do.
 - Dark theme only.
 
 ## From source

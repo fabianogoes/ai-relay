@@ -3,7 +3,7 @@
 ╭ Handoff ──────────────────────────────────────────────────────────────────────────────────────────────── ● Bloqueado ╮
 │ B-004 · T-003 · opencode · há 10 min                                                                                 │
 │                                                                                                                      │
-│ Objetivo  Scaffold da relay-ui com Vue 3.                                                                            │
+│ Objetivo  Esqueleto do módulo core em Rust.                                                                          │
 │ Próximo   Resolvido o bloqueio, rodar a criação do projeto Vite.                                                     │
 │ Bloqueio  Bloqueio: node_modules não pode ser instalado sem acesso ao registro npm neste ambiente. Condição de       │
 │           retomada: acesso ao registro npm restabelecido.                                                            │
@@ -13,7 +13,7 @@
 │                                                                                                                      │
 │ ✓ T-001 Materializar os sete fixtures                                                                                │
 │ ✓ T-002 Escrever tokens.css                                                                                          │
-│ ! T-003 Scaffold da relay-ui  bloqueado                                                                              │
+│ ! T-003 Esqueleto do módulo core  bloqueado                                                                          │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ╭ Specs pendentes ────────────────────────────────────────────────────────────────────────────────────────────────── 1 ╮
 │ Sem spec                                                                                                         0/1 │
@@ -26,7 +26,7 @@
   Resolva o bloqueio de T-003 (ver Handoff) e retome com relay-session.
 
 ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ Tab histórico · r recarregar · q sair                                                                                │
+│ Tab histórico · r recarregar · c config. · q sair                                                                    │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
 --- colors ---
@@ -35,7 +35,7 @@
 y.FFFFFFF.yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy.Y.YYYYYYYYY.y
 y.IIIII.m.iiiii.m.mmmmmmmm.m.mm.mm.mmm.................................................................................y
 y......................................................................................................................y
-y.mmmmmmmm..ffffffff.ff.ffffffff.fff.fff.ff............................................................................y
+y.mmmmmmmm..fffffffff.ff.ffffff.ffff.ff.fffff..........................................................................y
 y.mmmmmmm...fffffffff.f.fffffffff.fffff.f.fffffff.ff.fffffff.fffff.....................................................y
 y.mmmmmmmm..fffffffff.ffffffffffff.fff.ffff.fff.fffffffff.fff.ffffff.ff.ffffffff.fff.fffff.fffffffff.ffffffff.ff.......y
 y...........fffffffff.ffffff.ff.ffffffff.fff.ffffffffffffff............................................................y
@@ -45,7 +45,7 @@ d.gggggggg.gggggggg.yyyyyyyy....................................................
 d......................................................................................................................d
 d.G.iiiii.mmmmmmmmmmmm.mm.mmmm.mmmmmmmm................................................................................d
 d.G.iiiii.mmmmmmmm.mmmmmmmmmm..........................................................................................d
-d.Y.iiiii.ffffffff.ff.ffffffff..yyyyyyyyy..............................................................................d
+d.Y.iiiii.fffffffff.ff.ffffff.ffff..yyyyyyyyy..........................................................................d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 d.FFFFF.FFFFFFFFF.dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.m.d
 d.fff.ffff.........................................................................................................mmm.d
@@ -58,5 +58,5 @@ dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 ..mmmmmmm.m.mmmmmmmm.mm.iiiii.mmmm.mmmmmmmm.m.mmmmmm.mmm.FFFFFFFFFFFFFm
 
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm................................................................................d
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmmmmm.m.F.mmmm....................................................................d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

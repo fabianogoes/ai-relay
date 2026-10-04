@@ -45,9 +45,7 @@ for skill in relay-setup relay-spec relay-status relay-continue relay-session re
 done
 ```
 
-The package metadata is `.claude-plugin/plugin.json`. Once Relay has a public
-GitHub repository and marketplace entry, this section will add the equivalent
-remote installation command.
+The package metadata is `.claude-plugin/plugin.json`.
 
 ## Codex
 

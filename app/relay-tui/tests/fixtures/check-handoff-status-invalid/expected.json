@@ -1,0 +1,14 @@
+{
+  "kind": "inconsistent",
+  "violations": [
+    {
+      "check": "handoff-status-invalid",
+      "records": [
+        "handoff"
+      ],
+      "params": {
+        "status": "paused"
+      }
+    }
+  ]
+}

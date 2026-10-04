@@ -12,6 +12,7 @@ use ratatui::layout::Rect;
 use ratatui::style::{Color, Style};
 
 use crate::core::{ChecklistEntry, History, OkState, spec_id};
+use crate::language::Language;
 use crate::theme;
 
 use super::cards::{Seg, card, plain_title, plural, put, seg, seg_width};
@@ -27,10 +28,12 @@ pub(super) enum Tag {
 }
 
 impl Tag {
-    pub fn word(self) -> &'static str {
-        match self {
-            Tag::InProgress => "em curso",
-            Tag::Next => "a seguir",
+    pub fn word(self, language: Language) -> &'static str {
+        match (self, language) {
+            (Tag::InProgress, Language::PtBr) => "em curso",
+            (Tag::Next, Language::PtBr) => "a seguir",
+            (Tag::InProgress, Language::En) => "in progress",
+            (Tag::Next, Language::En) => "up next",
         }
     }
 }
@@ -67,7 +70,8 @@ fn valid_spec<'a>(entry: &'a ChecklistEntry, history: &History) -> Option<&'a st
 pub(super) fn groups<'a>(ok: &'a OkState, history: &History) -> Groups<'a> {
     // The groups in the order they first appear, keyed by path (`None` = no spec).
     let mut keys: Vec<Option<&str>> = Vec::new();
-    for entry in &ok.backlog {
+    // A dropped entry is not work to do: Agora never shows or counts it.
+    for entry in ok.backlog.iter().filter(|e| e.marker != '-') {
         let key = valid_spec(entry, history);
         if !keys.contains(&key) {
             keys.push(key);
@@ -76,11 +80,18 @@ pub(super) fn groups<'a>(ok: &'a OkState, history: &History) -> Groups<'a> {
     // The items with no spec come last, as the Sem spec level does in Histórico.
     keys.sort_by_key(|k| k.is_none());
     let build = |key: Option<&str>| {
-        let members: Vec<&ChecklistEntry> =
-            ok.backlog.iter().filter(|e| valid_spec(e, history) == key).collect();
+        let members: Vec<&ChecklistEntry> = ok
+            .backlog
+            .iter()
+            .filter(|e| e.marker != '-' && valid_spec(e, history) == key)
+            .collect();
         let (id, title) = match key {
             Some(path) => {
-                let title = history.specs.iter().find(|s| s.path == path).map(|s| s.title.clone());
+                let title = history
+                    .specs
+                    .iter()
+                    .find(|s| s.path == path)
+                    .map(|s| s.title.clone());
                 (Some(spec_id(path)), title.unwrap_or_default())
             }
             None => (None, "Sem spec".to_string()),
@@ -90,7 +101,11 @@ pub(super) fn groups<'a>(ok: &'a OkState, history: &History) -> Groups<'a> {
             title,
             done: members.iter().filter(|e| e.marker == 'x').count(),
             total: members.len(),
-            open: members.iter().filter(|e| e.marker != 'x').copied().collect(),
+            open: members
+                .iter()
+                .filter(|e| e.marker != 'x')
+                .copied()
+                .collect(),
         }
     };
 
@@ -112,7 +127,6 @@ pub(super) fn groups<'a>(ok: &'a OkState, history: &History) -> Groups<'a> {
     Groups { current, others }
 }
 
-
 // ---------------------------------------------------------------- sizes
 
 /// How the rows given to the backlog area are shared. Heights, not rows of
@@ -127,16 +141,26 @@ pub(super) struct Shape {
 
 impl Shape {
     pub fn height(self) -> u16 {
-        if self.count_line { 1 } else { self.current + self.pending }
+        if self.count_line {
+            1
+        } else {
+            self.current + self.pending
+        }
     }
 }
 
 fn current_full(g: &Groups) -> u16 {
-    g.current.as_ref().map_or(0, |(c, _)| 2 + c.open.len() as u16)
+    g.current
+        .as_ref()
+        .map_or(0, |(c, _)| 2 + c.open.len() as u16)
 }
 
 fn pending_full(g: &Groups) -> u16 {
-    if g.others.is_empty() { 0 } else { 2 + g.others.len() as u16 }
+    if g.others.is_empty() {
+        0
+    } else {
+        2 + g.others.len() as u16
+    }
 }
 
 /// Rows for everything whole: both cards.
@@ -151,21 +175,41 @@ pub(super) fn shape(g: &Groups, avail: u16) -> Shape {
     let (cur_full, pend_full) = (current_full(g), pending_full(g));
     let pend_line = u16::from(!g.others.is_empty());
     if avail >= cur_full + pend_full {
-        return Shape { current: cur_full, pending: pend_full, count_line: false };
+        return Shape {
+            current: cur_full,
+            pending: pend_full,
+            count_line: false,
+        };
     }
     if avail >= cur_full + pend_line {
-        return Shape { current: cur_full, pending: pend_line, count_line: false };
+        return Shape {
+            current: cur_full,
+            pending: pend_line,
+            count_line: false,
+        };
     }
     if cur_full == 0 {
         // Only the pending specs: their line is the least that says something.
-        return Shape { current: 0, pending: pend_line.max(1).min(avail), count_line: false };
+        return Shape {
+            current: 0,
+            pending: pend_line.max(1).min(avail),
+            count_line: false,
+        };
     }
     // Frame, one item and the `+N itens` row make the smallest cut card: one
     // that shows no item at all would only say how many there are.
     if avail >= 4 + pend_line {
-        return Shape { current: avail - pend_line, pending: pend_line, count_line: false };
+        return Shape {
+            current: avail - pend_line,
+            pending: pend_line,
+            count_line: false,
+        };
     }
-    Shape { current: 0, pending: 0, count_line: true }
+    Shape {
+        current: 0,
+        pending: 0,
+        count_line: true,
+    }
 }
 
 // ---------------------------------------------------------------- drawing
@@ -182,12 +226,26 @@ fn item_glyph(e: &ChecklistEntry) -> (&'static str, Color) {
 /// One line: `lead`, the text cut to what is left and, flush right, `right`
 /// (given long and short; the short one is used when the long one would leave
 /// the text almost nothing).
-fn row(lead: Vec<Seg>, text: &str, text_style: Style, right: [Vec<Seg>; 2], width: usize) -> Vec<Seg> {
+fn row(
+    lead: Vec<Seg>,
+    text: &str,
+    text_style: Style,
+    right: [Vec<Seg>; 2],
+    width: usize,
+) -> Vec<Seg> {
     let lead_w = seg_width(&lead);
     let room_for = |r: &[Seg]| width.saturating_sub(lead_w + seg_width(r) + 1);
-    let right = if room_for(&right[0]) >= 12 || right[1].is_empty() { &right[0] } else { &right[1] };
+    let right = if room_for(&right[0]) >= 12 || right[1].is_empty() {
+        &right[0]
+    } else {
+        &right[1]
+    };
     let right_w = seg_width(right);
-    let (right, right_w) = if room_for(right) >= 4 { (right.clone(), right_w) } else { (Vec::new(), 0) };
+    let (right, right_w) = if room_for(right) >= 4 {
+        (right.clone(), right_w)
+    } else {
+        (Vec::new(), 0)
+    };
     let room = width.saturating_sub(lead_w + if right_w > 0 { right_w + 1 } else { 0 });
     let text = truncate(text, room);
     let pad = width.saturating_sub(lead_w + text::width(&text) + right_w);
@@ -200,13 +258,49 @@ fn row(lead: Vec<Seg>, text: &str, text_style: Style, right: [Vec<Seg>; 2], widt
     out
 }
 
-fn item_row(e: &ChecklistEntry, all: &[ChecklistEntry], width: usize) -> Vec<Seg> {
+fn item_row(
+    e: &ChecklistEntry,
+    all: &[ChecklistEntry],
+    width: usize,
+    language: Language,
+) -> Vec<Seg> {
+    let en = language == Language::En;
     let (glyph, tone) = item_glyph(e);
-    let lead = vec![seg(format!("{glyph} "), theme::bold(tone)), seg(format!("{} ", e.id), theme::color(theme::ID))];
+    let lead = vec![
+        seg(format!("{glyph} "), theme::bold(tone)),
+        seg(format!("{} ", e.id), theme::color(theme::ID)),
+    ];
     let (text_style, right) = match e.marker {
-        '•' => (theme::bold(theme::FG), [vec![seg("em curso", theme::fg())], vec![]]),
-        '!' => (theme::fg(), [vec![seg("bloqueado", theme::color(theme::YELLOW))], vec![]]),
-        _ if e.available => (theme::fg(), [vec![seg("disponível", theme::fg())], vec![]]),
+        '•' => (
+            theme::bold(theme::FG),
+            [
+                vec![seg(
+                    if en { "in progress" } else { "em curso" },
+                    theme::fg(),
+                )],
+                vec![],
+            ],
+        ),
+        '!' => (
+            theme::fg(),
+            [
+                vec![seg(
+                    if en { "blocked" } else { "bloqueado" },
+                    theme::color(theme::YELLOW),
+                )],
+                vec![],
+            ],
+        ),
+        _ if e.available => (
+            theme::fg(),
+            [
+                vec![seg(
+                    if en { "available" } else { "disponível" },
+                    theme::fg(),
+                )],
+                vec![],
+            ],
+        ),
         _ => {
             // Which needs are still open is a lookup in the same list; whether
             // the item is available at all was decided by the core.
@@ -216,10 +310,20 @@ fn item_row(e: &ChecklistEntry, all: &[ChecklistEntry], width: usize) -> Vec<Seg
                 .filter(|n| all.iter().any(|o| &o.id == *n && o.marker != 'x'))
                 .map(String::as_str)
                 .collect();
-            let short = vec![seg("aguardando", theme::color(theme::META))];
+            let short = vec![seg(
+                if en { "waiting" } else { "aguardando" },
+                theme::color(theme::META),
+            )];
             let mut long = short.clone();
             if !open.is_empty() {
-                long.push(seg(format!(" · após {}", open.join(", ")), theme::color(theme::YELLOW)));
+                long.push(seg(
+                    format!(
+                        " · {} {}",
+                        if en { "after" } else { "após" },
+                        open.join(", ")
+                    ),
+                    theme::color(theme::YELLOW),
+                ));
             }
             (theme::color(theme::META), [long, short])
         }
@@ -231,77 +335,190 @@ fn count(g: &Group) -> Seg {
     seg(format!("{}/{}", g.done, g.total), theme::color(theme::META))
 }
 
-fn current_card(c: &Group, tag: Tag, all: &[ChecklistEntry], area: Rect, buf: &mut Buffer) {
+fn current_card(
+    c: &Group,
+    tag: Tag,
+    all: &[ChecklistEntry],
+    area: Rect,
+    buf: &mut Buffer,
+    language: Language,
+) {
     let tone = match tag {
         Tag::InProgress => theme::GREEN,
         Tag::Next => theme::BLUE,
     };
     let right = vec![
-        seg(format!(" {}", tag.word()), theme::bold(tone)),
-        seg(format!(" · {}/{} ", c.done, c.total), theme::color(theme::META)),
+        seg(format!(" {}", tag.word(language)), theme::bold(tone)),
+        seg(
+            format!(" · {}/{} ", c.done, c.total),
+            theme::color(theme::META),
+        ),
     ];
     // The id is always whole; the title gives way to what the right side needs.
     let id = c.id.clone().unwrap_or_default();
-    let room = (area.width as usize).saturating_sub(2 + seg_width(&right) + 1 + 3 + text::width(&id));
+    let room =
+        (area.width as usize).saturating_sub(2 + seg_width(&right) + 1 + 3 + text::width(&id));
     let title = vec![
         seg(" ", Style::new()),
         seg(id, theme::bold(theme::ID)),
-        seg(format!(" {} ", truncate(&c.title, room)), theme::bold(theme::FG)),
+        seg(
+            format!(" {} ", truncate(&c.title, room)),
+            theme::bold(theme::FG),
+        ),
     ];
     let inner = card(buf, area, &title, &right, theme::DIM);
     let rows = inner.height as usize;
     // The last row says what is hidden, unless everything fits.
-    let shown = if c.open.len() <= rows { c.open.len() } else { rows.saturating_sub(1) };
+    let shown = if c.open.len() <= rows {
+        c.open.len()
+    } else {
+        rows.saturating_sub(1)
+    };
     for (i, e) in c.open.iter().take(shown).enumerate() {
-        put(buf, inner, i, &item_row(e, all, inner.width as usize));
+        put(
+            buf,
+            inner,
+            i,
+            &item_row(e, all, inner.width as usize, language),
+        );
     }
     if shown < c.open.len() && rows > 0 {
-        put(buf, inner, shown, &[seg(format!("+{}", plural(c.open.len() - shown, "item", "itens")), theme::color(theme::META))]);
+        put(
+            buf,
+            inner,
+            shown,
+            &[seg(
+                format!("+{}", plural(c.open.len() - shown, "item", "itens")),
+                theme::color(theme::META),
+            )],
+        );
     }
 }
 
-fn pending_row(g: &Group, width: usize) -> Vec<Seg> {
+fn pending_row(g: &Group, width: usize, language: Language) -> Vec<Seg> {
     let lead = match &g.id {
         Some(id) => vec![seg(format!("{id} "), theme::color(theme::ID))],
         None => vec![],
     };
-    row(lead, &g.title, theme::fg(), [vec![count(g)], vec![]], width)
+    let title = if g.id.is_none() && language == Language::En {
+        "No spec"
+    } else {
+        &g.title
+    };
+    row(lead, title, theme::fg(), [vec![count(g)], vec![]], width)
 }
 
-fn pending_card(others: &[Group], area: Rect, buf: &mut Buffer) {
-    let right = vec![seg(format!(" {} ", others.len()), theme::color(theme::META))];
-    let inner = card(buf, area, &plain_title("Specs pendentes"), &right, theme::DIM);
+fn pending_card(others: &[Group], area: Rect, buf: &mut Buffer, language: Language) {
+    let right = vec![seg(
+        format!(" {} ", others.len()),
+        theme::color(theme::META),
+    )];
+    let inner = card(
+        buf,
+        area,
+        &plain_title(if language == Language::En {
+            "Pending specs"
+        } else {
+            "Specs pendentes"
+        }),
+        &right,
+        theme::DIM,
+    );
     let rows = inner.height as usize;
-    let shown = if others.len() <= rows { others.len() } else { rows.saturating_sub(1) };
+    let shown = if others.len() <= rows {
+        others.len()
+    } else {
+        rows.saturating_sub(1)
+    };
     for (i, g) in others.iter().take(shown).enumerate() {
-        put(buf, inner, i, &pending_row(g, inner.width as usize));
+        put(
+            buf,
+            inner,
+            i,
+            &pending_row(g, inner.width as usize, language),
+        );
     }
     if shown < others.len() && rows > 0 {
-        put(buf, inner, shown, &[seg(format!("+{}", plural(others.len() - shown, "spec", "specs")), theme::color(theme::META))]);
+        put(
+            buf,
+            inner,
+            shown,
+            &[seg(
+                format!("+{}", plural(others.len() - shown, "spec", "specs")),
+                theme::color(theme::META),
+            )],
+        );
     }
 }
 
 /// Draws the backlog area in the `shape` computed for its height: Spec atual,
 /// then Specs pendentes (a card or a line), or the one-line count of the whole
 /// backlog.
-pub(super) fn draw(g: &Groups, ok: &OkState, shape: Shape, area: Rect, buf: &mut Buffer, count_line: impl Fn(Rect, &mut Buffer)) {
+pub(super) fn draw(
+    g: &Groups,
+    ok: &OkState,
+    shape: Shape,
+    area: Rect,
+    buf: &mut Buffer,
+    count_line: impl Fn(Rect, &mut Buffer),
+    language: Language,
+) {
     if shape.count_line {
         count_line(Rect { height: 1, ..area }, buf);
         return;
     }
     let mut y = area.y;
     if let (Some((current, tag)), true) = (&g.current, shape.current > 0) {
-        current_card(current, *tag, &ok.backlog, Rect { y, height: shape.current, ..area }, buf);
+        current_card(
+            current,
+            *tag,
+            &ok.backlog,
+            Rect {
+                y,
+                height: shape.current,
+                ..area
+            },
+            buf,
+            language,
+        );
         y += shape.current;
     }
     match shape.pending {
         0 => {}
         1 => {
-            let line = Rect { y, height: 1, ..area };
+            let line = Rect {
+                y,
+                height: 1,
+                ..area
+            };
             let n = g.others.len();
-            put(buf, line, 0, &[seg(format!(" {}", plural(n, "spec pendente", "specs pendentes")), theme::color(theme::META))]);
+            put(
+                buf,
+                line,
+                0,
+                &[seg(
+                    format!(
+                        " {}",
+                        if language == Language::En {
+                            plural(n, "pending spec", "pending specs")
+                        } else {
+                            plural(n, "spec pendente", "specs pendentes")
+                        }
+                    ),
+                    theme::color(theme::META),
+                )],
+            );
         }
-        h => pending_card(&g.others, Rect { y, height: h, ..area }, buf),
+        h => pending_card(
+            &g.others,
+            Rect {
+                y,
+                height: h,
+                ..area
+            },
+            buf,
+            language,
+        ),
     }
 }
 
@@ -316,6 +533,7 @@ mod tests {
 
     fn world(backlog: &str, todo: &str) -> (OkState, History) {
         let files = RelayFiles {
+            changelogs: Default::default(),
             backlog: backlog.to_string(),
             todo: todo.to_string(),
             specs: [
@@ -348,13 +566,23 @@ mod tests {
         let g = groups(&ok, &history);
         let (current, tag) = g.current.expect("a current spec");
         assert_eq!(tag, Tag::InProgress);
-        assert_eq!((current.id.as_deref(), current.title.as_str()), (Some("20260202-001"), "Segunda"));
+        assert_eq!(
+            (current.id.as_deref(), current.title.as_str()),
+            (Some("20260202-001"), "Segunda")
+        );
         // The done item counts but is not listed; the others follow the backlog.
         assert_eq!((current.done, current.total), (1, 3));
         assert_eq!(ids(&current.open), ["B-002", "B-003"]);
         // Spec A is all done, so only C is left, and not the current one.
         assert_eq!(g.others.len(), 1);
-        assert_eq!((g.others[0].id.as_deref(), g.others[0].done, g.others[0].total), (Some("20260303-001"), 0, 1));
+        assert_eq!(
+            (
+                g.others[0].id.as_deref(),
+                g.others[0].done,
+                g.others[0].total
+            ),
+            (Some("20260303-001"), 0, 1)
+        );
     }
 
     #[test]
@@ -378,7 +606,9 @@ mod tests {
     #[test]
     fn no_available_entry_means_no_current_spec_and_every_pending_spec_is_listed() {
         let (ok, history) = world(
-            &format!("- [!] B-001 - a (spec: `{A}`)\n- [ ] B-002 - b (spec: `{B}`) (needs: B-001)\n"),
+            &format!(
+                "- [!] B-001 - a (spec: `{A}`)\n- [ ] B-002 - b (spec: `{B}`) (needs: B-001)\n"
+            ),
             "",
         );
         let g = groups(&ok, &history);
@@ -405,7 +635,10 @@ mod tests {
 
     #[test]
     fn an_active_item_with_no_valid_spec_has_no_current_card() {
-        let (ok, history) = world("- [•] B-001 - a\n- [ ] B-002 - b (spec: `.specs/20260101-001-a.md`)\n", "# Active task: B-001\n\n- [•] T-001 - x\n");
+        let (ok, history) = world(
+            "- [•] B-001 - a\n- [ ] B-002 - b (spec: `.specs/20260101-001-a.md`)\n",
+            "# Active task: B-001\n\n- [•] T-001 - x\n",
+        );
         let g = groups(&ok, &history);
         assert!(g.current.is_none());
         assert_eq!(g.others.len(), 2);
@@ -413,7 +646,10 @@ mod tests {
 
     #[test]
     fn a_spec_with_everything_done_is_not_pending() {
-        let (ok, history) = world(&format!("- [x] B-001 - a (spec: `{A}`)\n- [ ] B-002 - b (spec: `{B}`)\n"), "");
+        let (ok, history) = world(
+            &format!("- [x] B-001 - a (spec: `{A}`)\n- [ ] B-002 - b (spec: `{B}`)\n"),
+            "",
+        );
         let g = groups(&ok, &history);
         assert_eq!(g.current.unwrap().0.id.as_deref(), Some("20260202-001"));
         assert!(g.others.is_empty());

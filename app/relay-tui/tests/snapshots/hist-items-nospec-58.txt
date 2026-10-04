@@ -8,7 +8,7 @@
 ╰────────────────────────────────────────────────────────╯
 
 ╭────────────────────────────────────────────────────────╮
-│ Enter abrir · Esc voltar · Tab agora · q sair          │
+│ Esc voltar · Tab agora · c config. · q sair            │
 ╰────────────────────────────────────────────────────────╯
 
 --- colors ---
@@ -22,5 +22,5 @@ d........................................................d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-d.FFFFF.mmmmm.m.FFF.mmmmmm.m.FFF.mmmmm.m.F.mmmm..........d
+d.FFF.mmmmmm.m.FFF.mmmmm.m.F.mmmmmmm.m.F.mmmm............d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

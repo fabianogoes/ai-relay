@@ -148,7 +148,7 @@ warp_script() {
   printf '  delay 0.6\n'
   printf '  keystroke "%s"\n' "$(as "$CMD")"
   printf '  delay 0.4\n'
-  printf '  keystroke return\n'
+  printf '  key code 36\n'
   printf 'end tell\n'
 }
 

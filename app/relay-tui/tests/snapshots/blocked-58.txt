@@ -3,7 +3,7 @@
 ╭ Handoff ────────────────────────────────── ● Bloqueado ╮
 │ B-004 · T-003 · opencode · há 10 min                   │
 │                                                        │
-│ Objetivo  Scaffold da relay-ui com Vue 3.              │
+│ Objetivo  Esqueleto do módulo core em Rust.            │
 │ Próximo   Resolvido o bloqueio, rodar a criação do     │
 │           projeto Vite.                                │
 │ Bloqueio  Bloqueio: node_modules não pode ser          │
@@ -20,7 +20,7 @@
  1 spec pendente
 
 ╭────────────────────────────────────────────────────────╮
-│ Tab histórico · r recarregar · q sair                  │
+│ Tab histórico · r recarregar · c config. · q sair      │
 ╰────────────────────────────────────────────────────────╯
 
 --- colors ---
@@ -29,7 +29,7 @@
 y.FFFFFFF.yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy.Y.YYYYYYYYY.y
 y.IIIII.m.iiiii.m.mmmmmmmm.m.mm.mm.mmm...................y
 y........................................................y
-y.mmmmmmmm..ffffffff.ff.ffffffff.fff.fff.ff..............y
+y.mmmmmmmm..fffffffff.ff.ffffff.ffff.ff.fffff............y
 y.mmmmmmm...fffffffff.f.fffffffff.fffff.f.fffffff.ff.....y
 y...........fffffff.fffff................................y
 y.mmmmmmmm..fffffffff.ffffffffffff.fff.ffff.fff..........y
@@ -46,5 +46,5 @@ dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
 .m.mmmm.mmmmmmmm
 
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
-d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmm..................d
+d.FFF.mmmmmmmmm.m.F.mmmmmmmmmm.m.F.mmmmmmm.m.F.mmmm......d
 dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd

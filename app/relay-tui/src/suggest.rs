@@ -37,7 +37,13 @@ pub struct Suggestion {
 
 impl Suggestion {
     fn new(case: Case, skill: &'static str) -> Self {
-        Suggestion { case, skill, todo_id: None, backlog_id: None, title: None }
+        Suggestion {
+            case,
+            skill,
+            todo_id: None,
+            backlog_id: None,
+            title: None,
+        }
     }
 
     fn backlog(mut self, id: Option<&String>) -> Self {
@@ -60,7 +66,9 @@ impl Suggestion {
 pub fn suggest(state: Option<&RelayState>) -> Suggestion {
     match state {
         None => Suggestion::new(Case::NotAWorkspace, "relay-setup"),
-        Some(RelayState::Inconsistent { .. }) => Suggestion::new(Case::Inconsistent, "relay-status"),
+        Some(RelayState::Inconsistent { .. }) => {
+            Suggestion::new(Case::Inconsistent, "relay-status")
+        }
         Some(RelayState::Ok(ok)) => suggest_ok(ok),
     }
 }
@@ -80,10 +88,8 @@ fn suggest_ok(ok: &OkState) -> Suggestion {
             s.todo_id = Some(h.todo_id.clone());
             s
         }
-        WorkStatus::Blocked => {
-            Suggestion::new(Case::BlockedWithoutHandoff, "relay-continue")
-                .backlog(ok.active_backlog_id.as_ref())
-        }
+        WorkStatus::Blocked => Suggestion::new(Case::BlockedWithoutHandoff, "relay-continue")
+            .backlog(ok.active_backlog_id.as_ref()),
         WorkStatus::Ready => match first_available(&ok.todo) {
             Some(entry) => Suggestion::new(Case::Ready, "relay-session")
                 .backlog(ok.active_backlog_id.as_ref())
@@ -92,10 +98,13 @@ fn suggest_ok(ok: &OkState) -> Suggestion {
                 .backlog(ok.active_backlog_id.as_ref()),
         },
         WorkStatus::Done if todo_finished_but_item_open(ok) => {
-            Suggestion::new(Case::DoneWithTodo, "relay-session").backlog(ok.active_backlog_id.as_ref())
+            Suggestion::new(Case::DoneWithTodo, "relay-session")
+                .backlog(ok.active_backlog_id.as_ref())
         }
         WorkStatus::Backlog => match first_available(&ok.backlog) {
-            Some(entry) => Suggestion::new(Case::BacklogWithAvailable, "relay-session").entry(&entry, false),
+            Some(entry) => {
+                Suggestion::new(Case::BacklogWithAvailable, "relay-session").entry(&entry, false)
+            }
             None => Suggestion::new(Case::BacklogWithoutAvailable, "relay-continue"),
         },
         // `InProgress` without a handoff cannot be derived; both it and any other
@@ -115,5 +124,7 @@ fn todo_finished_but_item_open(ok: &OkState) -> bool {
     let Some(active) = ok.active_backlog_id.as_ref() else {
         return false;
     };
-    ok.backlog.iter().any(|e| &e.id == active && e.marker != 'x')
+    ok.backlog
+        .iter()
+        .any(|e| &e.id == active && e.marker != 'x')
 }

@@ -3,6 +3,7 @@
 //! The skill is bold in `fg`, ids are `id`, the rest is `meta`: the skill reads
 //! as text and bold, never only as a color.
 
+use crate::language::Language;
 use crate::suggest::{Case, Suggestion};
 use crate::theme;
 
@@ -12,97 +13,210 @@ use super::text;
 /// The line, for `width` columns: when it is too long, the task's title gives
 /// way first (cut with `…`, or left out when there is no room for even a few
 /// letters of it), so the skill to call is never what is cut.
-pub(super) fn segments(s: &Suggestion, width: usize) -> Vec<Seg> {
-    let whole = build(s, width, false);
+pub(super) fn segments(s: &Suggestion, width: usize, language: Language) -> Vec<Seg> {
+    let whole = build(s, width, false, language);
     let fits = |segs: &[Seg]| segs.iter().map(|(t, _)| text::width(t)).sum::<usize>() <= width;
     if fits(&whole) {
         return whole;
     }
     // Still too long with the title gone: the long wordings give way to a short
     // one, so that the skill at their end is not what is cut.
-    let short = build(s, width, true);
+    let short = build(s, width, true, language);
     if fits(&short) { short } else { whole }
 }
 
-fn build(s: &Suggestion, width: usize, short: bool) -> Vec<Seg> {
+fn build(s: &Suggestion, width: usize, short: bool, language: Language) -> Vec<Seg> {
     let mut b = Builder(Vec::new(), None);
+    let en = language == Language::En;
     let backlog = s.backlog_id.as_deref();
     let todo = s.todo_id.as_deref();
     let title = s.title.as_deref();
     match s.case {
         Case::NotAWorkspace => {
-            b.meta("Instale o protocolo com ").skill(s.skill).meta(".");
+            b.meta(if en {
+                "Install the protocol with "
+            } else {
+                "Instale o protocolo com "
+            })
+            .skill(s.skill)
+            .meta(".");
         }
         Case::Inconsistent if short => {
-            b.meta("Registros em conflito: ").skill(s.skill).meta(" e ").skill("relay-continue").meta(".");
+            b.meta(if en {
+                "Conflicting records: "
+            } else {
+                "Registros em conflito: "
+            })
+            .skill(s.skill)
+            .meta(if en { " and " } else { " e " })
+            .skill("relay-continue")
+            .meta(".");
         }
         Case::Inconsistent => {
-            b.meta("Os registros se contradizem: ")
-                .skill(s.skill)
-                .meta(" mostra o diagnóstico e ")
-                .skill("relay-continue")
-                .meta(" pode propor o reparo.");
+            b.meta(if en {
+                "The records conflict: "
+            } else {
+                "Os registros se contradizem: "
+            })
+            .skill(s.skill)
+            .meta(if en {
+                " shows the diagnosis and "
+            } else {
+                " mostra o diagnóstico e "
+            })
+            .skill("relay-continue")
+            .meta(if en {
+                " can propose a repair."
+            } else {
+                " pode propor o reparo."
+            });
         }
         Case::InProgress => {
-            b.meta("Retome ").id(todo).meta(" de ").id(backlog).meta(" com ").skill(s.skill).meta(".");
-        }
-        Case::BlockedWithHandoff if short => {
-            b.meta("Bloqueio em ").id(todo).meta(": retome com ").skill(s.skill).meta(".");
-        }
-        Case::BlockedWithHandoff => {
-            b.meta("Resolva o bloqueio de ")
+            b.meta(if en { "Resume " } else { "Retome " })
                 .id(todo)
-                .meta(" (ver Handoff) e retome com ")
+                .meta(if en { " from " } else { " de " })
+                .id(backlog)
+                .meta(if en { " with " } else { " com " })
                 .skill(s.skill)
                 .meta(".");
         }
+        Case::BlockedWithHandoff if short => {
+            b.meta(if en { "Blocked at " } else { "Bloqueio em " })
+                .id(todo)
+                .meta(if en {
+                    ": resume with "
+                } else {
+                    ": retome com "
+                })
+                .skill(s.skill)
+                .meta(".");
+        }
+        Case::BlockedWithHandoff => {
+            b.meta(if en {
+                "Resolve the block on "
+            } else {
+                "Resolva o bloqueio de "
+            })
+            .id(todo)
+            .meta(if en {
+                " (see Handoff) and resume with "
+            } else {
+                " (ver Handoff) e retome com "
+            })
+            .skill(s.skill)
+            .meta(".");
+        }
         Case::BlockedWithoutHandoff if short => {
-            b.meta("Sem subtarefa disponível: ").skill(s.skill).meta(".");
+            b.meta(if en {
+                "No subtask available: "
+            } else {
+                "Sem subtarefa disponível: "
+            })
+            .skill(s.skill)
+            .meta(".");
         }
         Case::BlockedWithoutHandoff => {
-            b.meta("Nenhuma subtarefa disponível");
+            b.meta(if en {
+                "No subtask available"
+            } else {
+                "Nenhuma subtarefa disponível"
+            });
             if backlog.is_some() {
-                b.meta(" em ").id(backlog);
+                b.meta(if en { " in " } else { " em " }).id(backlog);
             }
-            b.meta(": ").skill(s.skill).meta(" mostra o bloqueio e as opções.");
+            b.meta(": ").skill(s.skill).meta(if en {
+                " shows the block and available options."
+            } else {
+                " mostra o bloqueio e as opções."
+            });
         }
         Case::Ready => {
-            b.meta("Comece ").id(todo);
+            b.meta(if en { "Start " } else { "Comece " }).id(todo);
             if let Some(title) = title {
                 b.title(title);
             }
-            b.meta(" com ").skill(s.skill).meta(".");
+            b.meta(if en { " with " } else { " com " })
+                .skill(s.skill)
+                .meta(".");
         }
         Case::DoneWithTodo if short => {
-            b.id(backlog).meta(" concluído: feche com ").skill(s.skill).meta(".");
+            b.id(backlog)
+                .meta(if en {
+                    " completed: close with "
+                } else {
+                    " concluído: feche com "
+                })
+                .skill(s.skill)
+                .meta(".");
         }
         Case::DoneWithTodo => {
-            b.meta("Subtarefas de ")
+            b.meta(if en { "Subtasks of " } else { "Subtarefas de " })
                 .id(backlog)
-                .meta(" concluídas: feche o item com ")
+                .meta(if en {
+                    " completed: close the item with "
+                } else {
+                    " concluídas: feche o item com "
+                })
                 .skill(s.skill)
                 .meta(".");
         }
         Case::BacklogWithAvailable => {
-            b.meta(if short { "Próximo item: " } else { "Próximo item disponível: " }).id(backlog);
+            b.meta(if short {
+                if en { "Next item: " } else { "Próximo item: " }
+            } else {
+                if en {
+                    "Next available item: "
+                } else {
+                    "Próximo item disponível: "
+                }
+            })
+            .id(backlog);
             if let Some(title) = title {
                 b.title(title);
             }
-            b.meta(". Comece com ").skill(s.skill).meta(".");
+            b.meta(if en { ". Start with " } else { ". Comece com " })
+                .skill(s.skill)
+                .meta(".");
         }
         Case::BacklogWithoutAvailable if short => {
-            b.meta("Nenhum item disponível: ").skill(s.skill).meta(".");
+            b.meta(if en {
+                "No available items: "
+            } else {
+                "Nenhum item disponível: "
+            })
+            .skill(s.skill)
+            .meta(".");
         }
         Case::BacklogWithoutAvailable => {
-            b.meta("Nenhum item disponível: resolva os bloqueios ou dependências do backlog; ")
-                .skill(s.skill)
-                .meta(" mostra as opções.");
+            b.meta(if en {
+                "No available items: resolve the backlog blocks or dependencies; "
+            } else {
+                "Nenhum item disponível: resolva os bloqueios ou dependências do backlog; "
+            })
+            .skill(s.skill)
+            .meta(if en {
+                " shows the available options."
+            } else {
+                " mostra as opções."
+            });
         }
         Case::Done => {
-            b.meta("Tudo concluído. Para uma nova ideia: ").skill(s.skill).meta(".");
+            b.meta(if en {
+                "Everything is complete. For a new idea: "
+            } else {
+                "Tudo concluído. Para uma nova ideia: "
+            })
+            .skill(s.skill)
+            .meta(".");
         }
         Case::Idle => {
-            b.meta("Nada em andamento. Para começar: ").skill(s.skill).meta(".");
+            b.meta(if en {
+                "Nothing in progress. To get started: "
+            } else {
+                "Nada em andamento. Para começar: "
+            })
+            .skill(s.skill)
+            .meta(".");
         }
     }
     b.fit_title(width);
@@ -120,7 +234,8 @@ impl Builder {
 
     fn title(&mut self, title: &str) -> &mut Self {
         self.1 = Some(self.0.len());
-        self.0.push(seg(format!(" ({title})"), theme::color(theme::META)));
+        self.0
+            .push(seg(format!(" ({title})"), theme::color(theme::META)));
         self
     }
 
@@ -143,7 +258,10 @@ impl Builder {
             return;
         }
         let full = self.0[at].0.clone();
-        let inner = full.strip_prefix(" (").and_then(|t| t.strip_suffix(')')).unwrap_or(&full);
+        let inner = full
+            .strip_prefix(" (")
+            .and_then(|t| t.strip_suffix(')'))
+            .unwrap_or(&full);
         let kept = text::truncate(inner, room - 3);
         self.0[at].0 = format!(" ({kept})");
     }

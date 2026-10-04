@@ -1,8 +1,9 @@
 //! Watches a workspace's record directories and turns file-system events into
 //! `Dirty` / `Settled` signals.
 //!
-//! `.orchestration/` and `.specs/` are watched, not the whole repository, so a
-//! build writing thousands of files elsewhere never wakes it.
+//! `.orchestration/`, `.orchestration/changelog/` and `.specs/` are watched, not
+//! the whole repository, so a build writing thousands of files elsewhere never
+//! wakes it.
 
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -47,15 +48,19 @@ fn is_content_change(kind: &EventKind) -> bool {
 /// The record directories, attached as they exist: one missing at start-up (a
 /// workspace not set up yet) is attached once it appears.
 struct Dirs {
-    paths: [PathBuf; 2],
-    attached: [bool; 2],
+    paths: [PathBuf; 3],
+    attached: [bool; 3],
 }
 
 impl Dirs {
     fn new(workspace: &Path) -> Self {
         Dirs {
-            paths: [workspace.join(".orchestration"), workspace.join(".specs")],
-            attached: [false; 2],
+            paths: [
+                workspace.join(".orchestration"),
+                workspace.join(".orchestration").join("changelog"),
+                workspace.join(".specs"),
+            ],
+            attached: [false; 3],
         }
     }
 
@@ -64,7 +69,10 @@ impl Dirs {
     fn attach_missing(&mut self, watcher: &mut impl Watcher) -> bool {
         let mut any = false;
         for (path, attached) in self.paths.iter().zip(self.attached.iter_mut()) {
-            if !*attached && path.is_dir() && watcher.watch(path, RecursiveMode::NonRecursive).is_ok() {
+            if !*attached
+                && path.is_dir()
+                && watcher.watch(path, RecursiveMode::NonRecursive).is_ok()
+            {
                 *attached = true;
                 any = true;
             }
@@ -76,11 +84,12 @@ impl Dirs {
 /// Starts watching `workspace`. Dropping the returned watcher stops it.
 pub fn watch_workspace(workspace: &Path, quiescence: Duration) -> notify::Result<WorkspaceWatcher> {
     let (raw_tx, raw_rx) = mpsc::channel();
-    let mut watcher: RecommendedWatcher = notify::recommended_watcher(move |event: notify::Result<notify::Event>| {
-        if event.is_ok_and(|e| is_content_change(&e.kind)) {
-            let _ = raw_tx.send(());
-        }
-    })?;
+    let mut watcher: RecommendedWatcher =
+        notify::recommended_watcher(move |event: notify::Result<notify::Event>| {
+            if event.is_ok_and(|e| is_content_change(&e.kind)) {
+                let _ = raw_tx.send(());
+            }
+        })?;
     let mut dirs = Dirs::new(workspace);
     dirs.attach_missing(&mut watcher);
 
@@ -88,7 +97,13 @@ pub fn watch_workspace(workspace: &Path, quiescence: Duration) -> notify::Result
     let stop = Arc::new(AtomicBool::new(false));
     let flag = Arc::clone(&stop);
     let thread = thread::spawn(move || {
-        debounce(raw_rx, out_tx, quiescence, &flag, || dirs.attach_missing(&mut watcher));
+        debounce(raw_rx, out_tx, quiescence, &flag, || {
+            dirs.attach_missing(&mut watcher)
+        });
     });
-    Ok(WorkspaceWatcher { events, stop, thread: Some(thread) })
+    Ok(WorkspaceWatcher {
+        events,
+        stop,
+        thread: Some(thread),
+    })
 }

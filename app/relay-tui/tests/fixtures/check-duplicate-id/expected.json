@@ -1,0 +1,13 @@
+{
+  "kind": "inconsistent",
+  "violations": [
+    {
+      "check": "duplicate-id",
+      "params": { "id": "B-001" },
+      "records": [
+        "backlog",
+        "changelog"
+      ]
+    }
+  ]
+}

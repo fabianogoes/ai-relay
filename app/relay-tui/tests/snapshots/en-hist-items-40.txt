@@ -1,0 +1,34 @@
+ relay  ~/Developer/relay   ● up to date
+
+╭ Items · 20261002-001 ────────────────╮
+│ ▸ B-010 Core em Rust passa a… ✓ done │
+│   B-011 View em carto… ● in progress │
+│   B-012 Binario observa u… ◌ waiting │
+│   B-013 Release e docum… ○ available │
+│   B-014 Assinatura dos bi… ! blocked │
+│                                      │
+│                                      │
+│                                      │
+╰──────────────────────────────────────╯
+
+╭──────────────────────────────────────╮
+│ Tab now · c settings · q quit        │
+╰──────────────────────────────────────╯
+
+--- colors ---
+#######.mmmmmmmmmmmmmmmmm...g.mm.mm.mmmm
+
+d.FFFFF.F.IIIIIIIIIIII.ddddddddddddddddd
+d.U.iiiii.FFFF.FF.FFFF.FFFFF.FF.G.ffff.d
+d...iiiii.ffff.ff.ffffff.G.ff.ffffffff.d
+d...iiiii.fffffff.fffffff.ff.M.fffffff.d
+d...iiiii.fffffff.f.ffffff.U.fffffffff.d
+d...iiiii.ffffffffff.fff.fff.Y.fffffff.d
+d......................................d
+d......................................d
+d......................................d
+dddddddddddddddddddddddddddddddddddddddd
+
+dddddddddddddddddddddddddddddddddddddddd
+d.FFF.mmm.m.F.mmmmmmmm.m.F.mmmm........d
+dddddddddddddddddddddddddddddddddddddddd
