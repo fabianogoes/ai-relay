@@ -45,11 +45,20 @@ Cada arquivo tem um `.sha256` ao lado: `shasum -a 256 -c <arquivo>.sha256`.
 
 ## Atualizar
 
-Antes de configurar outro projeto, confira `relay-tui --version` e compare com
-a versão mais recente em [Releases](https://github.com/fabianogoes/ai-relay/releases).
-Mantenha o binário instalado quando ele já estiver atualizado. Se estiver
-ausente ou desatualizado, baixe o arquivo da plataforma, confira o checksum e
-substitua o binário instalado:
+Ao configurar um projeto, o instalador em
+[INSTALL.pt-BR.md](INSTALL.pt-BR.md#instalar-no-projeto-atual) compara as
+versões instalada e mais recente e mantém a TUI intacta quando ela já está
+atualizada:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/fabianogoes/ai-relay/main/install.py | python3 -
+```
+
+O comando acima também atualiza as skills Relay do projeto. Para atualizar
+somente o `relay-tui`, compare `relay-tui --version` com a versão mais recente
+em [Releases](https://github.com/fabianogoes/ai-relay/releases). Se o binário
+estiver ausente ou desatualizado, baixe o arquivo da plataforma, confira o
+checksum e substitua o binário instalado com os passos manuais abaixo:
 
 ```sh
 # Select the latest release and your platform.

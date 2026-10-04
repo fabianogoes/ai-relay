@@ -12,13 +12,28 @@ The public repository is `https://github.com/fabianogoes/ai-relay`.
 For local development, replace `/absolute/path/to/relay` below with this
 checkout's absolute path.
 
-Every install below links one symlink per skill rather than symlinking the
-`skills/` directory itself. Relay then sits alongside whatever skills the
-project already has, and the command still works when `.claude/skills/`,
-`.agents/skills/`, or `.opencode/skills/` already exists — symlinking onto an
-existing directory would nest the link inside it instead of replacing it.
+The no-clone installer copies only Relay's published skill files into
+`.claude/skills/` and preserves other skills. The development instructions
+below use one symlink per skill rather than symlinking the `skills/` directory
+itself, so they also work when the harness's skills directory already exists.
 
 ## Claude Code
+
+### Install in the current project
+
+From the root of a new project, run this command in a terminal:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/fabianogoes/ai-relay/main/install.py | python3 -
+```
+
+It downloads only the Relay skill files from GitHub and installs them under
+`.claude/skills/`. It does not clone or download the Relay repository. It also
+checks the latest `relay-tui` release and installs or updates the user binary
+when needed. It requires Python 3, which is used only from the standard library.
+Run it again to update the skills and TUI safely. Start a new Claude Code
+session, then run `/relay-setup` from the same project to initialize Relay's
+project records.
 
 Claude Code plugins discover skills under the plugin's `skills/` directory.
 Test the checkout directly with:
@@ -108,10 +123,10 @@ runtime is installed.
 
 ## Set up another project on this machine
 
-Install the Relay skills in your harness once, using the section above. If the
-skills are already available, do not install the package again for every
-repository. From the root of each new Git repository, invoke `relay-setup` in
-the harness:
+From the root of a new project, install the skills once for its harness. In
+Claude Code, run the installer in the section above. In Codex or OpenCode, use
+the matching installation instructions above. Start a new session and invoke
+`relay-setup` in the harness:
 
 | Harness | Invocation |
 | --- | --- |
@@ -135,5 +150,7 @@ configuration that should be shared with the repository.
 
 ## Updating
 
-Relay uses one shared `skills/` directory. Refresh the checkout or installed
-plugin, then start a new harness session so its skill registry is reloaded.
+Relay keeps one canonical `skills/` directory. To update a project-local
+installation, run the install command above again from that project's root and
+start a new Claude Code session so its skills are loaded again. For plugin and
+checkout installations, refresh the plugin or checkout and start a new session.

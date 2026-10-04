@@ -14,18 +14,20 @@ O CI existente cobre só o `relay-tui`: o `relay-tui-ci.yml` dispara com mudanç
 em `app/relay-tui/**` e o de release, com tags. O pacote em si (as skills, o
 único script que uma delas distribui e o contrato que as skills copiam do
 `docs/PROTOCOL.md`) não tinha verificação nenhuma. O `open-split.sh` é o único
-executável publicado, o teste dele tem 145 casos e não rodava no CI, e o teste de
-paridade das referências (`.agents/tests/skill-contract.test.sh`) precisa rodar
-quando o protocolo muda, coisa que o CI do `relay-tui` não vê.
+executável dentro do pacote, o teste dele tem 145 casos e não rodava no CI, e o
+teste de paridade das referências (`.agents/tests/skill-contract.test.sh`)
+precisa rodar quando o protocolo muda, coisa que o CI do `relay-tui` não vê.
 
 ## Decisão
 
 1. **Um workflow próprio do pacote**, `.github/workflows/package-ci.yml`. Ele roda
    os testes de `.agents/tests/` no macOS, que é o requisito e onde o `osascript`
    existe, e o `shellcheck` no Ubuntu, onde já vem instalado, sobre todo `*.sh` de
-   `skills/` e `.agents/tests/`.
+   `skills/` e `.agents/tests/`. A suíte Python do instalador sem clone também
+   roda no macOS.
 2. **Dispara só com o que o pacote usa:** `skills/**`, `.agents/tests/**`,
-   `docs/PROTOCOL.md` e o próprio arquivo, em push na `main` e em pull request.
+   `install.py`, `docs/PROTOCOL.md` e o próprio arquivo, em push na `main` e em
+   pull request.
 3. **`shellcheck -S warning`.** Aviso e erro reprovam. O nível `info` acusa como
    "nunca chamadas" as funções que o `open-split.sh` chama por variável, e
    silenciá-las dentro do script distribuído poria ruído no código que as pessoas

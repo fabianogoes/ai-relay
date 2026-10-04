@@ -42,6 +42,9 @@ not only the choice.
   overrides startup resolution for this process, preserves navigation and
   reloads, and never writes workspace configuration. Mouse capture pauses on
   Settings and resumes when returning to Histórico.
+- `docs/adr/0009-instalacao-sem-checkout.md` — Accepted — the project-local
+  installer fetches only Relay skill files, keeps `relay-tui` current, and
+  leaves protocol-record creation to `relay-setup`.
 - `docs/adr/0007-ci-do-pacote.md` — Accepted — the package has its own workflow,
   `package-ci.yml`, apart from the `relay-tui` ones: the `.agents/tests/` suites
   on macOS and `shellcheck -S warning` on Ubuntu, triggered by `skills/**`,

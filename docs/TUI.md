@@ -44,11 +44,19 @@ Every file has a `.sha256` next to it: `shasum -a 256 -c <file>.sha256`.
 
 ## Update
 
-Before setting up another project, check `relay-tui --version` and compare it
-with the latest version on [Releases](https://github.com/fabianogoes/ai-relay/releases).
-Keep the installed binary when it is already current. If it is missing or older,
-download the latest archive for your platform, verify its checksum, and replace
-the installed binary:
+When setting up a project, the installer in
+[INSTALL.md](INSTALL.md#install-in-the-current-project) compares the installed
+and latest versions, leaving the TUI untouched when it is current:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/fabianogoes/ai-relay/main/install.py | python3 -
+```
+
+The command above updates the project's Relay skills as well. To update only
+`relay-tui`, compare `relay-tui --version` with the latest version on
+[Releases](https://github.com/fabianogoes/ai-relay/releases). If it is missing
+or older, download the latest archive for your platform, verify its checksum,
+and replace the installed binary with the manual steps below:
 
 ```sh
 # Select the latest release and your platform.

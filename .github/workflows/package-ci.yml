@@ -1,7 +1,6 @@
-# CI for the Relay package: the skills, the script one of them ships and the
-# contract they copy from docs/PROTOCOL.md. It is separate from the relay-tui
-# workflows on purpose (ADR-0007): skills/ and .agents/ are not app/, and app/
-# has to stay removable.
+# CI for the Relay package and the no-clone installer. It is separate from the
+# relay-tui workflows on purpose (ADR-0007): skills/, install.py and .agents/
+# are not app/, and app/ has to stay removable.
 #
 # Repository tooling, not package surface: it only runs when skills/**,
 # .agents/tests/** or docs/PROTOCOL.md change.
@@ -14,12 +13,14 @@ on:
       - 'skills/**'
       - '.agents/tests/**'
       - 'docs/PROTOCOL.md'
+      - 'install.py'
       - '.github/workflows/package-ci.yml'
   pull_request:
     paths:
       - 'skills/**'
       - '.agents/tests/**'
       - 'docs/PROTOCOL.md'
+      - 'install.py'
       - '.github/workflows/package-ci.yml'
 
 jobs:
@@ -33,6 +34,8 @@ jobs:
         run: sh .agents/tests/skill-contract.test.sh
       - name: relay-tui-split script
         run: sh .agents/tests/open-split.test.sh
+      - name: Relay installer
+        run: python3 .agents/tests/install.test.py
 
   shellcheck:
     # Preinstalled on the Ubuntu runner. Warnings and errors fail; the "info"
