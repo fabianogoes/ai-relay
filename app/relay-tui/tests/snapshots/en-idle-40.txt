@@ -1,7 +1,10 @@
  relay  ~/Developer/relay   ● up to date
 
 ╭ Idle ────────────────────────────────╮
-│ No backlog, TODO, or handoff in thi… │
+│ No open work in the records.         │
+│ During the relay-spec interview,     │
+│ answer questions in your agent;      │
+│ the spec appears here when saved.    │
 ╰──────────────────────────────────────╯
 
 
@@ -14,10 +17,7 @@
 
 
 
-
-
-
-  Nothing in progress. To get started…
+  Create a spec: relay-spec.
 
 ╭──────────────────────────────────────╮
 │ Tab history · c settings · q quit    │
@@ -27,7 +27,10 @@
 #######.mmmmmmmmmmmmmmmmm...g.mm.mm.mmmm
 
 d.FFFF.ddddddddddddddddddddddddddddddddd
-d.ff.ffffffff.fffff.ff.fffffff.ff.ffff.d
+d.ff.ffff.ffff.ff.fff.ffffffff.........d
+d.ffffff.fff.ffffffffff.ffffffffff.....d
+d.ffffff.fffffffff.ff.ffff.ffffff......d
+d.fff.ffff.fffffff.ffff.ffff.ffffff....d
 dddddddddddddddddddddddddddddddddddddddd
 
 
@@ -40,10 +43,7 @@ dddddddddddddddddddddddddddddddddddddddd
 
 
 
-
-
-
-..mmmmmmm.mm.mmmmmmmmm.mm.mmm.mmmmmmmm
+..mmmmmm.m.mmmmm.FFFFFFFFFFm
 
 dddddddddddddddddddddddddddddddddddddddd
 d.FFF.mmmmmmm.m.F.mmmmmmmm.m.F.mmmm....d

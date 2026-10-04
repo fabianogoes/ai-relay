@@ -449,7 +449,7 @@ fn ok_body(view: &View, ok: &OkState, area: Rect, buf: &mut Buffer) {
             let inner = card(
                 buf,
                 Rect {
-                    height: area.height.min(3),
+                    height: area.height.min(6),
                     ..area
                 },
                 &plain_title(if view.language == crate::language::Language::En {
@@ -460,19 +460,24 @@ fn ok_body(view: &View, ok: &OkState, area: Rect, buf: &mut Buffer) {
                 &[],
                 theme::DIM,
             );
-            put(
-                buf,
-                inner,
-                0,
-                &[seg(
-                    if view.language == crate::language::Language::En {
-                        "No backlog, TODO, or handoff in this workspace."
-                    } else {
-                        "Nenhum backlog, TODO ou handoff neste workspace."
-                    },
-                    theme::fg(),
-                )],
-            );
+            let lines = if view.language == crate::language::Language::En {
+                [
+                    "No open work in the records.",
+                    "During the relay-spec interview,",
+                    "answer questions in your agent;",
+                    "the spec appears here when saved.",
+                ]
+            } else {
+                [
+                    "Sem trabalho aberto nos registros.",
+                    "Durante a entrevista da relay-spec,",
+                    "responda às perguntas no agente;",
+                    "a spec aparece aqui após ser salva.",
+                ]
+            };
+            for (row, line) in lines.into_iter().enumerate() {
+                put(buf, inner, row, &[seg(line, theme::fg())]);
+            }
         }
         WorkStatus::Done => done_card(ok, area, buf, view.language),
         WorkStatus::Backlog => backlog_body(view, ok, area, buf),

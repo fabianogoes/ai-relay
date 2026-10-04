@@ -89,6 +89,17 @@ fn every_status_names_itself_in_words() {
 }
 
 #[test]
+fn idle_explains_when_an_interviewed_spec_appears_at_narrow_width() {
+    let buf = render(&case("status-idle"), Freshness::Fresh, 40, 24);
+    let screen = text(&buf);
+    assert!(screen.contains("Sem trabalho aberto nos registros."));
+    assert!(screen.contains("Durante a entrevista da relay-spec,"));
+    assert!(screen.contains("responda às perguntas no agente;"));
+    assert!(screen.contains("a spec aparece aqui após ser salva."));
+    assert!(screen.contains("Para criar uma spec: relay-spec."));
+}
+
+#[test]
 fn the_label_and_the_marker_carry_the_tone_of_the_status() {
     let tones = [
         ("in_progress", theme::GREEN),

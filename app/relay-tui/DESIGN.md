@@ -124,7 +124,11 @@ próximo passo, nomes e títulos) permanece como foi escrito.
 | `blocked_item` | bloqueado | blocked |
 | `no_handoff` | Sem handoff ativo | No active handoff |
 | `no_workspace` | Não é um workspace Relay | Not a Relay workspace |
-| `no_work` | Nenhum backlog, TODO ou handoff neste workspace. | No backlog, TODO, or handoff in this workspace. |
+| `no_work` | Sem trabalho aberto nos registros. | No open work in the records. |
+| `spec_interview_1` | Durante a entrevista da relay-spec, | During the relay-spec interview, |
+| `spec_interview_2` | responda às perguntas no agente; | answer questions in your agent; |
+| `spec_interview_3` | a spec aparece aqui após ser salva. | the spec appears here when saved. |
+| `idle_hint` | Para criar uma spec: relay-spec. | Create a spec: relay-spec. |
 | `quit` | sair | quit |
 | `reload` | recarregar | reload |
 | `move` | mover | move |
@@ -251,7 +255,7 @@ em conflito: relay-status e relay-continue.`). O primeiro caso que casar vale:
 | `backlog` com disponível | há entrada de backlog disponível | Próximo item disponível: `B-NNN` (título). Comece com `relay-session`. |
 | `backlog` sem disponível | nenhuma entrada disponível | Nenhum item disponível: resolva os bloqueios ou dependências do backlog; `relay-continue` mostra as opções. |
 | `done` | qualquer outro `done` | Tudo concluído. Para uma nova ideia: `relay-spec`. |
-| `idle` | sem backlog, TODO nem handoff | Nada em andamento. Para começar: `relay-spec`. |
+| `idle` | sem backlog, TODO nem handoff | Para criar uma spec: `relay-spec`. |
 
 "Próximo item disponível" é a recomendação padrão do protocolo (a primeira
 entrada disponível em ordem textual), sem dizer que é a de maior prioridade. Em
@@ -262,7 +266,11 @@ A linha não existe na visão Histórico.
 leva o status — `● Pronto` em negrito `blue` — e `Sem handoff ativo` em `meta`,
 sobre o cartão TODO. `done` mostra um cartão
 `Concluído` em `green` com a contagem do backlog. `idle` mostra um cartão
-`Sem trabalho` com `Nenhum backlog, TODO ou handoff neste workspace.`. Um
+`Sem trabalho` com `Sem trabalho aberto nos registros.` e três linhas que
+explicam que, durante a entrevista de `relay-spec`, as perguntas acontecem no
+agente e a spec aparece no painel depois de salva. O cartão tem seis linhas
+(moldura e quatro linhas de conteúdo), legíveis também em 40 colunas. O próximo
+passo curto mantém `relay-spec` visível nessa largura. Um
 diretório sem `.orchestration/` mostra `Não é um workspace Relay`, com o caminho
 observado, e continua vigiando.
 

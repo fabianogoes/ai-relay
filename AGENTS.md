@@ -37,6 +37,10 @@ Write one when a decision affects structure, an architecture characteristic, a
 dependency, an interface, or a construction technique. Record the reasoning,
 not only the choice.
 
+- `docs/adr/0010-visibilidade-da-entrevista-da-spec-na-tui.md` — Accepted —
+  the `idle` screen explains that the `relay-spec` interview happens in the
+  agent and that the spec appears after it is saved; the derived state stays
+  `idle` until a record changes.
 - `docs/adr/0008-configuracoes-locais-da-relay-tui.md` — Accepted — `c` opens
   a local Settings screen from Agora or Histórico; the selected language
   overrides startup resolution for this process, preserves navigation and

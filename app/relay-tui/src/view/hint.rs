@@ -211,9 +211,9 @@ fn build(s: &Suggestion, width: usize, short: bool, language: Language) -> Vec<S
         }
         Case::Idle => {
             b.meta(if en {
-                "Nothing in progress. To get started: "
+                "Create a spec: "
             } else {
-                "Nada em andamento. Para começar: "
+                "Para criar uma spec: "
             })
             .skill(s.skill)
             .meta(".");

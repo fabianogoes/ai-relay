@@ -1,7 +1,10 @@
  relay  ~/Developer/relay   ● atualizado
 
 ╭ Sem trabalho ────────────────────────╮
-│ Nenhum backlog, TODO ou handoff nes… │
+│ Sem trabalho aberto nos registros.   │
+│ Durante a entrevista da relay-spec,  │
+│ responda às perguntas no agente;     │
+│ a spec aparece aqui após ser salva.  │
 ╰──────────────────────────────────────╯
 
 
@@ -14,10 +17,7 @@
 
 
 
-
-
-
-  Nada em andamento. Para começar: re…
+  Para criar uma spec: relay-spec.
 
 ╭──────────────────────────────────────╮
 │ Tab histórico · c config. · q sair   │
@@ -27,7 +27,10 @@
 #######.mmmmmmmmmmmmmmmmm...g.mmmmmmmmmm
 
 d.FFF.FFFFFFFF.ddddddddddddddddddddddddd
-d.ffffff.ffffffff.ffff.ff.fffffff.ffff.d
+d.fff.ffffffff.ffffff.fff.ffffffffff...d
+d.fffffff.f.ffffffffff.ff.fffffffffff..d
+d.ffffffff.ff.fffffffff.ff.fffffff.....d
+d.f.ffff.fffffff.ffff.ffff.fff.ffffff..d
 dddddddddddddddddddddddddddddddddddddddd
 
 
@@ -40,10 +43,7 @@ dddddddddddddddddddddddddddddddddddddddd
 
 
 
-
-
-
-..mmmm.mm.mmmmmmmmmm.mmmm.mmmmmmmm.FFF
+..mmmm.mmmmm.mmm.mmmmm.FFFFFFFFFFm
 
 dddddddddddddddddddddddddddddddddddddddd
 d.FFF.mmmmmmmmm.m.F.mmmmmmm.m.F.mmmm...d
