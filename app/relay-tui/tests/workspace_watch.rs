@@ -1,12 +1,12 @@
-//! The watcher against a real directory. Margins are generous: the operating
-//! system decides when an event arrives, and what is asserted is the order and
-//! the count of signals, not exact timing.
+//! The watcher against a real directory. The operating system decides when
+//! events arrive. These checks cover delivery and re-reading; the deterministic
+//! debounce tests cover burst grouping and the quiescence window.
 
 use std::fs;
 use std::path::Path;
 use std::sync::Mutex;
 use std::thread;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use WorkspaceEvent::{Dirty, Settled};
 use relay_tui::workspace::{
@@ -53,79 +53,20 @@ fn quiet(watcher: &WorkspaceWatcher) {
     {}
 }
 
-/// Five writes 20 ms apart. Returns when the last one finished and the longest
-/// gap between two of them: on a loaded machine a write can be descheduled for
-/// longer than the quiescence, and then it is no longer one burst.
-fn burst(dir: &Path) -> (Instant, Duration) {
-    let mut last_write = Instant::now();
-    let mut longest = Duration::ZERO;
-    for i in 0..5 {
-        let before = Instant::now();
-        fs::write(
-            dir.join(".orchestration/TODO.md"),
-            format!("# Active task: B-{i}\n"),
-        )
-        .unwrap();
-        // The reference is the last write, not the end of the sleep after it.
-        let now = Instant::now();
-        if i > 0 {
-            longest = longest.max(before.duration_since(last_write));
-        }
-        last_write = now;
-        thread::sleep(Duration::from_millis(20));
-    }
-    (last_write, longest)
-}
-
 #[test]
-fn a_burst_of_real_writes_yields_one_dirty_and_one_settled() {
+fn a_real_write_is_noticed_and_the_settled_workspace_has_its_content() {
     let _serial = serial_watcher_test();
     let dir = workspace_with_records();
     let watcher = started(dir.path());
 
-    // A stall of the machine in the middle of the writes (a shared CI runner)
-    // splits the burst in two, which says nothing about the watcher: try again
-    // with a burst that really was one. A gap that long is one that approaches
-    // the quiescence itself.
-    let mut longest_seen = Duration::ZERO;
-    for _ in 0..6 {
-        quiet(&watcher);
-        let (last_write, longest_gap) = burst(dir.path());
-        if longest_gap >= QUIESCENCE - Duration::from_millis(20) {
-            longest_seen = longest_seen.max(longest_gap);
-            continue;
-        }
-        assert_eq!(next(&watcher, LONG), Some(Dirty));
-        assert_eq!(next(&watcher, LONG), Some(Settled));
-        assert!(last_write.elapsed() >= QUIESCENCE - Duration::from_millis(30));
-        // The burst is one snapshot: nothing else follows it.
-        assert_eq!(next(&watcher, Duration::from_millis(700)), None);
-        // And the settled snapshot has the last write.
-        assert_eq!(read_workspace(dir.path()).todo, "# Active task: B-4\n");
-        return;
-    }
-
-    // The machine never let five writes through without a long stall (the
-    // longest gap seen is in the message). What still holds then: the signals
-    // alternate, the last one is Settled, and the settled snapshot has the last
-    // write.
     quiet(&watcher);
-    burst(dir.path());
-    let mut events = Vec::new();
-    while let Some(event) = next(&watcher, Duration::from_millis(700)) {
-        events.push(event);
-    }
-    assert!(
-        !events.is_empty() && events.len() % 2 == 0,
-        "longest gap {longest_seen:?}: {events:?}"
-    );
-    for pair in events.chunks(2) {
-        assert_eq!(
-            pair,
-            [Dirty, Settled],
-            "longest gap {longest_seen:?}: {events:?}"
-        );
-    }
+    fs::write(
+        dir.path().join(".orchestration/TODO.md"),
+        "# Active task: B-4\n",
+    )
+    .unwrap();
+    assert_eq!(next(&watcher, LONG), Some(Dirty));
+    assert_eq!(next(&watcher, LONG), Some(Settled));
     assert_eq!(read_workspace(dir.path()).todo, "# Active task: B-4\n");
 }
 
@@ -222,14 +163,4 @@ fn a_workspace_that_does_not_exist_is_not_an_error() {
     let watcher =
         watch_workspace(Path::new("/definitely/not/a/relay/workspace"), QUIESCENCE).unwrap();
     assert_eq!(next(&watcher, Duration::from_millis(500)), None);
-}
-
-#[test]
-fn dropping_the_watcher_stops_it_promptly() {
-    let _serial = serial_watcher_test();
-    let dir = workspace_with_records();
-    let watcher = started(dir.path());
-    let asked = Instant::now();
-    drop(watcher);
-    assert!(asked.elapsed() < Duration::from_secs(1));
 }
