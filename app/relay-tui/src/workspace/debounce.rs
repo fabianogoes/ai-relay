@@ -90,14 +90,12 @@ mod tests {
     use std::sync::Arc;
     use std::sync::mpsc;
     use std::thread::{self, JoinHandle};
-    use std::time::Instant;
 
     use WorkspaceEvent::{Dirty, Settled};
 
     struct Rig {
         raw: Sender<()>,
         events: Receiver<WorkspaceEvent>,
-        stop: Arc<AtomicBool>,
         thread: JoinHandle<()>,
     }
 
@@ -110,7 +108,6 @@ mod tests {
         Rig {
             raw,
             events,
-            stop,
             thread,
         }
     }
@@ -173,7 +170,6 @@ mod tests {
             (next(&rig, LONG), next(&rig, LONG)),
             (Some(Dirty), Some(Settled))
         );
-        thread::sleep(Duration::from_millis(100));
         rig.raw.send(()).unwrap();
         assert_eq!(
             (next(&rig, LONG), next(&rig, LONG)),
@@ -195,12 +191,29 @@ mod tests {
     }
 
     #[test]
-    fn the_stop_flag_ends_the_loop_within_an_idle_poll() {
-        let rig = start(QUIESCENCE, || false);
-        let asked = Instant::now();
-        rig.stop.store(true, Ordering::Relaxed);
-        rig.thread.join().unwrap();
-        assert!(asked.elapsed() < IDLE_POLL * 3);
+    fn the_stop_flag_ends_the_loop_before_another_idle_wait() {
+        for initially_stopped in [false, true] {
+            let stop = AtomicBool::new(initially_stopped);
+            let (out, events) = mpsc::channel();
+            let mut waited = false;
+            debounce_with_receive(
+                |within| {
+                    assert!(!waited, "waited again after a stop request");
+                    assert_eq!(within, Duration::from_millis(200));
+                    waited = true;
+                    Err(RecvTimeoutError::Timeout)
+                },
+                out,
+                QUIESCENCE,
+                &stop,
+                || {
+                    stop.store(true, Ordering::Relaxed);
+                    false
+                },
+            );
+            assert_eq!(waited, !initially_stopped);
+            assert_eq!(events.try_recv(), Err(mpsc::TryRecvError::Disconnected));
+        }
     }
 
     #[test]
