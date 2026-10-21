@@ -243,12 +243,18 @@ disponível.
 ## Dependências
 
 Uma entrada de checklist pode declarar dependências explícitas com
-`(needs: <ID>[, <ID>]...)`, referenciando outros IDs do mesmo registro. Essa é a
-única forma de expressar que uma entrada exige outra; a posição textual nunca
-carrega esse significado.
+`(needs: <ID>[, <ID>]...)`. Um item do TODO referencia IDs do mesmo TODO. Uma
+entrada do backlog referencia IDs do `BACKLOG.md` ou entradas arquivadas numa
+seção `## Closed` de um changelog por spec. Os IDs do backlog são únicos no
+workspace; portanto, resolva um ID arquivado em todas as seções de fechamento,
+inclusive nas de outras specs. O caminho da spec da entrada dependente não é o
+da spec da dependência. Essa é a única forma de expressar que uma entrada exige
+outra; a posição textual nunca carrega esse significado.
 
 Uma entrada está **disponível** quando é `[ ]` e todo ID de que ela precisa é
-`[x]`. Todo padrão determinístico seleciona a primeira entrada disponível em
+`[x]` no seu registro ou, no caso do backlog, está arquivado como `[x]` numa
+seção de fechamento. Uma entrada arquivada como `[-]` não satisfaz a dependência.
+Todo padrão determinístico seleciona a primeira entrada disponível em
 ordem textual. Uma entrada que não está disponível nunca é oferecida como padrão
 e nunca é selecionada em silêncio.
 
@@ -350,6 +356,9 @@ As entradas são copiadas literalmente. **A seção de fechamento é a autoridad
 uma entrada de backlog cujo ID já aparece na seção de fechamento da própria spec
 está arquivada, e removê-la do `BACKLOG.md` é limpeza. Uma sessão interrompida
 entre as duas escritas deixa, portanto, um estado coerente.
+Seu marcador final também resolve referências `needs` de outras entradas do
+backlog, inclusive as de outras specs. Durante a limpeza, a seção de fechamento
+prevalece sobre a cópia ainda presente no `BACKLOG.md`.
 
 `Waived` existe só no fechamento de uma spec com ao menos uma entrada `[-]`, e só
 o `relay-spec` a escreve. Um critério sem evidência numa spec com descarte
@@ -456,7 +465,9 @@ Trate o estado como `inconsistent` quando qualquer condição abaixo falhar:
   `done`.
 - Um item de checklist usa um marcador desconhecido, ou um item concluído não é
   `[x]`.
-- Uma referência `needs` nomeia um ID ausente do mesmo registro.
+- Uma referência `needs` nomeia um ID ausente do mesmo registro e, para entradas
+  do backlog, de todas as seções de fechamento dos changelogs por spec. Um ID
+  arquivado como `[-]` é conhecido, mas não satisfaz a dependência.
 - Uma relação `needs` contém um ciclo.
 - Uma entrada está `[x]` enquanto um ID de que ela precisa não está `[x]`.
 - Uma entrada pendente do backlog precisa de uma entrada descartada (`[-]`).

@@ -37,7 +37,8 @@ defeito é do caso.
   produzindo exatamente a violação que nomeia e mais nenhuma.
 - `structure-<caso>`: a estrutura do changelog e a leitura estrita — por spec,
   legado junto com por spec, spec fechada, entrada arquivada, descarte, dispensa,
-  CRLF e `Status` dentro de `Context`.
+  CRLF e `Status` dentro de `Context`. Os casos de dependência arquivada cobrem
+  um ID `[x]` em outra spec e um ID `[-]` que continua inválido.
 - `../data/repository-history/workspace` é a cópia congelada lida por
   `history.rs`; ela fica fora de `fixtures/` porque não é um caso golden com
   `expected.json`, e os testes de histórico não dependem dos registros vivos.

@@ -24,9 +24,11 @@ const STATUS_CASES: [&str; 7] = [
 // Cases of the changelog structure that are not a status or a check: the
 // per-spec changelog, the legacy one, closing sections, drops, waivers, CRLF
 // and a strict handoff.
-const STRUCTURE_CASES: [&str; 10] = [
+const STRUCTURE_CASES: [&str; 12] = [
     "all-done-with-drop",
+    "archived-dropped-dependency",
     "archived-entry-cleanup",
+    "archived-needs-across-specs",
     "closed-spec",
     "closed-with-waiver",
     "crlf",

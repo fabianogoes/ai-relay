@@ -86,7 +86,7 @@ de integridade do `docs/PROTOCOL.md` e deriva o `RelayState`. As regras do contr
 | `todo-cleared-before-changelog` | Item saiu do handoff antes do resultado entrar no changelog |
 | `backlog-done-with-pending-todo` | Backlog `done` com item de TODO ativo não concluído |
 | `unknown-marker` | Marcador desconhecido, ou item concluído que não é `[x]` |
-| `needs-unknown-id` | `needs` referencia ID ausente do mesmo registro |
+| `needs-unknown-id` | `needs` referencia ID ausente do mesmo registro e, para backlog, das seções `## Closed` (ADR-0011) |
 | `needs-cycle` | Relação de `needs` contém ciclo |
 | `needs-incomplete-on-done` | Entrada `[x]` cujo `needs` não está todo `[x]` |
 | `handoff-status-invalid` | `Status` do handoff diferente de `in_progress` e `blocked` (ou ausente) |

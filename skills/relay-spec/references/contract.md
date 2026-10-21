@@ -116,11 +116,17 @@ it with `grep`, without reading whole files. No existing ID is renumbered.
 ## Dependencies
 
 A checklist entry may declare explicit dependencies with
-`(needs: <ID>[, <ID>]...)`, referencing other IDs in the same record. This is
-the only way to express that one entry requires another; textual position never
-carries that meaning.
+`(needs: <ID>[, <ID>]...)`. A TODO item references IDs in the same TODO. A
+backlog entry references IDs in `BACKLOG.md` or entries archived in a `## Closed`
+section of a per-spec changelog. Backlog IDs are unique across the workspace, so
+resolve an archived ID across all closing sections, including those of other
+specifications; the dependent entry's spec path is not the dependency's spec.
+This is the only way to express that one entry requires another; textual
+position never carries that meaning.
 
-An entry is **available** when it is `[ ]` and every ID it needs is `[x]`. Every
+An entry is **available** when it is `[ ]` and every ID it needs is `[x]` in its
+record or, for a backlog entry, archived as `[x]` in a closing section. An
+archived `[-]` entry does not satisfy a dependency. Every
 deterministic default selects the first available entry in textual order. An
 entry that is not available is never offered as a default and is never selected
 silently.
@@ -156,6 +162,9 @@ The entries are copied literally. **The closing section is the authority:** a
 backlog entry whose ID already appears in the closing section of its own spec
 is archived, and removing it from `BACKLOG.md` is cleanup. A session interrupted
 between the two writes therefore leaves a coherent state.
+Its final marker also resolves `needs` references from other backlog entries,
+including entries of other specifications. During cleanup, the closing section
+takes precedence over the copy still in `BACKLOG.md`.
 
 `Waived` exists only in the closing of a spec with at least one `[-]` entry, and
 only `relay-spec` writes it. A criterion with no evidence in a spec that has a

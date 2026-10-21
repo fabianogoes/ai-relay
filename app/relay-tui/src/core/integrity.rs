@@ -335,6 +335,9 @@ fn check_needs_unknown_id(i: &IntegrityInput) -> Option<Violation> {
     for (name, entries) in records(i) {
         let mut ids: HashSet<&str> = entries.iter().map(|e| e.id.as_str()).collect();
         if name == "backlog" {
+            // A closed ID is still known after cleanup, even when its entry
+            // belongs to another spec. A closed `[-]` is rejected by the
+            // dropped-dependency check rather than reported as unknown.
             ids.extend(i.closed.iter().map(|c| c.entry.id.as_str()));
         }
         for entry in entries {

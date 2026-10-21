@@ -37,6 +37,9 @@ Write one when a decision affects structure, an architecture characteristic, a
 dependency, an interface, or a construction technique. Record the reasoning,
 not only the choice.
 
+- `docs/adr/0011-dependencias-de-backlog-arquivadas.md` — Accepted — uma
+  dependência de backlog arquivada como `[x]` em `## Closed` satisfaz `needs`
+  mesmo entre specs; `[-]` continua inválida, e TODO continua local.
 - `docs/adr/0010-visibilidade-da-entrevista-da-spec-na-tui.md` — Accepted —
   the `idle` screen explains that the `relay-spec` interview happens in the
   agent and that the spec appears after it is saved; the derived state stays
