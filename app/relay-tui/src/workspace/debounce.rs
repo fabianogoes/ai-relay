@@ -34,13 +34,31 @@ pub(super) fn debounce(
     out: Sender<WorkspaceEvent>,
     quiescence: Duration,
     stop: &AtomicBool,
+    on_idle: impl FnMut() -> bool,
+) {
+    debounce_with_receive(
+        |within| raw.recv_timeout(within),
+        out,
+        quiescence,
+        stop,
+        on_idle,
+    );
+}
+
+// Keep the wait boundary injectable so tests can place events inside a window
+// without relying on the operating system to resume a sleeping test in time.
+fn debounce_with_receive(
+    mut receive: impl FnMut(Duration) -> Result<(), RecvTimeoutError>,
+    out: Sender<WorkspaceEvent>,
+    quiescence: Duration,
+    stop: &AtomicBool,
     mut on_idle: impl FnMut() -> bool,
 ) {
     loop {
         if stop.load(Ordering::Relaxed) {
             return;
         }
-        match raw.recv_timeout(IDLE_POLL) {
+        match receive(IDLE_POLL) {
             Ok(()) => {}
             Err(RecvTimeoutError::Timeout) => {
                 if !on_idle() {
@@ -53,7 +71,7 @@ pub(super) fn debounce(
             return;
         }
         loop {
-            match raw.recv_timeout(quiescence) {
+            match receive(quiescence) {
                 Ok(()) => {}
                 Err(RecvTimeoutError::Timeout) => break,
                 Err(RecvTimeoutError::Disconnected) => return,
@@ -109,35 +127,42 @@ mod tests {
     }
 
     #[test]
-    fn a_burst_of_writes_yields_one_dirty_and_one_settled_after_the_quiescence() {
-        let rig = start(QUIESCENCE, || false);
-        let mut last_write = Instant::now();
-        for _ in 0..5 {
-            rig.raw.send(()).unwrap();
-            // The reference is the last write itself, not the end of the sleep
-            // after it: on a loaded runner that sleep can overshoot by a lot.
-            last_write = Instant::now();
-            thread::sleep(Duration::from_millis(10));
-        }
-
-        assert_eq!(next(&rig, LONG), Some(Dirty));
-        assert_eq!(next(&rig, LONG), Some(Settled));
-        // Not before the window after the last write (small slack for the clock).
-        assert!(last_write.elapsed() >= QUIESCENCE - Duration::from_millis(15));
-        // Exactly one signal pair for the whole burst.
-        assert_eq!(next(&rig, Duration::from_millis(500)), None);
-    }
-
-    #[test]
-    fn a_write_inside_the_window_postpones_the_settled_signal() {
-        let rig = start(QUIESCENCE, || false);
-        rig.raw.send(()).unwrap();
-        assert_eq!(next(&rig, LONG), Some(Dirty));
-        thread::sleep(Duration::from_millis(100));
-        rig.raw.send(()).unwrap();
-        let second_write = Instant::now();
-        assert_eq!(next(&rig, LONG), Some(Settled));
-        assert!(second_write.elapsed() >= QUIESCENCE - Duration::from_millis(15));
+    fn every_write_restarts_the_window_and_a_burst_yields_one_signal_pair() {
+        let (out, events) = mpsc::channel();
+        // Each receive says how long to wait, what has been emitted so far,
+        // and whether another write arrives before that wait expires.
+        let mut steps = [
+            (IDLE_POLL, None, Ok(())),
+            (Duration::from_millis(150), Some(Dirty), Ok(())),
+            (Duration::from_millis(150), None, Ok(())),
+            (Duration::from_millis(150), None, Ok(())),
+            (Duration::from_millis(150), None, Ok(())),
+            (
+                Duration::from_millis(150),
+                None,
+                Err(RecvTimeoutError::Timeout),
+            ),
+            (
+                IDLE_POLL,
+                Some(Settled),
+                Err(RecvTimeoutError::Disconnected),
+            ),
+        ]
+        .into_iter();
+        debounce_with_receive(
+            |within| {
+                let (expected_wait, emitted, result) = steps.next().expect("unexpected wait");
+                assert_eq!(within, expected_wait);
+                assert_eq!(events.try_recv().ok(), emitted);
+                result
+            },
+            out,
+            QUIESCENCE,
+            &AtomicBool::new(false),
+            || false,
+        );
+        assert!(steps.next().is_none(), "the burst was not fully processed");
+        assert_eq!(events.try_recv(), Err(mpsc::TryRecvError::Disconnected));
     }
 
     #[test]
